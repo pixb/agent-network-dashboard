@@ -2298,6 +2298,13 @@ html[data-legion-present='1'] [data-app-shell-nav] {
   transition: opacity 240ms ease, filter 240ms ease;
 }
 
+/* 军团 2D：聚焦某个部门时，其它节点降透明度到 0.18。实体留着可以，
+   但文字在 0.18 下只剩一团糊——和 3D 的「幽灵标签」是同一类问题（截图实测）。
+   规则：被调暗的节点不画文字，只留盘子/扇区的轮廓。 */
+[data-legion-root] svg [data-dim='true'] text {
+  display: none;
+}
+
 /* 军团页：面板/工具栏里的按钮与链接在键盘聚焦时必须看得见。
    之前这些按钮都只有 hover 样式，Tab 过去屏幕上没有任何反馈；用一条作用域规则覆盖，
    比给每个按钮单独加类名更不容易漏（新增按钮自动继承）。 */
