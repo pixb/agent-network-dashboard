@@ -1013,8 +1013,8 @@ export default function LegionPage() {
                       <g
                         key={`sector:${node.id}`}
                         // 聚焦某部门时，其它扇区轻微失焦（聚光）：只压暗不够，失焦才像「镜头对着这一个」。
-                        // 窄屏不加（软光栅下会掉帧），reduced-motion 无影响（不是动画）。
-                        style={focusGroup && !on && size.width >= 1024 ? { filter: 'blur(0.9px)' } : undefined}
+                        // 是否启用交给 CSS 媒体查询（按视口判断）；窄屏不加，避免软光栅掉帧。
+                        data-dim={focusGroup && !on ? 'true' : undefined}
                       >
                         {/* 扇区厚度随层级递进：外层部门粗而淡（表示「一大类」），
                             内层部门细而实（表示「具体科室」）。层级不再只靠半径区分。 */}

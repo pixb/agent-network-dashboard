@@ -2359,3 +2359,8 @@ html[data-legion-present='1'] [data-app-shell-nav] {
 @media (prefers-reduced-motion: reduce) {
   [data-legion-root] [data-role="legion-plate"] { animation: none; }
 }
+
+/* 军团 2D：聚焦时的「聚光」——其它扇区在宽屏上轻微失焦（按视口判断，不按舞台宽度）。 */
+@media (min-width: 1024px) {
+  [data-legion-root] g[data-dim="true"] { filter: blur(0.9px); }
+}
