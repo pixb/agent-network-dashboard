@@ -460,8 +460,44 @@ export default function LegionPage() {
     return () => window.removeEventListener('keydown', onKey, true);
   }, [cleanView]);
 
-  const reset = useCallback(() => setView({ k: 1, tx: 0, ty: 0 }), []);
+  // 窄屏取景：390px 下节点并集只占舞台宽度约 65%（实测 2d-390-fit），字被缩得偏小。
+  // 手机把 k 提到「节点用满 88% 宽度」；桌面保持 1。用户自己缩放过就不再干预，
+  // 「重置」会清掉标记并重新算。
+  // 变焦是绕原点缩放的，所以 tx/ty 必须同时补上「保持舞台中心不动」的位移。
+  const userZoomed = useRef(false);
+  const fitKey = useRef('');
+  const fitNarrow = useCallback(() => {
+    const svg = svgRef.current;
+    if (!svg || !size.width || !size.height) return;
+    if (userZoomed.current) return;
+    const key = `${Math.round(size.width)}x${Math.round(size.height)}:${layout.nodes.length}`;
+    if (fitKey.current === key) return;
+    const groups = [...svg.querySelectorAll('[data-node-id]')];
+    if (!groups.length) return;
+    let x1 = Infinity, x2 = -Infinity;
+    for (const g of groups) {
+      const r = g.getBoundingClientRect();
+      if (!r.width && !r.height) continue;
+      x1 = Math.min(x1, r.left); x2 = Math.max(x2, r.right);
+    }
+    if (!Number.isFinite(x1) || x2 <= x1) return;
+    fitKey.current = key;
+    if (size.width >= 640) { setView({ k: 1, tx: 0, ty: 0 }); return; }
+    setView(v => {
+      const baseWidth = (x2 - x1) / v.k; // 折算回 k=1 的宽度
+      if (!baseWidth) return v;
+      const k = Math.max(1, Math.min(1.8, (size.width * 0.88) / baseWidth));
+      return { k, tx: (size.width / 2) * (1 - k), ty: (size.height / 2) * (1 - k) };
+    });
+  }, [size.width, size.height, layout.nodes.length]);
+  useEffect(() => { fitNarrow(); }, [fitNarrow]);
+
+  const reset = useCallback(() => {
+    userZoomed.current = false;
+    setView({ k: 1, tx: 0, ty: 0 });
+  }, []);
   const zoomBy = useCallback((factor: number, anchor?: { x: number; y: number }) => {
+    userZoomed.current = true;
     setView(v => {
       const k = Math.min(3, Math.max(0.5, v.k * factor));
       // 有锚点（滚轮）就以指针为准，没有就用容器中心（＋/－ 按钮、键盘）。
