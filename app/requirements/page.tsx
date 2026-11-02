@@ -167,7 +167,7 @@ function TimelineView({ rows }: { rows: Requirement[] }) {
               const left = Math.max(2, Math.min(96, at(String(row.due))));
               // 行高至少 44px，标题链接撑满行高：手机上原来只有 16px 高的文字可点。
               return (
-                <div key={row.id} className="flex min-h-11 items-center gap-2 border-b border-[var(--border)]/60 last:border-0" data-testid="timeline-row" data-column={row.column}>
+                <div key={row.id} className="flex min-h-12 items-center gap-2 border-b border-[var(--border)]/60 last:border-0" data-testid="timeline-row" data-column={row.column}>
                   <Link href={`/requirements/${row.id}`} className="flex w-[34%] shrink-0 items-center self-stretch truncate text-xs text-gray-300 hover:underline" title={row.name}>
                     <span className="mr-1 tabular-nums text-[10px] text-[var(--fg-dim)]">#{row.seq}</span>
                     {row.name}
