@@ -692,6 +692,23 @@ export default function LegionPage() {
     drag.current = null;
   };
 
+  // 选中/聚焦时把目标带回视野：用户在手机上拖走图之后，从列表点一个部门，
+  // 结果焦点在屏幕外——「点了没反应」。只在目标不在可见区（或贴边）时才平移，
+  // 已经看得见就不动，避免每次点击都跳一下。
+  useEffect(() => {
+    const id = focusGroup ?? selected;
+    if (!id || !size.width || !size.height) return;
+    const node = layout.nodes.find(n => n.id === id);
+    if (!node) return;
+    setView(v => {
+      const margin = 48;
+      const sx = v.k * node.x + v.tx;
+      const sy = v.k * node.y + v.ty;
+      if (sx >= margin && sx <= size.width - margin && sy >= margin && sy <= size.height - margin) return v;
+      return { ...v, tx: size.width / 2 - v.k * node.x, ty: size.height / 2 - v.k * node.y };
+    });
+  }, [focusGroup, selected, layout.nodes, size.width, size.height]);
+
   const baseRadius = (Math.min(size.width, size.height) / 2) * 0.84;
   // 节点尺寸随画布缩放：1280 下取 1，375 下约 0.66。不缩的话部门圆直径
   // 44px 会大于环差，父子部门在窄屏上叠成一坨（实测 375 下圆心只差 29px）。
