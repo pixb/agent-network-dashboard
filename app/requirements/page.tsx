@@ -1260,15 +1260,27 @@ function RequirementsContent({ networkId }: { networkId: string }) {
           />
         )}
 
-        <button
-          type="button"
-          data-testid="requirements-mobile-filters"
-          aria-expanded={mobileFiltersOpen}
-          onClick={() => setMobileFiltersOpen(v => !v)}
-          className="mb-2 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] sm:hidden"
-        >
-          {mobileFiltersOpen ? '收起筛选' : `筛选${activeFilterLabels.length ? `（${activeFilterLabels.length}）` : ''}`}
-        </button>
+        <div className="mb-2 flex items-center gap-1.5 sm:hidden">
+          <button
+            type="button"
+            data-testid="requirements-mobile-filters"
+            aria-expanded={mobileFiltersOpen}
+            onClick={() => setMobileFiltersOpen(v => !v)}
+            className="rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]"
+          >
+            {mobileFiltersOpen ? '收起筛选' : `筛选${activeFilterLabels.length ? `（${activeFilterLabels.length}）` : ''}`}
+          </button>
+          {/* 手机上 Refresh 为省首屏被隐藏了，但手动刷新不能没有：这里补一个等效入口。 */}
+          <button
+            type="button"
+            data-testid="requirements-mobile-refresh"
+            aria-label="刷新需求列表"
+            onClick={() => { setProjectRefresh(n => n + 1); void load(); }}
+            className="min-h-9 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]"
+          >
+            刷新
+          </button>
+        </div>
         <div className={mobileFiltersOpen || extraFiltersActive ? 'contents' : 'hidden sm:contents'} data-testid="requirements-mobile-filter-panel">
         <ProjectFilter
           networkId={networkId}
