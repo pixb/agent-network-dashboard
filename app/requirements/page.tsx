@@ -1325,6 +1325,8 @@ function RequirementsContent({ networkId }: { networkId: string }) {
             onDraftChange={setTagInput}
             onApply={next => setParam({ tag: next, q: qInput })}
           />
+          </div>
+          {/* 「管理标签」是操作而不是筛选条件，不能跟着筛选一起收起。 */}
           {tagCatalog?.canManage && tagOpsSupported && (
             <button
               type="button"
@@ -1335,7 +1337,6 @@ function RequirementsContent({ networkId }: { networkId: string }) {
               管理标签
             </button>
           )}
-          </div>
           {archiveSupported === true && (
             <label className={`flex min-h-11 items-center gap-2 rounded-md px-2.5 text-xs sm:min-h-9 ${searching ? 'cursor-pointer text-[var(--fg)]' : 'text-[var(--fg-muted)]'}`}>
               <input
