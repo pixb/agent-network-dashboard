@@ -267,6 +267,21 @@ export default function Legion3DPage() {
   const [exportError, setExportError] = useState('');
   // 演示/录屏模式：隐藏鼠标与悬浮提示、匀速环绕，并可直接导出 16 秒循环。
   const [presenting, setPresenting] = useState(false);
+  // 演示前自检：后台标签页/减动效/窗口过小都会让录屏白拍，进入演示时就地说明。
+  const [presentChecks, setPresentChecks] = useState<string[] | null>(null);
+  const runPresentChecks = useCallback(() => {
+    const issues: string[] = [];
+    if (typeof document !== 'undefined' && document.visibilityState !== 'visible') {
+      issues.push('标签页在后台，录到的会是静止帧');
+    }
+    if (typeof window !== 'undefined' && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+      issues.push('系统开启「减少动态效果」，巡礼不会自动推进');
+    }
+    if (typeof window !== 'undefined' && (window.innerWidth < 1280 || window.innerHeight < 720)) {
+      issues.push('窗口小于 1280×720，导出会缩放');
+    }
+    setPresentChecks(issues);
+  }, []);
   // 与 2D 对齐：大网络里列表很长，可只看部门与圆心。
   const [listDeptsOnly, setListDeptsOnly] = useState(false);
   // 与 2D 共用同一个本地偏好：切视图后不用重新勾一次。
@@ -2209,6 +2224,7 @@ export default function Legion3DPage() {
   const togglePresenting = useCallback(() => {
     if (presentingRef.current) { exitPresenting(); return; }
     setPresenting(true);
+    runPresentChecks();
     setCleanView(true);
     setCaptureError('');
     setCaptureInfo('');
@@ -2314,6 +2330,7 @@ export default function Legion3DPage() {
       safety,
     };
     setPresenting(true);
+    runPresentChecks();
     setCleanView(true);
     setCapturing(true);
     setSpin(true);
@@ -2587,6 +2604,15 @@ export default function Legion3DPage() {
               className="h-1 w-16 overflow-hidden rounded-full bg-[var(--border)]/60 backdrop-blur"
             >
               <span className="block h-full rounded-full bg-[var(--accent)]/70 transition-[width] duration-200" style={{ width: `${Math.round(tourProgress.frac * 100)}%` }} />
+            </span>
+          )}
+          {presentChecks && (
+            <span
+              role="status"
+              data-testid="legion-3d-present-checks"
+              className={`max-w-[60vw] rounded-md px-2 py-1 text-[11px] backdrop-blur ${presentChecks.length ? 'bg-[var(--danger)]/15 text-[var(--danger)]' : 'bg-[var(--bg-secondary)]/90 text-[var(--fg-muted)]'}`}
+            >
+              演示检查：{presentChecks.length ? presentChecks.join(' · ') : '就绪'}
             </span>
           )}
           <button
