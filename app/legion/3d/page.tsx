@@ -2646,6 +2646,18 @@ export default function Legion3DPage() {
               第 {Math.max(1, node.depth ?? 1)} 层 · {node.memberCount} 人 · 下级 {children}
               {node.leader ? ` · 负责人 ${node.leader}` : ''}
             </p>
+            {/* 讲解条也带上路径：演示时观众一直知道当前讲的是哪条链上的部门。 */}
+            <p data-testid="legion-3d-caption-path" className="mt-0.5 text-[10px] text-[var(--fg-dim)]">
+              {(() => {
+                const byId = new Map(layout.nodes.map(n => [n.id, n]));
+                const chain: string[] = [];
+                for (let cur = node.parentId ? byId.get(node.parentId) : undefined; cur && cur.kind !== 'core'; cur = cur.parentId ? byId.get(cur.parentId) : undefined) {
+                  chain.unshift(cur.label);
+                }
+                chain.push(node.label);
+                return chain.join(' / ');
+              })()}
+            </p>
           </div>
         );
       })()}
