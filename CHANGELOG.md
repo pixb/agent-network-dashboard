@@ -6,6 +6,14 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.285 — 2026-11-02
+
+### 3D 军团：补上「三环分别是什么」的说明
+
+- 2D 页有「圆心是网络，外三环依次是部门、成员与名下 Agent」，3D 页没有——第一次看的人只能猜，
+  演示时主讲人还得口头解释一遍。
+- 现在 3D 头部也用同一句话说明环的含义（弱化色，不抢画面）。
+
 ## 0.6.4-preview.284 — 2026-11-02
 
 ### 3D 军团：开场镜头先偏一下再归位
