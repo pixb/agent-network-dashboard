@@ -1628,8 +1628,10 @@ function RequirementsContent({ networkId }: { networkId: string }) {
               {bulkError && <span role="alert" className="text-[11px] text-[var(--danger)]">{bulkError}</span>}
             </div>
           )}
-          <div className="-mx-1 min-w-0 overflow-x-auto pb-1" data-testid="requirements-board">
-            <div className="flex snap-x gap-3 px-1">
+          {/* snap 必须加在「真正滚动的容器」上：之前加在内层 flex 上，容器 scroll-snap-type 是 none，
+              手机上滑到一半会停在两列之间。 */}
+          <div className="-mx-1 min-w-0 snap-x snap-mandatory overflow-x-auto pb-1" data-testid="requirements-board">
+            <div className="flex gap-3 px-1">
               {COLUMNS.filter(col => col.key)
                 .filter(col => (!status || col.key === status) && (col.key !== 'abandoned' || showAbandoned || status === 'abandoned'))
                 .map(col => {
