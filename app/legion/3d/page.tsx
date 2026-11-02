@@ -2897,6 +2897,9 @@ export default function Legion3DPage() {
                 for (let cur = node.parentId ? byId.get(node.parentId) : undefined; cur && cur.kind !== 'core'; cur = cur.parentId ? byId.get(cur.parentId) : undefined) {
                   chain.unshift(cur.label);
                 }
+                // 顶层部门没有上级：路径就是它自己，和胶囊开头的名字重复
+                // （实拍显示成「聚焦：平台 · 1人 · 下级 0 · 平台」）。
+                if (!chain.length) return '';
                 chain.push(node.label);
                 return chain.join(' / ');
               })()}
