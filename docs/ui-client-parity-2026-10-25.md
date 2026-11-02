@@ -1174,12 +1174,43 @@ responsibility 88 · summary 18 · tags 20 · tag-ops 26 · timeline 16`（+ 设
 - `next-release.py` 生成后自检：版本引用形状校验（release/preview/版本号/套件标签）、期望值与上一版对照告警。
 - 已知教训：生成器只换版本号会漏“上一版记录”引用；全局替换要先确认“不该命中”的地方。
 
-### 19.5 当前发布门（`.290`，同一 SHA）
+### 19.5 当前发布门（`.295`，同一 SHA）
 
 `archive 70 · board 142 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
-legion 184 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
+legion 196 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
 responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
+
+## 29. 2026-11-02 续十：低透明度下的文字，与一个被误判为“偶发”的竞态
+
+### 29.1 文字要么清楚，要么不画
+两处都是同一类问题，先后被截图抓到：
+
+| 视图 | 现象 | 处理 |
+|---|---|---|
+| 3D 生产密度 | 子部门淡到 `alpha 0.12` 仍在画字，出现“看得出形状、读不出内容”的部门名 | `alpha < 0.5` 不画节点文字 |
+| 2D 聚焦某部门 | 其它节点降到 `opacity 0.18`，标签照画，糊成灰雾 | `[data-dim='true'] text { display:none }`，只留轮廓 |
+
+判据都落在“实际绘制了什么”上，而不是开关状态：
+3D 每帧写 `data-node-text-alpha`（实测 0.77）；2D 用 DOM 计算样式统计调暗组里的可见文字（0 个）。
+两侧都配了反向断言，防止“一刀切全隐藏”也算通过。
+
+### 29.2 演示态 Esc 丢键：不是偶发，是覆盖
+`?present=1` 深链进入后立刻按 Esc，偶尔无效。`.293` 曾把原因判为“监听器挂得太晚”，
+改成常驻后症状变轻但没消失——说明判断不完整。
+
+真正的顺序是：
+
+1. 深链那一次 render 里 `presenting` 还是 `false`；
+2. 深链 effect 把 `presentingRef.current = true`，并排队 setState；
+3. **同一次提交**里，`useEffect(() => { presentingRef.current = presenting })` 用旧的 `false` 覆盖回去；
+4. 下一次 render 才恢复。按键落在这一个窗口内就被忽略。
+
+处理：删掉“跟随 state”的 ref effect，`presentingRef` 只在真正改变演示状态的四处显式写
+（深链 / 切换 / 退出 / 开始录屏）；Esc 监听移到捕获阶段，别的组件 `stopPropagation` 也拦不住。
+
+教训：**用 ref 做同步判断时，不要再挂一个“跟随 state”的 effect**——两者在同一提交里会互相打架。
+另外，单次通过不足以证明竞态消失：断言改成“深链进入 → Esc 连做 3 次必须全中”。
 
 ## 28. 2026-11-02 续九：军团 3D 的实测基线（先量再改）
 
