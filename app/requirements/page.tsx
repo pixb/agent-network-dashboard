@@ -165,9 +165,10 @@ function TimelineView({ rows }: { rows: Requirement[] }) {
               const barRight = hasBar ? Math.max(2, Math.min(96, at(String(row.due)))) : 0;
               // 首尾都留 2%：贴边的点在圆角容器里会被切掉一半。
               const left = Math.max(2, Math.min(96, at(String(row.due))));
+              // 行高至少 44px，标题链接撑满行高：手机上原来只有 16px 高的文字可点。
               return (
-                <div key={row.id} className="flex items-center gap-2 border-b border-[var(--border)]/60 py-1 last:border-0" data-testid="timeline-row" data-column={row.column}>
-                  <Link href={`/requirements/${row.id}`} className="w-[34%] shrink-0 truncate text-xs text-gray-300 hover:underline" title={row.name}>
+                <div key={row.id} className="flex min-h-11 items-center gap-2 border-b border-[var(--border)]/60 last:border-0" data-testid="timeline-row" data-column={row.column}>
+                  <Link href={`/requirements/${row.id}`} className="flex w-[34%] shrink-0 items-center self-stretch truncate text-xs text-gray-300 hover:underline" title={row.name}>
                     <span className="mr-1 tabular-nums text-[10px] text-[var(--fg-dim)]">#{row.seq}</span>
                     {row.name}
                   </Link>
