@@ -1174,12 +1174,32 @@ responsibility 88 · summary 18 · tags 20 · tag-ops 26 · timeline 16`（+ 设
 - `next-release.py` 生成后自检：版本引用形状校验（release/preview/版本号/套件标签）、期望值与上一版对照告警。
 - 已知教训：生成器只换版本号会漏“上一版记录”引用；全局替换要先确认“不该命中”的地方。
 
-### 19.5 当前发布门（`.288`，同一 SHA）
+### 19.5 当前发布门（`.290`，同一 SHA）
 
 `archive 70 · board 142 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
-legion 181 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
+legion 184 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
 responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
+
+## 27. 2026-11-02 续八：演示 / 录屏链路（一条链接跑完）
+
+演示场景原来要点两次（打开页面、点「演示模式」，再点「部门巡礼」），漏点一次就会把工具栏录进画面。
+现在一条链接即可：
+
+`/legion/3d?present=1&tour=1`
+
+| 环节 | 断言 / 保障 |
+|---|---|
+| 直接进演示模式 | `present:deepLinkEntersPresentation`（`.289`） |
+| Esc 退出且不自动重进 | `present:deepLinkExitsWithEscape` |
+| 自动开始巡礼 | `?tour=1`，等布局出现部门后才启动 |
+| 减少动态效果下不自动巡礼 | `present:tourDeeplinkRespectsReducedMotion`（`.290`） |
+| 进入时自检 | 后台标签页 / 减少动态效果 / 窗口 <1280×720（`.281`） |
+| 讲解条 | 部门名 + 第 N 层 · 人数 · 下级 · 负责人 + 路径 |
+| 导出规格 | 1280×720 / 16 秒无缝循环（recording 23） |
+
+**教训**：判断「减少动态效果」必须直接读 `window.matchMedia`，不要用渲染后的 state——
+首帧 state 还是默认值，会让深链做出与按钮 `aria-disabled` 相反的事（`.290` 就是这样被抓出来的）。
 
 ## 26. 2026-11-02 续七：军团的「层级路径」三处同源
 
