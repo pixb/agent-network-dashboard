@@ -1174,12 +1174,31 @@ responsibility 88 · summary 18 · tags 20 · tag-ops 26 · timeline 16`（+ 设
 - `next-release.py` 生成后自检：版本引用形状校验（release/preview/版本号/套件标签）、期望值与上一版对照告警。
 - 已知教训：生成器只换版本号会漏“上一版记录”引用；全局替换要先确认“不该命中”的地方。
 
-### 19.5 当前发布门（`.284`，同一 SHA）
+### 19.5 当前发布门（`.288`，同一 SHA）
 
 `archive 70 · board 142 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
-legion 177 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
+legion 181 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
 responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
+
+## 26. 2026-11-02 续七：军团的「层级路径」三处同源
+
+部门路径（`平台 / 平台1组`）现在出现在三个地方，全部用同一套 `parentId` 回溯，
+不会各算一套、各说一句：
+
+| 位置 | 断言 / 证据 |
+|---|---|
+| 3D 聚焦胶囊 | `3d:focusShowsPath`，`views.focus-path` |
+| 2D 聚焦胶囊 | `focus:2dShowsPath`，`views.focus-path-2d` |
+| 3D 巡礼讲解条 | `tour:captionShowsPath`，`views.caption-path` |
+
+巡礼首站是顶层部门，路径只有一段；多段格式由前两条钉住，讲解条那条只断言
+「末段等于当前讲解部门」，避免在首站误报。
+
+同日其它结论：批量失败按原因归并（`bulk:groupsSameReason`）、重试只补发失败项
+（`bulk:retrySendsOnlyFailedItem`）、飞行中按钮禁用（`bulk:applyDisabledWhileBusy`）；
+发布链路新增 `sync-publish-expectations.py`，把「新增断言后期望值过期」这类发布中断
+从手工步骤变成一条命令。
 
 ## 25. 2026-11-02 续六：批量操作的健壮性（全部有断言）
 
