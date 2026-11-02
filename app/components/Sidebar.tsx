@@ -356,6 +356,9 @@ export function Sidebar() {
         ${mode === 'expanded' ? 'w-52 bg-[var(--bg)] border-r border-[var(--border)]' : mode === 'icon-rail' ? 'w-14 bg-[#0A0C14]' : 'w-16 bg-[var(--bg)] border-r border-[var(--border)]'}
         ${mobileOpen ? 'translate-x-0 shadow-2xl shadow-black/40 lg:shadow-none' : '-translate-x-full'}
         lg:translate-x-0 lg:static lg:shrink-0 lg:shadow-none
+        /* 手机底部有固定的 Tab 栏（约 56px + 安全区），抽屉若占满 100dvh，
+           最底部的「Sign out」会被它压住、点不到。这里留出同样的高度。 */
+        pb-[calc(3.5rem+env(safe-area-inset-bottom))] lg:pb-0
       `}>
         {/* Brand header — round 4: 3-node mesh mark matches /login,
             with an inline live "online" pulse so every page surfaces
