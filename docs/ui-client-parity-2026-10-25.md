@@ -1174,12 +1174,40 @@ responsibility 88 · summary 18 · tags 20 · tag-ops 26 · timeline 16`（+ 设
 - `next-release.py` 生成后自检：版本引用形状校验（release/preview/版本号/套件标签）、期望值与上一版对照告警。
 - 已知教训：生成器只换版本号会漏“上一版记录”引用；全局替换要先确认“不该命中”的地方。
 
-### 19.5 当前发布门（`.307`，同一 SHA）
+### 19.5 当前发布门（`.308`，同一 SHA）
 
 `archive 70 · board 142 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
-legion 224 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
+legion 228 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
 responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
+
+## 36. 2026-11-03 续十七：套件全绿 ≠ 证据可用
+
+`.308` 发布被拦了三次，每次拦下来的都不是产品缺陷，而是**证据本身不可信**。这三条现在都有会失败的断言守着。
+
+### 36.1 断言数下降必须报警
+我在撤回一段探测代码时切片过大，把 `nodes-kbd` 从 14 条删到 6 条。套件照样「6/6 全绿」，
+同步工具甚至准备把期望值一起调低——那等于**永久削弱门禁**，而且以后不会再有人发现。
+
+- 还原：每次运行都会把当时的探针副本存成 `probe-used.mjs`，从上一轮目录取回即恢复；
+- 硬闸：`sync-publish-expectations.py` 遇到「断言数下降」默认**拒绝落盘**（退出码 2），
+  必须显式 `--allow-shrink`；
+- 演练：把期望临时改成 16，工具确实拒绝下调到 14。演练后还原。
+
+### 36.2 同一 SHA 不够，还要同一份构建
+另外两次拦截分别是：
+- `sourceCommit` 与发布 SHA 不一致——我用了功能分支的工作区跑套件；
+- `buildId` 与发布目录不一致——同一个 SHA 可以有**两次不同构建**，套件必须跑在
+  `releases/preview.<label>-<sha>` 那份构建上（`--source` 指向它）。
+
+### 36.3 发布前的三条对齐
+| 检查 | 含义 |
+|---|---|
+| 断言数不下降 | 套件被削弱 = 门禁变松，必须人工确认 |
+| `sourceCommit == 发布 SHA` | 证据来自同一次提交 |
+| `buildId == 发布目录 BUILD_ID` | 证据来自**同一份**构建产物 |
+
+一句话：**「全绿」只说明它跑过了；能不能拿来发布，还要看项数、SHA、构建三者是否对齐。**
 
 ## 35. 2026-11-03 续十六：隐藏控件之前，先问它是不是唯一入口
 
