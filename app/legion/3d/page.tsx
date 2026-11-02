@@ -2754,6 +2754,20 @@ export default function Legion3DPage() {
               const children = layout.nodes.filter(n => n.parentId === node.id && n.kind === 'group').length;
               return `${node.label} · ${node.memberCount} 人 · 下级 ${children}`;
             })()}</span>
+            {/* 聚焦路径：深链/巡礼走到下一层部门时，观众需要知道它挂在哪条链上。 */}
+            <span data-testid="legion-3d-focus-path" className="text-[10px] text-[var(--fg-dim)]">
+              {(() => {
+                const node = layout.nodes.find(n => n.id === focus);
+                if (!node || node.kind !== 'group') return '';
+                const byId = new Map(layout.nodes.map(n => [n.id, n]));
+                const chain: string[] = [];
+                for (let cur = node.parentId ? byId.get(node.parentId) : undefined; cur && cur.kind !== 'core'; cur = cur.parentId ? byId.get(cur.parentId) : undefined) {
+                  chain.unshift(cur.label);
+                }
+                chain.push(node.label);
+                return chain.join(' / ');
+              })()}
+            </span>
             <span aria-hidden>✕</span>
           </button>
         )}
