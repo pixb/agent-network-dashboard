@@ -100,6 +100,17 @@ export default function LegionPage() {
   // 悬停/聚焦只影响亮度，不改布局：图不能因为鼠标划过就重排。
   const [hovered, setHovered] = useState<string | null>(null);
   const [focusGroup, setFocusGroup] = useState<string | null>(null);
+  // ?present=1：与 3D 对齐，直接进净屏（演示/截图用一条链接）。
+  // 只读一次 URL，退出后不回写——按 Esc 退出就该退出。
+  const presentDeeplinkSettled = useRef(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || presentDeeplinkSettled.current) return;
+    presentDeeplinkSettled.current = true;
+    if (new URLSearchParams(window.location.search).get('present') !== '1') return;
+    setCleanView(true);
+  }, []);
+
+
   // 复制反馈：2D 早已把 focus/node 写回地址（链接可转人），但界面上没有复制入口，
   // 3D 有「复制链接」+ 反馈。这里补齐，文案与 3D 一致。
   const [shareInfo, setShareInfo] = useState('');
@@ -324,6 +335,8 @@ export default function LegionPage() {
       }
       if (e.key !== 'Escape') return;
       if (helpOpen) { e.preventDefault(); setHelpOpen(false); return; }
+      // 与 3D 一致：演示（净屏）状态下 Esc 先退出净屏。
+      if (cleanView) { e.preventDefault(); setCleanView(false); return; }
       // 一次 Esc 只退一样：先清搜索，再退选中/聚焦。
       if (query) {
         e.preventDefault();
@@ -336,7 +349,7 @@ export default function LegionPage() {
     };
     window.addEventListener('keydown', onKey, true);
     return () => window.removeEventListener('keydown', onKey, true);
-  }, [selected, canCollapse, toggleCollapse, query, layout.nodes, router, helpOpen, statusOnly]);
+  }, [selected, canCollapse, toggleCollapse, query, layout.nodes, router, helpOpen, statusOnly, cleanView]);
 
   // 从 /org 的「在军团图里看」跳过来：/legion?focus=<部门名>
   // 用 location.search 而不是 useSearchParams，避免这个客户端页要额外包 Suspense。
