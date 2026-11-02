@@ -489,6 +489,7 @@ export default function Legion3DPage() {
     presentDeeplinkSettled.current = true;
     const params = new URLSearchParams(window.location.search);
     if (params.get('present') !== '1') return;
+    presentingRef.current = true;
     setPresenting(true);
     runPresentChecks();
     // ?tour=1 连巡礼一起开：录屏只放一条链接就能直接开始讲。
@@ -698,6 +699,8 @@ export default function Legion3DPage() {
   }, []);
 
   useEffect(() => { spinRef.current = spin; }, [spin]);
+  // 同步更新：进入/退出的同一帧就要生效。之前只在 effect 里跟，按下 Esc 的那一刻
+  // ref 可能还是旧值；.293 就因为「刚进演示就按 Esc」实测丢过一次按键。
   useEffect(() => { presentingRef.current = presenting; }, [presenting]);
   // 演示是「整屏」的事：侧栏/手机导航在应用壳里，读不到这个页面的状态，
   // 所以用一个 html 级标记让它们一起淡出；退出或卸载时清掉。
@@ -2271,6 +2274,7 @@ export default function Legion3DPage() {
   }, []);
 
   const exitPresenting = useCallback(() => {
+    presentingRef.current = false;
     endCapture(true);
     setPresenting(false);
     setCleanView(false);
@@ -2279,6 +2283,7 @@ export default function Legion3DPage() {
 
   const togglePresenting = useCallback(() => {
     if (presentingRef.current) { exitPresenting(); return; }
+    presentingRef.current = true;
     setPresenting(true);
     runPresentChecks();
     setCleanView(true);
@@ -2293,16 +2298,17 @@ export default function Legion3DPage() {
 
   // 演示/录屏时焦点可能落在 body（点了工具栏按钮后按钮重渲染），舞台的
   // onKeyDown 收不到事件；Esc 必须在任何焦点下都能退出，并丢弃未完成录制。
+  // 常驻监听，不跟着 presenting 一起挂/卸：深链进入演示的那一刻，effect 还没跑完，
+  // 此时按 Esc 会丢——`?present=1` 的暗场里最容易发生。判断放在监听器内部。
   useEffect(() => {
-    if (!presenting) return;
     const onKey = (event: KeyboardEvent) => {
-      if (event.key !== 'Escape') return;
+      if (event.key !== 'Escape' || !presentingRef.current) return;
       event.preventDefault();
       exitPresenting();
     };
     window.addEventListener('keydown', onKey);
     return () => window.removeEventListener('keydown', onKey);
-  }, [presenting, exitPresenting]);
+  }, [exitPresenting]);
 
   const startCapture = useCallback(() => {
     if (captureRef.current) return;
