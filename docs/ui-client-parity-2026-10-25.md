@@ -1174,12 +1174,35 @@ responsibility 88 · summary 18 · tags 20 · tag-ops 26 · timeline 16`（+ 设
 - `next-release.py` 生成后自检：版本引用形状校验（release/preview/版本号/套件标签）、期望值与上一版对照告警。
 - 已知教训：生成器只换版本号会漏“上一版记录”引用；全局替换要先确认“不该命中”的地方。
 
-### 19.5 当前发布门（`.299`，同一 SHA）
+### 19.5 当前发布门（`.300`，同一 SHA）
 
 `archive 70 · board 142 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
-legion 203 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
+legion 207 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
 responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
+
+## 32. 2026-11-03 续十三：手机上「控件合格 ≠ 手指能用」
+
+### 32.1 台账：两个视图的手势能力曾经不对等
+3D 军团早已支持单指旋转 + 双指缩放；2D 只有滚轮、`+/-` 按钮和键盘，**双指没有反应**。
+同一个产品里两套手势语汇，用户在手机上只会认为 2D 坏了。
+
+`.300` 补齐 2D：单指平移（原有）、双指按 `span/prevSpan` 缩放、以两指中点为锚（与滚轮同规则），
+走同一个 `zoomBy`，所以手动操作同样会停止窄屏自动取景；补 `onPointerCancel` 避免中断手势残留指针。
+
+### 32.2 怎么验的：读变换，不信“事件似乎触发了”
+Playwright 的 `touchscreen` 只有 tap，多指必须用 CDP `Input.dispatchTouchEvent`。
+断言直接读结果，而不是读“处理函数被调用过”：
+
+| 断言 | 实测 |
+|---|---|
+| `390:3dTouchDragRotates` | `data-view-yaw` 0.62 → 1.58 |
+| `390:3dTouchPinchZooms` | `data-zoom` 79% → 306% |
+| `390:2dTouchDragPans` | `<g>` `translate.x` −63.8 → 16.2 |
+| `390:2dTouchPinchZooms` | `<g>` `scale(k)` 1.356 → 2.863 |
+
+注：3D 双指 3.88 倍指距对应 3.87 倍缩放，是**成正比**的（地图类手势的标准行为），
+不是“太灵敏”的缺陷。若日后要手感更柔和，应加阻尼曲线，而不是改断言。
 
 ## 31. 2026-11-03 续十二：把「叠印」变成可自动发现的问题
 
