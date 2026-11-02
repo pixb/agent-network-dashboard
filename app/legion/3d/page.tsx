@@ -365,6 +365,9 @@ export default function Legion3DPage() {
   // 呼吸相位：-1 = 当前没有聚焦/选中的部门（不呼吸），0..1 = 绘制实际使用的相位。
   const breathePhaseRef = useRef(-1);
   const lastViewExpose = useRef(0);
+  // 节点实体在屏幕上的包围盒（含描边/呼吸余量）。窄屏取景到底有没有把图装进去，
+  // 不能靠看截图判断——把实测数字写到画布上，断言才有依据。
+  const lastFitExpose = useRef(0);
   // 聚焦部门时请求一次重新取景：镜头会重新框住画面，并保底 1.35×，
   // 让「只看这个部门」在画面上也有换视角的实感。走的是既有取景逻辑，
   // 不另起一套动画——之前那版独立缓动就是被取景覆盖掉的（实测停在 86%）。
@@ -1495,6 +1498,25 @@ export default function Legion3DPage() {
         }
         // 镜头朝向也镜像到画布上（节流 200ms）：入场/巡礼结束是否真的停住，
         // 需要能读到「当前 yaw」而不是靠截图猜。
+        // 节点包围盒实测（含描边余量）：窄屏是否把整张图装进画布，用数字说话。
+        if (now - lastFitExpose.current > 400) {
+          lastFitExpose.current = now;
+          const canvasEl = canvasRef.current;
+          if (canvasEl) {
+            let minX = Infinity, minY = Infinity, maxX = -Infinity, maxY = -Infinity;
+            for (const sn of nodes) {
+              const { rx, ry } = nodeBody(sn, layout.stats.people);
+              minX = Math.min(minX, sn.projected.x - rx);
+              minY = Math.min(minY, sn.projected.y - ry);
+              maxX = Math.max(maxX, sn.projected.x + rx);
+              maxY = Math.max(maxY, sn.projected.y + ry);
+            }
+            if (Number.isFinite(minX)) {
+              canvasEl.dataset.fitBounds = `${Math.round(minX)},${Math.round(minY)},${Math.round(maxX)},${Math.round(maxY)}`;
+              canvasEl.dataset.fitView = `${Math.round(size.width)}x${Math.round(size.height)}`;
+            }
+          }
+        }
         if (now - lastViewExpose.current > 200) {
           lastViewExpose.current = now;
           const canvasEl = canvasRef.current;
