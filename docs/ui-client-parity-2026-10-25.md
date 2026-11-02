@@ -1167,6 +1167,10 @@ responsibility 88 · summary 18 · tags 20 · tag-ops 26 · timeline 16`（+ 设
 
 - `should-release.py`：只有产物变化才发版（纯测试/文档轮次不产生版本号）。
 - `check-release.py --publish-script`：逐套打印 expected/actual，不一致即失败；另拒绝脚本里写死的证据日期。
+- `sync-publish-expectations.py --label N [--write]`：从 `evidence/<suite>/result.json` 回填发布脚本里的
+  断言数与 `views` 条数。发布脚本是从上一版复制的，本轮新增断言后期望值必然过期；靠手工同步漏过多次
+  （每次都被 publish 自己的 assert 拦下），改为验收后跑一次：`--write` 前先看 dry-run 差异。
+  若某套 `passed < total`，脚本会点名提示——那说明验收其实没过，不该发布。
 - `next-release.py` 生成后自检：版本引用形状校验（release/preview/版本号/套件标签）、期望值与上一版对照告警。
 - 已知教训：生成器只换版本号会漏“上一版记录”引用；全局替换要先确认“不该命中”的地方。
 
