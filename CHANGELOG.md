@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.289 — 2026-11-02
+
+### 3D 军团：`?present=1` 直接进演示模式
+
+- PPT / 录屏现在只放一条链接即可：打开即为干净画面，不必现场再点「演示模式」。
+- 同时执行演示前自检（后台标签页 / 减少动态效果 / 窗口尺寸）；Esc 仍可退出，退出后不会自动重进。
+
 ## 0.6.4-preview.288 — 2026-11-02
 
 ### 3D 军团：巡礼讲解条带上部门路径

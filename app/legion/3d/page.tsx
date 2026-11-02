@@ -477,6 +477,17 @@ export default function Legion3DPage() {
   // 不用 id —— id 是布局内部生成的，换一次数据就变了，链接会失效）。
   // 注意：URL 里的 focus 没应用完之前，不要往回写 URL —— StrictMode 会重跑
   // effect，一次性 guard 拦不住，会把 ?focus= 抹掉（踩过）。
+  // ?present=1：直接进演示模式（PPT/录屏可以只放一条链接，不必现场点按钮）。
+  // 只读一次 URL，不在退出后回写——用户按 Esc 退出就该退出。
+  const presentDeeplinkSettled = useRef(false);
+  useEffect(() => {
+    if (typeof window === 'undefined' || presentDeeplinkSettled.current) return;
+    presentDeeplinkSettled.current = true;
+    if (new URLSearchParams(window.location.search).get('present') !== '1') return;
+    setPresenting(true);
+    runPresentChecks();
+  }, [runPresentChecks]);
+
   const urlFocusSettled = useRef(false);
   // 深链指向的部门不存在时给明确提示（与 2D 同口径），而不是静默给一张没聚焦的图。
   const [focusMissing, setFocusMissing] = useState<string | null>(null);
