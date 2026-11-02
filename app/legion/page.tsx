@@ -746,7 +746,8 @@ export default function LegionPage() {
         <div className={`mb-4 flex flex-wrap items-end justify-between gap-3 ${cleanView ? 'invisible' : 'visible'}`}>
           <div>
             <h1 className="text-lg font-semibold text-white">Legion</h1>
-            <p className="mt-1 text-xs text-[var(--fg-muted)]">
+            {/* 手机首屏优先给画布：这行说明在窄屏收起（桌面仍显示）。 */}
+            <p className="mt-1 hidden text-xs text-[var(--fg-muted)] sm:block">
               军团编制：圆心是网络，外三环依次是部门、成员与名下 Agent。
             </p>
             {matched && matched.size === 0 && (

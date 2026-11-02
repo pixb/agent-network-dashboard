@@ -2821,7 +2821,7 @@ export default function Legion3DPage() {
               + (statusOnly ? ` · 仅显示 ${({ working: '运行中', idle: '空闲', blocked: '阻塞', error: '错误', offline: '未上报' } as const)[statusOnly]}` : '')}
         </p>
         {/* 第一次看 3D 的人不知道三环各是什么；2D 页有这行说明，这里补上（演示时更不用口头解释）。 */}
-        <p className="mt-0.5 text-[11px] text-[var(--fg-dim)]" data-testid="legion-3d-legend">
+        <p className="mt-0.5 hidden text-[11px] text-[var(--fg-dim)] sm:block" data-testid="legion-3d-legend">
           圆心是网络，外三环依次是部门、成员与名下 Agent。
         </p>
         <div className="pointer-events-auto mt-2 flex items-center gap-2">
