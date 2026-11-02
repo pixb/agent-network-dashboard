@@ -1174,12 +1174,44 @@ responsibility 88 · summary 18 · tags 20 · tag-ops 26 · timeline 16`（+ 设
 - `next-release.py` 生成后自检：版本引用形状校验（release/preview/版本号/套件标签）、期望值与上一版对照告警。
 - 已知教训：生成器只换版本号会漏“上一版记录”引用；全局替换要先确认“不该命中”的地方。
 
-### 19.5 当前发布门（`.296`，同一 SHA）
+### 19.5 当前发布门（`.299`，同一 SHA）
 
 `archive 70 · board 142 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
-legion 198 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
+legion 203 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
 responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
+
+## 31. 2026-11-03 续十二：把「叠印」变成可自动发现的问题
+
+`.298` 的「重命名 / 归档」叠在一起，是靠看截图撞见的。人眼看几十个控件必然漏，
+所以做了一次性投入的**通用重叠体检**，跑在每次套件里。
+
+### 31.1 规则
+同一页面内任意两个可见的 `button` / `a[href]`，若相交面积超过较小者的一半，就记录
+（元素文字 + 比例）。修检查本身花了两次功夫，这两条比规则本身更重要：
+
+1. **必须与视口求交**：320px 下侧栏是移出屏幕的抽屉，元素仍有尺寸，不排除会报
+   `Settings ↔ 主题` 这种用户根本看不到的“重叠”。
+2. **必须与裁剪祖先求交**：滚动容器里滚出去的导航项，`getBoundingClientRect` 仍返回
+   原位坐标，会被判成压在底部按钮上（曾一次报出三对假重叠）。改成「与所有
+   overflow 祖先 + 视口求交后再比较」，18 项 → 9 项可见，误报归零。
+
+### 31.2 覆盖与实测
+| 页面 | 结果 |
+|---|---|
+| 需求列表 320 | 0 |
+| 需求详情 320 | 0（变异验证：去掉 `flex-wrap` 后精确报出 `重命名 ↔ 归档 0.71`，且只红那一条） |
+| 看板 320 | 0 |
+| 军团 2D / 3D 390 | 0 / 0 |
+| 抽屉展开 320×568（需求页 + 军团两页） | 0，底部按钮露在 Tab 栏之上 |
+
+### 31.3 由此抓到的真实缺陷
+短屏打开侧栏时，抽屉占满 `100dvh`，底部固定 Tab 栏浮在上面，**「Sign out」被压住点不到**。
+修法：抽屉加 `pb-[calc(3.5rem+env(safe-area-inset-bottom))]`（桌面 `lg:pb-0`）。
+实测 `footerBottom 496` vs `mobileNavTop 507`，露出 11px。
+
+断言：`narrow:drawerNoOverlap`、`narrow:drawerFooterClearOfTabBar`、
+`drawer:legion-2d/3dNoOverlap`、`drawer:legion-2d/3dFooterClear`。
 
 ## 30. 2026-11-02 续十一：窄屏取景——2D 该放大，3D 不该
 
