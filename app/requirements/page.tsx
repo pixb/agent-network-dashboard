@@ -410,6 +410,13 @@ function RequirementsContent({ networkId }: { networkId: string }) {
     if (prevBulkBusy.current && !bulkBusy) restoreFocusAfterUnmount(() => bulkBarRef.current);
     prevBulkBusy.current = bulkBusy;
   }, [bulkBusy]);
+  // 批量失败时把原因汇总：只报「第一条原因」会让人以为其余失败也是同一原因。
+  const summarizeFailures = (failures: { error: string }[]) => {
+    const byReason = new Map<string, number>();
+    for (const item of failures) byReason.set(item.error, (byReason.get(item.error) ?? 0) + 1);
+    return [...byReason.entries()].map(([reason, n]) => (n > 1 ? `${reason}（${n} 项）` : reason)).join('；');
+  };
+
   const [bulkMessage, setBulkMessage] = useState('');
   const [bulkDue, setBulkDue] = useState('');
   const [bulkTag, setBulkTag] = useState('');
@@ -823,7 +830,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
       }
     }
     if (failures.length) {
-      setBulkError(`成功 ${changed} 项，失败 ${failures.length} 项：${failures[0].error}`);
+      setBulkError(`成功 ${changed} 项，失败 ${failures.length} 项：${summarizeFailures(failures)}`);
       setSelectedIds(new Set(failures.map(item => item.id)));
     } else {
       setBulkMessage(mode === 'add' ? `已把 ${changed} 项加入参与者` : `已从 ${changed} 项移出参与者`);
@@ -864,7 +871,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
       }
     }
     if (failures.length) {
-      setBulkError(`成功 ${changed} 项，失败 ${failures.length} 项：${failures[0].error}`);
+      setBulkError(`成功 ${changed} 项，失败 ${failures.length} 项：${summarizeFailures(failures)}`);
       setSelectedIds(new Set(failures.map(item => item.id)));
     } else {
       setBulkMessage(mode === 'add' ? `已给 ${changed} 项加上「${tag}」` : `已从 ${changed} 项移除「${tag}」`);
