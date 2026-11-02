@@ -692,6 +692,31 @@ export default function LegionPage() {
     drag.current = null;
   };
 
+  // 选中/聚焦时把目标带回视野：用户在手机上拖走图之后，从列表点一个部门，
+  // 结果焦点在屏幕外——「点了没反应」。只在目标不在可见区（或贴边）时才平移，
+  // 已经看得见就不动，避免每次点击都跳一下。
+  // 位置一律**量真实 DOM 矩形**再算位移：之前按「布局坐标 × k + t」推算，
+  // 假设不成立，实测点完仍在屏幕外（.301 第一次跑就是这样红的）。
+  const bringIntoView = useCallback((id: string) => {
+    const svg = svgRef.current;
+    if (!svg || size.width >= 640) return; // 桌面有右侧面板，移动反而会被挡住
+    const el = svg.querySelector(`[data-node-id="${id.replace(/"/g, '')}"]`);
+    if (!el) return;
+    const r = el.getBoundingClientRect();
+    const s = svg.getBoundingClientRect();
+    const cx = r.left + r.width / 2 - s.left;
+    const cy = r.top + r.height / 2 - s.top;
+    const margin = 48;
+    if (cx >= margin && cx <= size.width - margin && cy >= margin && cy <= size.height - margin) return;
+    setView(v => ({ ...v, tx: v.tx + (size.width / 2 - cx), ty: v.ty + (size.height / 2 - cy) }));
+  }, [size.width, size.height]);
+  useEffect(() => {
+    const id = focusGroup ?? selected;
+    if (!id) return;
+    const raf = requestAnimationFrame(() => bringIntoView(id));
+    return () => cancelAnimationFrame(raf);
+  }, [focusGroup, selected, bringIntoView]);
+
   const baseRadius = (Math.min(size.width, size.height) / 2) * 0.84;
   // 节点尺寸随画布缩放：1280 下取 1，375 下约 0.66。不缩的话部门圆直径
   // 44px 会大于环差，父子部门在窄屏上叠成一坨（实测 375 下圆心只差 29px）。
