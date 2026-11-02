@@ -722,9 +722,12 @@ export default function LegionPage() {
     if (!selected || size.width >= 640) return;
     const el = panelRef.current;
     if (!el) return;
+    // 底部要避开手机 Tab 栏（约 56px）：只「擦边可见」等于没有。
+    const bottomLimit = window.innerHeight - 56;
     const r = el.getBoundingClientRect();
-    if (r.top >= 0 && r.bottom <= window.innerHeight) return; // 已经完整可见
-    const raf = requestAnimationFrame(() => el.scrollIntoView({ block: 'nearest', behavior: 'smooth' }));
+    if (r.top >= 0 && r.bottom <= bottomLimit) return; // 已经完整可见且不被 Tab 栏压
+    // 居中而不是最小滚动：nearest 会让面板底边正好贴在视口底部、被 Tab 栏压住。
+    const raf = requestAnimationFrame(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }));
     return () => cancelAnimationFrame(raf);
   }, [selected, size.width]);
 
