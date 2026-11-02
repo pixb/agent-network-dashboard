@@ -716,6 +716,20 @@ export default function LegionPage() {
     const raf = requestAnimationFrame(() => bringIntoView(id));
     return () => cancelAnimationFrame(raf);
   }, [focusGroup, selected, bringIntoView]);
+  // 手机上详情面板在画布下方：点完部门只有高亮变化，看不到任何信息，像「点了没反应」。
+  // 窄屏选中后把面板滚进视野（桌面面板在右侧，不需要）。
+  useEffect(() => {
+    if (!selected || size.width >= 640) return;
+    const el = panelRef.current;
+    if (!el) return;
+    // 底部要避开手机 Tab 栏（约 56px）：只「擦边可见」等于没有。
+    const bottomLimit = window.innerHeight - 56;
+    const r = el.getBoundingClientRect();
+    if (r.top >= 0 && r.bottom <= bottomLimit) return; // 已经完整可见且不被 Tab 栏压
+    // 居中而不是最小滚动：nearest 会让面板底边正好贴在视口底部、被 Tab 栏压住。
+    const raf = requestAnimationFrame(() => el.scrollIntoView({ block: 'center', behavior: 'smooth' }));
+    return () => cancelAnimationFrame(raf);
+  }, [selected, size.width]);
 
   const baseRadius = (Math.min(size.width, size.height) / 2) * 0.84;
   // 节点尺寸随画布缩放：1280 下取 1，375 下约 0.66。不缩的话部门圆直径
