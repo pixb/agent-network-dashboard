@@ -6,6 +6,14 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.282 — 2026-11-02
+
+### 需求批量操作：失败原因按类别归并
+
+- 批量移动 / 改参与者 / 改标签部分失败时，提示原来只报**第一条**原因，多因失败会被误读成「全都是同一个原因」。
+- 现在按原因归并计数：`成功 0 项，失败 2 项：network_access_denied（2 项）`；不同原因用「；」分隔。
+- 失败项仍保持选中，方便就地重试。
+
 ## 0.6.4-preview.281 — 2026-11-02
 
 ### 3D 演示前自检：别再录到静止画面
