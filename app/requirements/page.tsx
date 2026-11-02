@@ -902,7 +902,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
     }));
     const failures = results.filter(result => result.error);
     if (failures.length) {
-      setBulkError(`成功 ${ids.length - failures.length} 项，失败 ${failures.length} 项：${failures[0].error}`);
+      setBulkError(`成功 ${ids.length - failures.length} 项，失败 ${failures.length} 项：${summarizeFailures(failures)}`);
       setSelectedIds(new Set(failures.map(item => item.id)));
     } else {
       setBulkMessage(`已更新 ${ids.length} 项`);
