@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.283 — 2026-11-02
+
+### 需求时间线：手机上标题有 48px 高的可点区域
+
+- 320 宽下时间线的需求标题只是一个 34% 宽、**16px 高**的文字链接，手指很难点中。
+- 现在每行至少 48px 高，标题链接撑满整行高度（实测 47px，越过 44px 触控下限）。
+
 ## 0.6.4-preview.282 — 2026-11-02
 
 ### 需求批量操作：失败原因按类别归并
