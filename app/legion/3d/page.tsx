@@ -2930,7 +2930,9 @@ export default function Legion3DPage() {
         data-testid="legion-3d-toolbar"
         // 窄屏单行横向滚动：两行工具条会占掉约 90px 高度（实测 390 下顶部合计 ~300px，
         // 视口的 35%），收成一行可以多给画布 ~50px，且不隐藏任何功能。
-        className="pointer-events-auto flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-0.5 sm:flex-wrap sm:justify-end sm:overflow-visible sm:pb-0"
+        // flex 子项默认会收缩：只写 nowrap 会把按钮压到 48px、标签折成两行（实拍）。
+        // 用 [&>*]:shrink-0 保持自然宽度，整行横向滚动。
+        className="pointer-events-auto flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-0.5 [&>*]:shrink-0 sm:flex-wrap sm:justify-end sm:overflow-visible sm:pb-0"
         onKeyDown={e => {
           // Enter activates the focused control, even when a node is selected.
           if (e.key === 'Enter') e.stopPropagation();
