@@ -2928,7 +2928,11 @@ export default function Legion3DPage() {
       <div
         ref={toolbarRef}
         data-testid="legion-3d-toolbar"
-        className="pointer-events-auto flex flex-wrap items-center gap-1.5 sm:justify-end"
+        // 窄屏单行横向滚动：两行工具条会占掉约 90px 高度（实测 390 下顶部合计 ~300px，
+        // 视口的 35%），收成一行可以多给画布 ~50px，且不隐藏任何功能。
+        // flex 子项默认会收缩：只写 nowrap 会把按钮压到 48px、标签折成两行（实拍）。
+        // 用 [&>*]:shrink-0 保持自然宽度，整行横向滚动。
+        className="pointer-events-auto flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-0.5 [&>*]:shrink-0 sm:flex-wrap sm:justify-end sm:overflow-visible sm:pb-0"
         onKeyDown={e => {
           // Enter activates the focused control, even when a node is selected.
           if (e.key === 'Enter') e.stopPropagation();
@@ -2940,7 +2944,7 @@ export default function Legion3DPage() {
           aria-pressed={spin && !reducedMotion}
           aria-disabled={reducedMotion}
           data-testid="legion-3d-spin"
-          className={`rounded-md px-2.5 py-1.5 text-xs transition-colors ${spin && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
+          className={`max-sm:order-last rounded-md px-2.5 py-1.5 text-xs transition-colors ${spin && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
         >
           {reducedMotion ? '自转静止' : spin ? '自转中' : '自转已停'}
         </button>
@@ -2951,14 +2955,14 @@ export default function Legion3DPage() {
           aria-disabled={reducedMotion}
           title="光流仅示意组织连接，不表示节点在线或任务运行；系统减少动态效果时保持静止"
           data-testid="legion-3d-flow"
-          className={`min-h-11 rounded-md px-2.5 py-1.5 text-xs transition-colors sm:min-h-0 ${flow && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]'} focus-visible:outline-2 focus-visible:outline-[var(--accent-text)]`}
+          className={`min-h-11 rounded-md px-2.5 py-1.5 text-xs transition-colors sm:min-h-0 ${flow && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]'} focus-visible:outline-2 focus-visible:outline-[var(--accent-text)] max-sm:order-last`}
         >
           {reducedMotion ? '光流静止' : flow ? '光流开启' : '光流暂停'}
         </button>
         <button
           type="button"
           onClick={resetView}
-          className="rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+          className="max-sm:order-last rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
         >
           重置视角
         </button>
@@ -2966,7 +2970,7 @@ export default function Legion3DPage() {
           type="button"
           data-testid="legion-3d-copy-view"
           onClick={() => void copyViewLink()}
-          className="rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+          className="max-sm:order-last rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
         >
           复制视角链接
         </button>
