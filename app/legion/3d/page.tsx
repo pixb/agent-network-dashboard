@@ -2587,7 +2587,7 @@ export default function Legion3DPage() {
       // position 必须二选一：`relative` 与 `fixed` 同在一条 class 里时，胜负由样式表
       // 顺序决定（实测 relative 赢），元素留在文档流里只被拉大成 100vw，量出来是
       // 「从侧栏右边开始的一大块」——.293 第一版就这么错了。
-      className={`${presenting ? 'fixed inset-0 z-40' : 'relative w-full'} overflow-hidden bg-[var(--bg)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] max-sm:order-last`}
+      className={`${presenting ? 'fixed inset-0 z-40' : 'relative w-full'} overflow-hidden bg-[var(--bg)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]`}
       aria-label="军团 3D 网络拓扑"
       data-testid="legion-3d-stage"
       data-hover-depth={depthPreview ?? ''}
@@ -2944,7 +2944,7 @@ export default function Legion3DPage() {
           aria-pressed={spin && !reducedMotion}
           aria-disabled={reducedMotion}
           data-testid="legion-3d-spin"
-          className={`rounded-md px-2.5 py-1.5 text-xs transition-colors ${spin && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
+          className={`max-sm:order-last rounded-md px-2.5 py-1.5 text-xs transition-colors ${spin && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
         >
           {reducedMotion ? '自转静止' : spin ? '自转中' : '自转已停'}
         </button>
