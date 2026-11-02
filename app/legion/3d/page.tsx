@@ -1518,6 +1518,22 @@ export default function Legion3DPage() {
               canvasEl.dataset.fitBounds = `${Math.round(minX)},${Math.round(minY)},${Math.round(maxX)},${Math.round(maxY)}`;
               canvasEl.dataset.fitView = `${Math.round(size.width)}x${Math.round(size.height)}`;
             }
+            // 噪点基线：多少个 Agent 圆点、其中多少离线/未上报、实体占画面比例。
+            // 「看起来乱」必须先变成数字，否则改动只能靠猜。
+            {
+              let agents = 0, offlineAgents = 0, area = 0;
+              for (const sn of nodes) {
+                const { rx, ry } = nodeBody(sn, layout.stats.people);
+                area += Math.PI * rx * ry;
+                if (sn.item.kind === 'agent') {
+                  agents += 1;
+                  const st = statusByAlias.get(sn.item.label);
+                  if (!st || st === 'offline') offlineAgents += 1;
+                }
+              }
+              const cover = size.width > 0 && size.height > 0 ? area / (size.width * size.height) : 0;
+              canvasEl.dataset.noise = `agents=${agents},offline=${offlineAgents},cover=${cover.toFixed(3)}`;
+            }
           }
         }
         if (now - lastViewExpose.current > 200) {
