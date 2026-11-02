@@ -1170,12 +1170,46 @@ responsibility 88 · summary 18 · tags 20 · tag-ops 26 · timeline 16`（+ 设
 - `next-release.py` 生成后自检：版本引用形状校验（release/preview/版本号/套件标签）、期望值与上一版对照告警。
 - 已知教训：生成器只换版本号会漏“上一版记录”引用；全局替换要先确认“不该命中”的地方。
 
-### 19.5 当前发布门（`.281`，同一 SHA）
+### 19.5 当前发布门（`.283`，同一 SHA）
 
-`archive 70 · board 136 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
-legion 174 · mine 22 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
-responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 16`（+ 设计师探针 6/6），
+`archive 70 · board 138 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
+legion 176 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
+responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
+
+## 24. 2026-11-02 续五：移动端触控与首屏基线
+
+### 24.1 触控目标体检（320px，实测）
+
+| 页面 | 结论 |
+|---|---|
+| 需求列表 | 行高 65px；审计中 <44px 仅 `skip-to-content`(1×1，聚焦前隐藏) |
+| 需求时间线 | 行高 **47px**（`.283` 修复前 16px） |
+| 我参与筛选 | 行高 63px |
+| 军团 2D / 3D | 审计中 <44px 仅 `skip-to-content`；控件全部 ≥44px |
+| 审计口径 | 行内文字链接与 `<label>` 内原生 checkbox 不计为触控缺陷 |
+
+### 24.2 首屏可交互基线（冷启动，新建上下文/独立缓存）
+
+| 入口 | 实测 | 守护阈值 |
+|---|---|---|
+| 军团 3D | 260ms | <4000ms |
+| 军团 2D | 276ms | <4000ms |
+| 需求列表 | 503ms | <4000ms |
+
+热导航值（约 110ms）只作参考，不作为守卫——预取后的数字不代表首次打开。
+
+### 24.3 断言可信度抽查（mutation）
+
+三次故意把修复改回去，套件都**只在目标断言处变红**：
+
+| 变异 | 唯一失败项 |
+|---|---|
+| snap 放回内层 flex | `narrow:boardSnapConfigured` |
+| 去掉「减少动态效果」提示 | `present:reducedMotionReported` |
+| 批量失败只报第一条原因 | `bulk:groupsSameReason` |
+
+关键修复上线后抽 1–2 条做变异验证，确认断言与真实缺陷绑定。
 
 ## 23. 2026-11-02 续四：窄屏体检与演示前自检（.276–.281）
 
