@@ -474,20 +474,32 @@ export default function LegionPage() {
     if (fitKey.current === key) return;
     const groups = [...svg.querySelectorAll('[data-node-id]')];
     if (!groups.length) return;
-    let x1 = Infinity, x2 = -Infinity;
+    let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+    const box = svg.getBoundingClientRect();
     for (const g of groups) {
       const r = g.getBoundingClientRect();
       if (!r.width && !r.height) continue;
-      x1 = Math.min(x1, r.left); x2 = Math.max(x2, r.right);
+      x1 = Math.min(x1, r.left - box.left); x2 = Math.max(x2, r.right - box.left);
+      y1 = Math.min(y1, r.top - box.top); y2 = Math.max(y2, r.bottom - box.top);
     }
     if (!Number.isFinite(x1) || x2 <= x1) return;
     fitKey.current = key;
     if (size.width >= 640) { setView({ k: 1, tx: 0, ty: 0 }); return; }
+    // 把「图形自身包围盒中心」对到舞台中心：不能假设图形本来就以舞台中心为原点——
+    // 实测它偏上，绕舞台中心放大后偏移被放大，顶部成员会顶到统计条（.296 实拍）。
     setView(v => {
       const baseWidth = (x2 - x1) / v.k; // 折算回 k=1 的宽度
       if (!baseWidth) return v;
+      const px = ((x1 + x2) / 2 - v.tx) / v.k; // 图形中心在布局坐标里的位置
+      const py = ((y1 + y2) / 2 - v.ty) / v.k;
       const k = Math.max(1, Math.min(1.8, (size.width * 0.88) / baseWidth));
-      return { k, tx: (size.width / 2) * (1 - k), ty: (size.height / 2) * (1 - k) };
+      // 竖直留出顶部统计条的高度，避免放大后与浮层重叠。
+      const topInset = 64;
+      return {
+        k,
+        tx: size.width / 2 - k * px,
+        ty: topInset + (size.height - topInset) / 2 - k * py,
+      };
     });
   }, [size.width, size.height, layout.nodes.length]);
   useEffect(() => { fitNarrow(); }, [fitNarrow]);
