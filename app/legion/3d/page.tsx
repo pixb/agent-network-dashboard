@@ -1475,6 +1475,9 @@ export default function Legion3DPage() {
       const selectedIsGroup = !!selectedRef.current
         && layout.nodes.some(n => n.id === selectedRef.current && n.kind === 'group');
       const labelQueue: Array<{ node: LegionNode; text: string; anchor: LabelEllipse; alpha: number; dim: boolean; priority: number }> = [];
+      // 本帧「节点文字」实际用过的最低透明度。窄屏/密集网络里淡出的子部门如果
+      // 还画字，就会出现能看见却读不清的幽灵标签（实拍）。用数字断言，不靠眼。
+      let nodeTextAlphaMin = 1;
       const labelBodies: LabelEllipse[] = [];
       for (const sn of nodes) {
         const node = sn.item;
@@ -1638,9 +1641,12 @@ export default function Legion3DPage() {
         // 远看全是「白饼」（admin 截图里最扎眼的就是这个）。
         if (!dim) {
           const textColor = dark ? tk.bg : tk.fg;
-          if (node.kind === 'group' && radiusPx >= 9) {
+          // alpha < 0.5 的实体是「故意淡出」的（深一层部门/空部门）：这时画字
+          // 只会留下读不清的残影。要么清楚，要么不画。
+          if (alpha >= 0.5 && node.kind === 'group' && radiusPx >= 9) {
             const short = Array.from(node.label.replace(/[*+\s]/g, '')).slice(0, rx >= 28 ? 3 : 2).join('');
             if (short) {
+              nodeTextAlphaMin = Math.min(nodeTextAlphaMin, alpha);
               const fs = Math.min(13, Math.max(11, ry * 1.25));
               ctx.font = `600 ${fs}px system-ui, -apple-system, "Noto Sans SC", sans-serif`;
               ctx.fillStyle = tk.fg;
@@ -1648,7 +1654,8 @@ export default function Legion3DPage() {
               ctx.textBaseline = 'middle';
               ctx.fillText(short, p.x, p.y + 0.5);
             }
-          } else if (node.kind === 'person' && !face && radiusPx >= 8) {
+          } else if (alpha >= 0.5 && node.kind === 'person' && !face && radiusPx >= 8) {
+            nodeTextAlphaMin = Math.min(nodeTextAlphaMin, alpha);
             const initial = (node.label || '?').trim().slice(0, 1).toUpperCase();
             ctx.font = `600 ${Math.min(radiusPx * 0.9, 12)}px system-ui, -apple-system, "Noto Sans SC", sans-serif`;
             ctx.fillStyle = textColor;
@@ -1787,6 +1794,7 @@ export default function Legion3DPage() {
             ctx.fill();
           }
           ctx.globalAlpha = item.alpha;
+          nodeTextAlphaMin = Math.min(nodeTextAlphaMin, item.alpha);
           ctx.fillStyle = tk.fg;
           for (const [index, line] of metric.lines.entries()) {
             ctx.fillText(line, (spot.x1 + spot.x2) / 2, spot.y1 + 3 + metric.lineHeight * (index + 0.5));
@@ -1805,6 +1813,8 @@ export default function Legion3DPage() {
           ctx.stroke();
         }
         ctx.globalAlpha = 1;
+        // 整帧画完再记：此时 nodeTextAlphaMin 已经覆盖本帧所有节点文字。
+        if (canvasRef.current) canvasRef.current.dataset.nodeTextAlpha = nodeTextAlphaMin.toFixed(2);
 
         // 悬停提示：不点也能知道「这是谁、什么状态」。
         // 选中时不画（右侧详情卡已经有完整信息）。
