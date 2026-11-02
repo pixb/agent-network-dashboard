@@ -490,8 +490,12 @@ export default function Legion3DPage() {
     runPresentChecks();
     // ?tour=1 连巡礼一起开：录屏只放一条链接就能直接开始讲。
     // 减少动态效果时不自动开（与按钮的 aria-disabled 一致，避免「链接能开、按钮不能」的矛盾）。
-    if (params.get('tour') === '1' && !reducedMotion) setTourPending(true);
-  }, [runPresentChecks, reducedMotion]);
+    // 直接读系统偏好：reducedMotion 是 state，首帧还是默认 false，
+    // 用它判断会让「减动效下链接也自动开巡礼」，与按钮的 disabled 自相矛盾。
+    const prefersReduce = typeof window !== 'undefined'
+      && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (params.get('tour') === '1' && !prefersReduce) setTourPending(true);
+  }, [runPresentChecks]);
 
   // 巡礼深链要等布局真的有部门（首帧只有圆心），所以单独等一次。
   useEffect(() => {
