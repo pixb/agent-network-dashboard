@@ -2510,6 +2510,9 @@ export default function Legion3DPage() {
       ? `/org?focus=${encodeURIComponent(selectedNode.label)}`
       : '/org';
 
+  // 演示是整屏的事：应用侧栏虽然淡到 0.18，仍占着左边一条浅色，投屏/录屏时会割裂
+  // 画面。演示态把舞台铺满视口（盖住侧栏）；出口是舞台里的「退出演示（Esc）」按钮，
+  // 所以不会出现「进了演示找不回来」。
   return (
     <div
       ref={wrapRef}
@@ -2517,8 +2520,8 @@ export default function Legion3DPage() {
       tabIndex={0}
       onKeyDown={onKeyDown}
       data-legion-stage="3d"
-      style={{ height: isFullscreen ? '100dvh' : (stageHeight ?? 'calc(100dvh - 7.5rem)') }}
-      className="relative w-full overflow-hidden bg-[var(--bg)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]"
+      style={{ height: presenting || isFullscreen ? '100dvh' : (stageHeight ?? 'calc(100dvh - 7.5rem)') }}
+      className={`relative w-full overflow-hidden bg-[var(--bg)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] ${presenting ? 'fixed inset-0 z-40 w-screen' : ''}`}
       aria-label="军团 3D 网络拓扑"
       data-testid="legion-3d-stage"
       data-hover-depth={depthPreview ?? ''}
