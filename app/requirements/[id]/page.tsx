@@ -650,7 +650,9 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
               ))}
             </p>
           )}
-          <div className="flex items-start justify-between gap-3">
+          {/* 窄屏必须允许换行：标题块带 min-w-0 会被压到 0 宽，里面的「重命名」
+              溢出后直接压在「归档」上（320px 实拍是「重命名档」）。 */}
+          <div className="flex flex-wrap items-start justify-between gap-3">
             {renaming ? (
               <div className="min-w-0 flex-1">
                 <input
