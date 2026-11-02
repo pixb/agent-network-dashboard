@@ -6,6 +6,14 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.290 — 2026-11-02
+
+### 3D 军团：`?tour=1` 让链接直接开始巡礼
+
+- 录屏只放一条链接：`?present=1&tour=1` 打开即进入演示并开始部门巡礼。
+- 系统开启「减少动态效果」时不自动开始——否则会出现「按钮 disabled、链接却能开」的自相矛盾
+  （这条判断直接读系统偏好，不依赖首帧尚未就绪的状态）。
+
 ## 0.6.4-preview.289 — 2026-11-02
 
 ### 3D 军团：`?present=1` 直接进演示模式

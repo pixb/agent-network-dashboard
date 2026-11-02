@@ -480,13 +480,34 @@ export default function Legion3DPage() {
   // ?present=1：直接进演示模式（PPT/录屏可以只放一条链接，不必现场点按钮）。
   // 只读一次 URL，不在退出后回写——用户按 Esc 退出就该退出。
   const presentDeeplinkSettled = useRef(false);
+  const [tourPending, setTourPending] = useState(false);
   useEffect(() => {
     if (typeof window === 'undefined' || presentDeeplinkSettled.current) return;
     presentDeeplinkSettled.current = true;
-    if (new URLSearchParams(window.location.search).get('present') !== '1') return;
+    const params = new URLSearchParams(window.location.search);
+    if (params.get('present') !== '1') return;
     setPresenting(true);
     runPresentChecks();
+    // ?tour=1 连巡礼一起开：录屏只放一条链接就能直接开始讲。
+    // 减少动态效果时不自动开（与按钮的 aria-disabled 一致，避免「链接能开、按钮不能」的矛盾）。
+    // 直接读系统偏好：reducedMotion 是 state，首帧还是默认 false，
+    // 用它判断会让「减动效下链接也自动开巡礼」，与按钮的 disabled 自相矛盾。
+    const prefersReduce = typeof window !== 'undefined'
+      && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+    if (params.get('tour') === '1' && !prefersReduce) setTourPending(true);
   }, [runPresentChecks]);
+
+  // 巡礼深链要等布局真的有部门（首帧只有圆心），所以单独等一次。
+  useEffect(() => {
+    if (!tourPending) return;
+    const depts = tourOrder(layout.nodes);
+    if (!depts.length) return;
+    setTourPending(false);
+    setTour(true);
+    tourIndex.current = 0;
+    setFocus(depts[0].id);
+    yawTarget.current = depts[0].angle;
+  }, [tourPending, layout.nodes]);
 
   const urlFocusSettled = useRef(false);
   // 深链指向的部门不存在时给明确提示（与 2D 同口径），而不是静默给一张没聚焦的图。
