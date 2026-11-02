@@ -316,6 +316,9 @@ export default function Legion3DPage() {
   const selectedRef = useRef<string | null>(null);
   const lastInteract = useRef(0);
   const yawTarget = useRef<number | null>(null);
+  // 部门切换的「抬升-落位」：大角度转场时镜头在中段略微拉远再落回，
+  // 不再从画面中心一眼糊过去。纯装饰，减少动态效果下不跑（peak 恒为 0）。
+  const camArcRef = useRef<{ t0: number; peak: number }>({ t0: 0, peak: 0 });
   const presentingRef = useRef(false);
   const [shareInfo, setShareInfo] = useState('');
   const [exportHigh, setExportHigh] = useState(false);
@@ -948,6 +951,13 @@ export default function Legion3DPage() {
         // 定时缓动（ease-out cubic，480ms）：与指数逼近不同，这里保证「一定在 0.48s 内停稳」，
         // 巡礼切层因此可以断言「多久之后镜头不再动」，而不是只能看着像停了。
         if (!yawAnimRef.current) {
+          // 差角取环上的最短距离：从 6.2 rad 转到 0.1 rad 是 0.18，不是 6.1。
+          const raw = Math.abs(yawTarget.current - view.yaw) % (Math.PI * 2);
+          const delta = Math.min(raw, Math.PI * 2 - raw);
+          camArcRef.current = {
+            t0: now,
+            peak: !motionPreference.matches && delta >= 0.35 ? 0.2 : 0,
+          };
           yawAnimRef.current = { t0: now, from: view.yaw, to: yawTarget.current };
         }
         const anim = yawAnimRef.current;
@@ -1014,10 +1024,20 @@ export default function Legion3DPage() {
       }
       const breathe = (capture || (presentingRef.current && !motionPreference.matches)) ? breathRef.current : 0;
       const dolly = 1 + Math.sin(breathe * Math.PI * 2) * 0.035;
+      // 转场弧线：与 yaw 缓动同一时基（480ms），中途拉远 20%，两端归零，
+      // 所以「停下」时画面上不会有残留的推拉。
+      const arcAnim = camArcRef.current;
+      let camArc = 0;
+      if (arcAnim.peak > 0) {
+        const p = Math.min(1, (now - arcAnim.t0) / YAW_ANIM_MS);
+        camArc = Math.sin(Math.PI * p) * arcAnim.peak;
+        if (p >= 1) camArcRef.current = { t0: 0, peak: 0 };
+      }
+      if (canvasRef.current) canvasRef.current.dataset.camArc = camArc.toFixed(3);
       const cam = {
         yaw: view.yaw,
         pitch: view.pitch + (breathe ? Math.sin(breathe * Math.PI * 2 + Math.PI / 2) * 0.012 : 0),
-        dist: view.dist * dolly,
+        dist: view.dist * dolly * (1 + camArc),
         focal: Math.min(size.width, size.height) * (narrow ? 2.4 : 1.73) * view.zoom,
         cx: size.width / 2 + view.panX,
         cy: size.height / 2 + view.panY,
