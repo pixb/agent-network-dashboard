@@ -1018,7 +1018,8 @@ function RequirementsContent({ networkId }: { networkId: string }) {
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
             <h1 className="text-lg font-semibold text-white">Requirements</h1>
-            <p className="mt-1 text-xs text-[var(--fg-muted)]">
+            {/* 手机首屏寸土寸金：副标题与说明优先让位给第一条需求（实测第一条被推到 741px）。 */}
+            <p className="mt-1 hidden text-xs text-[var(--fg-muted)] sm:block">
               只读视图。派单在 <Link href="/tasks" className="text-[var(--hl)] hover:underline">Tasks</Link>。
             </p>
           </div>
@@ -1106,7 +1107,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
           <button
             type="button"
             onClick={() => { setProjectRefresh(n => n + 1); void load(); }}
-            className="rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] transition-colors hover:bg-[var(--hover-tint)] hover:text-gray-200"
+            className="hidden rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] transition-colors hover:bg-[var(--hover-tint)] hover:text-gray-200 sm:block"
           >
             Refresh
           </button>
@@ -1136,7 +1137,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
           })}
         </div>
 
-        <div className="mb-4 flex flex-wrap items-center gap-1.5">
+        <div className={`mb-4 flex-wrap items-center gap-1.5 sm:flex ${mobileFiltersOpen || extraFiltersActive ? 'flex' : 'hidden'}`}>
           <button
             type="button"
             aria-pressed={overdue}
@@ -1369,7 +1370,9 @@ function RequirementsContent({ networkId }: { networkId: string }) {
           )}
         </div>
 
-        <p id="archive-search-hint" role="status" className="mb-4 text-xs text-[var(--fg-muted)]">
+        {/* 「还没搜索」这句在手机上是纯占位：留着会把第一条需求再往下推一行。
+            错误/未登录/搜索中一律保留——那些是必须看见的状态。 */}
+        <p id="archive-search-hint" role="status" className={`mb-4 text-xs text-[var(--fg-muted)] ${!searching && !error && !needsLogin ? 'hidden sm:block' : ''}`}>
           {needsLogin
             ? '登录后可继续读取需求。'
             : error
