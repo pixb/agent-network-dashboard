@@ -697,7 +697,9 @@ export default function LegionPage() {
   // 已经看得见就不动，避免每次点击都跳一下。
   useEffect(() => {
     const id = focusGroup ?? selected;
-    if (!id || !size.width || !size.height) return;
+    // 只在窄屏做：桌面右侧有详情面板，自动把节点移到舞台中心反而会被面板挡住
+    // （.301 第一版就这样让一次点击被 aside 拦截）。
+    if (!id || !size.width || !size.height || size.width >= 640) return;
     const node = layout.nodes.find(n => n.id === id);
     if (!node) return;
     setView(v => {
