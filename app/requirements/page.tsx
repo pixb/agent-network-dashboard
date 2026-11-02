@@ -394,6 +394,9 @@ function RequirementsContent({ networkId }: { networkId: string }) {
   // 手机上筛选区有 4 个控件 + 搜索，默认全展开会把内容推到折叠线以下；
   // 宽屏照旧全展开，手机上收进「筛选」。
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  // 深链带着项目/责任归属/标签/归档参数进来时，这些筛选必须**自动展开**：
+  // 否则手机上你看得见结果，却看不见「为什么只剩这几条」，也没法就地取消。
+  const extraFiltersActive = Boolean(project || owner || agent || tag || includeArchived);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   // 批量操作期间按钮被 disabled，焦点会掉到 body。这里不按「原元素」恢复
@@ -1254,7 +1257,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
         >
           {mobileFiltersOpen ? '收起筛选' : `筛选${activeFilterLabels.length ? `（${activeFilterLabels.length}）` : ''}`}
         </button>
-        <div className={mobileFiltersOpen ? 'contents' : 'hidden sm:contents'} data-testid="requirements-mobile-filter-panel">
+        <div className={mobileFiltersOpen || extraFiltersActive ? 'contents' : 'hidden sm:contents'} data-testid="requirements-mobile-filter-panel">
         <ProjectFilter
           networkId={networkId}
           value={project}
@@ -1312,7 +1315,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
               </button>
             )}
           </div>
-          <div className={mobileFiltersOpen ? 'contents' : 'hidden sm:contents'}>
+          <div className={mobileFiltersOpen || extraFiltersActive ? 'contents' : 'hidden sm:contents'}>
           <TagPicker
             draft={tagInput}
             applied={tag}
