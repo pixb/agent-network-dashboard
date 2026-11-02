@@ -1517,6 +1517,13 @@ export default function Legion3DPage() {
             if (Number.isFinite(minX)) {
               canvasEl.dataset.fitBounds = `${Math.round(minX)},${Math.round(minY)},${Math.round(maxX)},${Math.round(maxY)}`;
               canvasEl.dataset.fitView = `${Math.round(size.width)}x${Math.round(size.height)}`;
+              // 选中节点的屏幕坐标：手机上的详情卡会不会挡住焦点，用坐标判断。
+              const focusedSn = nodes.find(sn => sn.item.id === selectedRef.current);
+              if (focusedSn) {
+                canvasEl.dataset.focusAt = `${Math.round(focusedSn.projected.x)},${Math.round(focusedSn.projected.y)}`;
+              } else {
+                delete canvasEl.dataset.focusAt;
+              }
             }
             // 噪点基线：多少个 Agent 圆点、其中多少离线/未上报、实体占画面比例。
             // 「看起来乱」必须先变成数字，否则改动只能靠猜。
