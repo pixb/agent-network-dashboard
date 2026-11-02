@@ -6,6 +6,14 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.280 — 2026-11-02
+
+### 需求看板：手机上横向滑动会吸附到列边界
+
+- 吸附规则原本加在内层 flex 行上，而真正滚动的是外层容器（实测 `scroll-snap-type: none`），
+  手机上滑到一半会停在两列之间。
+- 现在 `snap-x snap-mandatory` 放到滚动容器上，列为 `snap-start`：一次滑动明确停在某一列。
+
 ## 0.6.4-preview.279 — 2026-11-02
 
 ### 需求页：手机上的筛选不再把内容顶下去
