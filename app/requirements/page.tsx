@@ -1335,6 +1335,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
               管理标签
             </button>
           )}
+          </div>
           {archiveSupported === true && (
             <label className={`flex min-h-11 items-center gap-2 rounded-md px-2.5 text-xs sm:min-h-9 ${searching ? 'cursor-pointer text-[var(--fg)]' : 'text-[var(--fg-muted)]'}`}>
               <input
@@ -1348,7 +1349,6 @@ function RequirementsContent({ networkId }: { networkId: string }) {
               包含已归档
             </label>
           )}
-          </div>
           {(status || tag || q || project || owner || agent || overdue || participating || priorities) && (
             <button
               type="button"
