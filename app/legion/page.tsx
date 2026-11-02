@@ -504,10 +504,15 @@ export default function LegionPage() {
   }, [size.width, size.height, layout.nodes.length]);
   useEffect(() => { fitNarrow(); }, [fitNarrow]);
 
+  // 重置要回到「自动取景后的默认视角」，而不是硬编码的 100%：
+  // 窄屏取景把 k 提到约 1.36，硬设 k=1 会让重置后的图比刚打开时更小。
+  // 清掉 userZoomed 与残留检查键，再重新取景一次。
   const reset = useCallback(() => {
     userZoomed.current = false;
+    fitKey.current = '';
     setView({ k: 1, tx: 0, ty: 0 });
-  }, []);
+    requestAnimationFrame(() => fitNarrow());
+  }, [fitNarrow]);
   const zoomBy = useCallback((factor: number, anchor?: { x: number; y: number }) => {
     userZoomed.current = true;
     setView(v => {
