@@ -655,15 +655,42 @@ export default function LegionPage() {
     zoomBy(e.deltaY < 0 ? 1.12 : 1 / 1.12, { x: e.clientX - rect.left, y: e.clientY - rect.top });
   };
 
+  // 触屏：单指平移（原有行为），双指缩放（此前只有滚轮与按钮——
+  // 手机上「捏合没反应」和 3D 的手势不一致，实测确实无法用双指放大）。
+  const pointers = useRef(new Map<number, { x: number; y: number }>());
+  const pinch = useRef<{ span: number } | null>(null);
   const onPointerDown = (e: React.PointerEvent) => {
     (e.target as Element).setPointerCapture?.(e.pointerId);
+    pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size === 2) {
+      const [a, b] = [...pointers.current.values()];
+      pinch.current = { span: Math.hypot(a.x - b.x, a.y - b.y) };
+      drag.current = null;
+      return;
+    }
     drag.current = { x: e.clientX, y: e.clientY, tx: view.tx, ty: view.ty };
   };
   const onPointerMove = (e: React.PointerEvent) => {
+    if (pointers.current.has(e.pointerId)) pointers.current.set(e.pointerId, { x: e.clientX, y: e.clientY });
+    if (pointers.current.size === 2 && pinch.current) {
+      const [a, b] = [...pointers.current.values()];
+      const span = Math.hypot(a.x - b.x, a.y - b.y);
+      if (span > 4 && pinch.current.span > 4) {
+        const rect = (e.currentTarget as HTMLElement).getBoundingClientRect();
+        // 以两指中点为中心缩放，和滚轮的锚点规则一致。
+        zoomBy(span / pinch.current.span, { x: (a.x + b.x) / 2 - rect.left, y: (a.y + b.y) / 2 - rect.top });
+      }
+      pinch.current.span = span;
+      return;
+    }
     if (!drag.current) return;
     setView(v => ({ ...v, tx: drag.current!.tx + (e.clientX - drag.current!.x), ty: drag.current!.ty + (e.clientY - drag.current!.y) }));
   };
-  const onPointerUp = () => { drag.current = null; };
+  const onPointerUp = (e?: React.PointerEvent) => {
+    if (e) pointers.current.delete(e.pointerId);
+    if (pointers.current.size < 2) pinch.current = null;
+    drag.current = null;
+  };
 
   const baseRadius = (Math.min(size.width, size.height) / 2) * 0.84;
   // 节点尺寸随画布缩放：1280 下取 1，375 下约 0.66。不缩的话部门圆直径
@@ -962,6 +989,7 @@ export default function LegionPage() {
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
               onPointerUp={onPointerUp}
+              onPointerCancel={onPointerUp}
               onPointerLeave={onPointerUp}
               onDoubleClick={reset}
             >
