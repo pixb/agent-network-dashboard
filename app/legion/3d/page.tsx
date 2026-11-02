@@ -2587,7 +2587,7 @@ export default function Legion3DPage() {
       // position 必须二选一：`relative` 与 `fixed` 同在一条 class 里时，胜负由样式表
       // 顺序决定（实测 relative 赢），元素留在文档流里只被拉大成 100vw，量出来是
       // 「从侧栏右边开始的一大块」——.293 第一版就这么错了。
-      className={`${presenting ? 'fixed inset-0 z-40' : 'relative w-full'} overflow-hidden bg-[var(--bg)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]`}
+      className={`${presenting ? 'fixed inset-0 z-40' : 'relative w-full'} overflow-hidden bg-[var(--bg)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] max-sm:order-last`}
       aria-label="军团 3D 网络拓扑"
       data-testid="legion-3d-stage"
       data-hover-depth={depthPreview ?? ''}
@@ -2955,14 +2955,14 @@ export default function Legion3DPage() {
           aria-disabled={reducedMotion}
           title="光流仅示意组织连接，不表示节点在线或任务运行；系统减少动态效果时保持静止"
           data-testid="legion-3d-flow"
-          className={`min-h-11 rounded-md px-2.5 py-1.5 text-xs transition-colors sm:min-h-0 ${flow && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]'} focus-visible:outline-2 focus-visible:outline-[var(--accent-text)]`}
+          className={`min-h-11 rounded-md px-2.5 py-1.5 text-xs transition-colors sm:min-h-0 ${flow && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]'} focus-visible:outline-2 focus-visible:outline-[var(--accent-text)] max-sm:order-last`}
         >
           {reducedMotion ? '光流静止' : flow ? '光流开启' : '光流暂停'}
         </button>
         <button
           type="button"
           onClick={resetView}
-          className="rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+          className="max-sm:order-last rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
         >
           重置视角
         </button>
@@ -2970,7 +2970,7 @@ export default function Legion3DPage() {
           type="button"
           data-testid="legion-3d-copy-view"
           onClick={() => void copyViewLink()}
-          className="rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+          className="max-sm:order-last rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
         >
           复制视角链接
         </button>
