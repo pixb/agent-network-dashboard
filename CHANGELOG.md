@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.287 — 2026-11-02
+
+### 军团 2D：聚焦部门也显示层级路径
+
+- 3D 在 `.286` 已经能在聚焦胶囊里显示「平台 / 平台1组」，2D 还只有部门名与人数。
+- 现在 2D 用同一套 parentId 回溯，多层级时显示路径；单层部门不显示，避免拥挤。
+
 ## 0.6.4-preview.286 — 2026-11-02
 
 ### 3D 军团：聚焦部门显示它在哪条链上

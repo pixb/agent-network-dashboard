@@ -666,11 +666,22 @@ export default function LegionPage() {
               // 顺带报出规模：聚焦后画面只留这棵子树，不报人数就不知道该看多少人。
               const node = layout.nodes.find(n => n.id === focusGroup);
               const facts = node ? `${node.memberCount} 人 · 下级 ${layout.nodes.filter(n => n.parentId === node.id && n.kind === 'group').length}` : '';
+              // 与 3D 同口径：聚焦二层部门时给出它在哪条链上，避免只看到孤零零一个部门名。
+              const byId = new Map(layout.nodes.map(n => [n.id, n]));
+              const chain: string[] = [];
+              for (let cur = node?.parentId ? byId.get(node.parentId) : undefined; cur && cur.kind !== 'core'; cur = cur.parentId ? byId.get(cur.parentId) : undefined) {
+                chain.unshift(cur.label);
+              }
+              if (node) chain.push(node.label);
+              const focusPath = chain.join(' / ');
               return (
               <span role="status" aria-live="polite" data-testid="legion-focus-status"
                 className="mt-2 inline-flex items-center gap-2 rounded-full bg-[var(--bg-elevated)] px-3 py-1 text-[11px] text-[var(--fg)]">
                 聚焦：{node?.label}
                 {facts && <span data-testid="legion-focus-facts" className="text-[var(--fg-muted)] tabular-nums">{facts}</span>}
+                {focusPath.includes(' / ') && (
+                  <span data-testid="legion-2d-focus-path" className="text-[10px] text-[var(--fg-dim)]">{focusPath}</span>
+                )}
                 <span data-testid="legion-2d-focus" hidden>{node?.label}</span>
                 <button type="button" onClick={() => setFocusGroup(null)} aria-label="取消聚焦" className="text-[var(--fg-muted)] hover:text-[var(--fg)]">
                   ✕
