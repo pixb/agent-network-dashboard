@@ -702,9 +702,9 @@ export default function Legion3DPage() {
   }, []);
 
   useEffect(() => { spinRef.current = spin; }, [spin]);
-  // 同步更新：进入/退出的同一帧就要生效。之前只在 effect 里跟，按下 Esc 的那一刻
-  // ref 可能还是旧值；.293 就因为「刚进演示就按 Esc」实测丢过一次按键。
-  useEffect(() => { presentingRef.current = presenting; }, [presenting]);
+  // 注意：不要用 effect 让 ref 跟随 state。深链那一帧 render 里 presenting 还是 false，
+  // 这个 effect 会把「刚在深链里设成 true 的 ref」覆盖回 false，直到下一次 render 才恢复。
+  // 那一个窗口里按 Esc 会被忽略（.295 实测偶发失败）。ref 只在真正改动演示状态处显式写。
   // 演示是「整屏」的事：侧栏/手机导航在应用壳里，读不到这个页面的状态，
   // 所以用一个 html 级标记让它们一起淡出；退出或卸载时清掉。
   useEffect(() => {
@@ -2354,8 +2354,9 @@ export default function Legion3DPage() {
       event.preventDefault();
       exitPresenting();
     };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    // 捕获阶段：别的组件（帮助浮层、命令面板）在冒泡里 stopPropagation 也拦不住出口。
+    window.addEventListener('keydown', onKey, true);
+    return () => window.removeEventListener('keydown', onKey, true);
   }, [exitPresenting]);
 
   const startCapture = useCallback(() => {
@@ -2439,6 +2440,7 @@ export default function Legion3DPage() {
       }, 200),
       safety,
     };
+    presentingRef.current = true;
     setPresenting(true);
     runPresentChecks();
     setCleanView(true);
