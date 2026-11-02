@@ -2928,7 +2928,9 @@ export default function Legion3DPage() {
       <div
         ref={toolbarRef}
         data-testid="legion-3d-toolbar"
-        className="pointer-events-auto flex flex-wrap items-center gap-1.5 sm:justify-end"
+        // 窄屏单行横向滚动：两行工具条会占掉约 90px 高度（实测 390 下顶部合计 ~300px，
+        // 视口的 35%），收成一行可以多给画布 ~50px，且不隐藏任何功能。
+        className="pointer-events-auto flex flex-nowrap items-center gap-1.5 overflow-x-auto pb-0.5 sm:flex-wrap sm:justify-end sm:overflow-visible sm:pb-0"
         onKeyDown={e => {
           // Enter activates the focused control, even when a node is selected.
           if (e.key === 'Enter') e.stopPropagation();
