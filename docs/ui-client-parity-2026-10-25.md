@@ -1170,12 +1170,27 @@ responsibility 88 · summary 18 · tags 20 · tag-ops 26 · timeline 16`（+ 设
 - `next-release.py` 生成后自检：版本引用形状校验（release/preview/版本号/套件标签）、期望值与上一版对照告警。
 - 已知教训：生成器只换版本号会漏“上一版记录”引用；全局替换要先确认“不该命中”的地方。
 
-### 19.5 当前发布门（`.283`，同一 SHA）
+### 19.5 当前发布门（`.284`，同一 SHA）
 
-`archive 70 · board 138 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
-legion 176 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
+`archive 70 · board 142 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
+legion 177 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
 responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
+
+## 25. 2026-11-02 续六：批量操作的健壮性（全部有断言）
+
+| 行为 | 断言 | 实测 |
+|---|---|---|
+| 请求飞行中，批量「应用」按钮 | `bulk:applyDisabledWhileBusy` | disabled |
+| 请求次数 | `bulk:noDuplicateRequests` | 每项 1 次，无重复 |
+| 部分失败 | `bulk:partialFailureKeepsFailedSelected` | 只留失败项选中 |
+| 失败原因 | `bulk:groupsSameReason` | 按原因归并计数 |
+| 重试 | `bulk:retrySendsOnlyFailedItem` | 只补发失败项（+1 次） |
+
+夹具为此新增 `slow_patch`（PATCH 延迟 500ms）与 `deny_ids`（多项同时拒绝）。
+
+两条经验：断言“结束后按钮可用”是错的——成功路径会清空选中，按钮因**无选中**而禁用；
+新增用例若改变选中集合，结束时要还原，否则后面的用例（如「清空选择」）会因为 disabled 而卡住。
 
 ## 24. 2026-11-02 续五：移动端触控与首屏基线
 
