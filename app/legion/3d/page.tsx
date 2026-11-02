@@ -2521,7 +2521,10 @@ export default function Legion3DPage() {
       onKeyDown={onKeyDown}
       data-legion-stage="3d"
       style={{ height: presenting || isFullscreen ? '100dvh' : (stageHeight ?? 'calc(100dvh - 7.5rem)') }}
-      className={`relative w-full overflow-hidden bg-[var(--bg)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)] ${presenting ? 'fixed inset-0 z-40 w-screen' : ''}`}
+      // position 必须二选一：`relative` 与 `fixed` 同在一条 class 里时，胜负由样式表
+      // 顺序决定（实测 relative 赢），元素留在文档流里只被拉大成 100vw，量出来是
+      // 「从侧栏右边开始的一大块」——.293 第一版就这么错了。
+      className={`${presenting ? 'fixed inset-0 z-40' : 'relative w-full'} overflow-hidden bg-[var(--bg)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]`}
       aria-label="军团 3D 网络拓扑"
       data-testid="legion-3d-stage"
       data-hover-depth={depthPreview ?? ''}
