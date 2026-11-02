@@ -1101,6 +1101,10 @@ export default function Legion3DPage() {
             let seen = false;
             try { seen = sessionStorage.getItem('legion3d-intro') === '1'; } catch {}
             if (!reduce && !seen) {
+              // 入场时镜头先偏一点，再靠定时缓动转回正位：开场有「推到位」的运动感，
+              // 且因为缓动是定时的（480ms），不会影响「入场后镜头必须停住」的断言。
+              view.yaw -= 0.35;
+              yawTarget.current = view.yaw + 0.35;
               view.zoom = want * 0.62;
               // 动画期间也别让「尺寸漂移」触发重算。
               userAdjusted.current = true;
