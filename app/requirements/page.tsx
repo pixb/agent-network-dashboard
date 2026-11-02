@@ -391,6 +391,9 @@ function RequirementsContent({ networkId }: { networkId: string }) {
   const [collapsedColumns, setCollapsedColumns] = useState<Set<string>>(new Set());
   const [showAbandoned, setShowAbandoned] = useState(false);
   const [bulkMode, setBulkMode] = useState(false);
+  // 手机上筛选区有 4 个控件 + 搜索，默认全展开会把内容推到折叠线以下；
+  // 宽屏照旧全展开，手机上收进「筛选」。
+  const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
   const [bulkBusy, setBulkBusy] = useState(false);
   // 批量操作期间按钮被 disabled，焦点会掉到 body。这里不按「原元素」恢复
@@ -1242,6 +1245,16 @@ function RequirementsContent({ networkId }: { networkId: string }) {
           />
         )}
 
+        <button
+          type="button"
+          data-testid="requirements-mobile-filters"
+          aria-expanded={mobileFiltersOpen}
+          onClick={() => setMobileFiltersOpen(v => !v)}
+          className="mb-2 rounded-md border border-[var(--border)] px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] sm:hidden"
+        >
+          {mobileFiltersOpen ? '收起筛选' : `筛选${activeFilterLabels.length ? `（${activeFilterLabels.length}）` : ''}`}
+        </button>
+        <div className={mobileFiltersOpen ? 'contents' : 'hidden sm:contents'} data-testid="requirements-mobile-filter-panel">
         <ProjectFilter
           networkId={networkId}
           value={project}
@@ -1255,6 +1268,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
           query={peopleQuery} onQueryChange={setPeopleQuery}
           catalog={peopleCatalog} options={personOptions} onRetry={retryPeople}
           onChange={value => setParam({ ...responsibilityPatch(value), q: qInput, tag: tagInput })} />
+        </div>
 
         {/* Text filters */}
         <div className="mb-4 flex flex-wrap items-center gap-2">
@@ -1298,6 +1312,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
               </button>
             )}
           </div>
+          <div className={mobileFiltersOpen ? 'contents' : 'hidden sm:contents'}>
           <TagPicker
             draft={tagInput}
             applied={tag}
@@ -1328,6 +1343,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
               包含已归档
             </label>
           )}
+          </div>
           {(status || tag || q || project || owner || agent || overdue || participating || priorities) && (
             <button
               type="button"
