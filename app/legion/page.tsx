@@ -460,8 +460,56 @@ export default function LegionPage() {
     return () => window.removeEventListener('keydown', onKey, true);
   }, [cleanView]);
 
-  const reset = useCallback(() => setView({ k: 1, tx: 0, ty: 0 }), []);
+  // 窄屏取景：390px 下节点并集只占舞台宽度约 65%（实测 2d-390-fit），字被缩得偏小。
+  // 手机把 k 提到「节点用满 88% 宽度」；桌面保持 1。用户自己缩放过就不再干预，
+  // 「重置」会清掉标记并重新算。
+  // 变焦是绕原点缩放的，所以 tx/ty 必须同时补上「保持舞台中心不动」的位移。
+  const userZoomed = useRef(false);
+  const fitKey = useRef('');
+  const fitNarrow = useCallback(() => {
+    const svg = svgRef.current;
+    if (!svg || !size.width || !size.height) return;
+    if (userZoomed.current) return;
+    const key = `${Math.round(size.width)}x${Math.round(size.height)}:${layout.nodes.length}`;
+    if (fitKey.current === key) return;
+    const groups = [...svg.querySelectorAll('[data-node-id]')];
+    if (!groups.length) return;
+    let x1 = Infinity, y1 = Infinity, x2 = -Infinity, y2 = -Infinity;
+    const box = svg.getBoundingClientRect();
+    for (const g of groups) {
+      const r = g.getBoundingClientRect();
+      if (!r.width && !r.height) continue;
+      x1 = Math.min(x1, r.left - box.left); x2 = Math.max(x2, r.right - box.left);
+      y1 = Math.min(y1, r.top - box.top); y2 = Math.max(y2, r.bottom - box.top);
+    }
+    if (!Number.isFinite(x1) || x2 <= x1) return;
+    fitKey.current = key;
+    if (size.width >= 640) { setView({ k: 1, tx: 0, ty: 0 }); return; }
+    // 把「图形自身包围盒中心」对到舞台中心：不能假设图形本来就以舞台中心为原点——
+    // 实测它偏上，绕舞台中心放大后偏移被放大，顶部成员会顶到统计条（.296 实拍）。
+    setView(v => {
+      const baseWidth = (x2 - x1) / v.k; // 折算回 k=1 的宽度
+      if (!baseWidth) return v;
+      const px = ((x1 + x2) / 2 - v.tx) / v.k; // 图形中心在布局坐标里的位置
+      const py = ((y1 + y2) / 2 - v.ty) / v.k;
+      const k = Math.max(1, Math.min(1.8, (size.width * 0.88) / baseWidth));
+      // 竖直留出顶部统计条的高度，避免放大后与浮层重叠。
+      const topInset = 64;
+      return {
+        k,
+        tx: size.width / 2 - k * px,
+        ty: topInset + (size.height - topInset) / 2 - k * py,
+      };
+    });
+  }, [size.width, size.height, layout.nodes.length]);
+  useEffect(() => { fitNarrow(); }, [fitNarrow]);
+
+  const reset = useCallback(() => {
+    userZoomed.current = false;
+    setView({ k: 1, tx: 0, ty: 0 });
+  }, []);
   const zoomBy = useCallback((factor: number, anchor?: { x: number; y: number }) => {
+    userZoomed.current = true;
     setView(v => {
       const k = Math.min(3, Math.max(0.5, v.k * factor));
       // 有锚点（滚轮）就以指针为准，没有就用容器中心（＋/－ 按钮、键盘）。
