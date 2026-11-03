@@ -2732,7 +2732,10 @@ export default function Legion3DPage() {
         <div
           data-testid="legion-3d-present-bar"
           data-idle={chromeIdle ? '1' : '0'}
-          className={`pointer-events-auto absolute bottom-3 right-3 z-20 flex max-w-[70vw] flex-wrap items-center justify-end gap-2 transition-opacity duration-500 ${chromeIdle ? 'opacity-0' : 'opacity-100'}`}
+          // 窄屏单行横向滚动：原来 max-w-[70vw] + flex-wrap 在 390px 下按钮折成多行，
+          // 实测控制条高 214px（屏幕的 24%），压在全屏画布上挡住画面；
+          // 320px 同样 214px。桌面保持原来的换行布局不变。
+          className={`pointer-events-auto absolute bottom-3 right-3 z-20 flex max-w-[calc(100vw-1.5rem)] flex-nowrap items-center justify-end gap-2 overflow-x-auto whitespace-nowrap pb-0.5 transition-opacity duration-500 sm:max-w-[70vw] sm:flex-wrap sm:overflow-visible sm:pb-0 ${chromeIdle ? 'opacity-0' : 'opacity-100'}`}
         >
           <button
             type="button"
