@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.324 — 2026-11-03
+
+### 更新日志补齐 .312–.323
+
+- `/changelog` 此前最新条目停在 `.290`，页面展示了 33 个预览版之前的内容；本版补齐 `.312`–`.323`。
+- 新增契约判据：CHANGELOG 最新条目与 `package.json` 相差不得超过 12 个预览版，超出即失败。
+
 ## 0.6.4-preview.323 — 2026-11-03
 
 ### 聊天：窄屏附件与语音按钮不再重叠
