@@ -32,4 +32,17 @@ for (const tag of ['p', 'li', 'h3']) {
   assert.ok(/overflow-wrap:anywhere/.test(line), `${tag} 必须允许任意断行，否则窄屏会长串溢出`);
 }
 
+// 内容新鲜度：页面在、内容旧是最容易被忽略的坏法——`.319` 上线了页面，
+// 但 CHANGELOG 最新条目停在 `.290`，页面展示了 33 个预览版之前的说明。
+// 这里要求「最新条目」与 package.json 的 preview 号相差不超过 12。
+const pkg = JSON.parse(read('package.json'));
+const pkgPreview = Number((pkg.version || '').match(/preview\.(\d+)/)?.[1] ?? NaN);
+const newest = Number([...changelog.matchAll(/^## \d+\.\d+\.\d+-preview\.(\d+)/gm)]
+  .map(m => Number(m[1])).sort((a, b) => b - a)[0] ?? NaN);
+assert.ok(Number.isFinite(pkgPreview), 'package.json 必须是 preview 版本号');
+assert.ok(Number.isFinite(newest), 'CHANGELOG 里必须至少有一条 preview 条目');
+const gap = pkgPreview - newest;
+assert.ok(gap >= 0 && gap <= 12,
+  `CHANGELOG 最新条目 .${newest} 落后 package.json .${pkgPreview} 共 ${gap} 个版本（上限 12）：请补写发布说明`);
+
 console.log(`changelog page contract ok (${versions.length} versions, wrap guarded)`);
