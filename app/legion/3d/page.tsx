@@ -862,6 +862,8 @@ export default function Legion3DPage() {
         y2: cleanView ? stage.height - 24 : (bottom?.y1 ?? stage.height - 24) - 24,
       };
       fitBoundsRef.current = bounds;
+      // 取景安全区镜像到 DOM：演示态到底按哪块区域取景，要能读到数字而不是推算。
+      wrap.dataset.safeBounds = `${Math.round(bounds.x1)},${Math.round(bounds.y1)},${Math.round(bounds.x2)},${Math.round(bounds.y2)}`;
       // Restoring controls can shrink the safe area without resizing the canvas.
       // Expanding it alone must not move a manually positioned camera.
       if (previous && !userAdjusted.current && (
