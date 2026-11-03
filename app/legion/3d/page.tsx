@@ -1349,6 +1349,36 @@ export default function Legion3DPage() {
       }
       ctx.globalAlpha = 1;
 
+      // 雷达扫掠：一道亮弧沿着最外环缓慢转过，让静态图有「正在扫描」的动势。
+      // 只画在暗场、非交互、未聚焦时；flowTime 在「减少动态效果」下不前进，
+      // 所以它会自然静止而不是变成闪烁。
+      if (dark && !interacting && !activeSet) {
+        const ringR = layout.nodes.reduce((max, n) => (n.kind === 'group' && n.radius ? Math.max(max, n.radius) : max), 0);
+        if (ringR > 0) {
+          const head = (flowTime * 0.55) % (Math.PI * 2);
+          const span = 0.75;
+          const segs = 24;
+          const yRing = RING_HEIGHT[1] ?? 0;
+          ctx.save();
+          ctx.lineCap = 'round';
+          ctx.strokeStyle = tk.accent;
+          for (let s = 0; s < segs; s++) {
+            const a1 = head - span * (s / segs);
+            const a2 = head - span * ((s + 1) / segs);
+            const p1 = projectPoint({ x: Math.sin(a1) * ringR, y: yRing, z: Math.cos(a1) * ringR }, cam, size);
+            const p2 = projectPoint({ x: Math.sin(a2) * ringR, y: yRing, z: Math.cos(a2) * ringR }, cam, size);
+            if (!p1 || !p2) continue;
+            ctx.globalAlpha = 0.42 * Math.pow(1 - s / segs, 1.6);
+            ctx.lineWidth = 2.4 - 1.4 * (s / segs);
+            ctx.beginPath();
+            ctx.moveTo(p2.x, p2.y);
+            ctx.lineTo(p1.x, p1.y);
+            ctx.stroke();
+          }
+          ctx.restore();
+        }
+      }
+
       // 圆心光晕：给整张图一个视觉重心，不然四周的环会散掉。
       const coreCenter = byIdProbe();
       if (coreCenter) {
