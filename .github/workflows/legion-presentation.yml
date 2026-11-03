@@ -25,7 +25,10 @@ on:
 
 jobs:
   presentation:
-    runs-on: ubuntu-latest
+    # 钉版本：`ubuntu-latest` 现在是 26.04，Playwright 1.59.1 明确不支持
+    # （runner 日志：Playwright does not support chromium on ubuntu26.04-x64），
+    # 第一次合并时这条 job 就是这样红的。24.04 是受支持且有预装依赖的版本。
+    runs-on: ubuntu-24.04
     timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
