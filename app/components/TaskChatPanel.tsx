@@ -1413,6 +1413,84 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
     setAttachedFiles(prev => [...prev, ...picked].slice(0, 6));
   };
 
+  // ── 语音输入（对齐客户端） ────────────────────────────────────────
+  // 录一段音 → 包成 File → 走已有的上传/附件链路（`/api/hub/upload` + `meta.attachments`）。
+  // 不新开接口：附件那条路已经有 12 MiB 限制、429 文案、失败气泡，语音没有理由另起一套。
+  // 编码：Chrome/Firefox 用 webm/opus；Safari 只有 audio/mp4，故按 isTypeSupported 逐个试。
+  const [recording, setRecording] = useState(false);
+  const [recSeconds, setRecSeconds] = useState(0);
+  const [recError, setRecError] = useState('');
+  const recorderRef = useRef<MediaRecorder | null>(null);
+  const recChunksRef = useRef<BlobPart[]>([]);
+  const recTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const REC_MAX_SECONDS = 120;
+
+  const stopRecorder = () => {
+    if (recTimerRef.current) { clearInterval(recTimerRef.current); recTimerRef.current = null; }
+    const rec = recorderRef.current;
+    if (rec && rec.state !== 'inactive') rec.stop();
+    recorderRef.current = null;
+    setRecording(false);
+    setRecSeconds(0);
+  };
+
+  const startRecording = async () => {
+    setRecError('');
+    if (typeof window === 'undefined' || typeof MediaRecorder === 'undefined'
+      || !navigator.mediaDevices?.getUserMedia) {
+      setRecError(t('这个浏览器不支持录音', 'Recording is not supported in this browser'));
+      return;
+    }
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      const types = ['audio/webm;codecs=opus', 'audio/webm', 'audio/mp4'];
+      const mime = types.find(type => MediaRecorder.isTypeSupported?.(type)) || '';
+      const rec = new MediaRecorder(stream, mime ? { mimeType: mime } : undefined);
+      recChunksRef.current = [];
+      rec.ondataavailable = event => { if (event.data && event.data.size > 0) recChunksRef.current.push(event.data); };
+      rec.onstop = () => {
+        // 录音结束必须释放麦克风，否则浏览器标签页会一直亮着录音图标。
+        stream.getTracks().forEach(track => track.stop());
+        const type = rec.mimeType || mime || 'audio/webm';
+        const blob = new Blob(recChunksRef.current, { type });
+        recChunksRef.current = [];
+        if (blob.size < 800) {
+          // 太短的片段（误点一下）不值得发：明确说一句，而不是上传 0.1 秒的噪音。
+          setRecError(t('录音太短，按住先说几句', 'Recording too short'));
+          return;
+        }
+        const ext = type.includes('mp4') ? 'm4a' : 'webm';
+        const stamp = new Date().toISOString().replace(/[:.]/g, '-').slice(11, 19);
+        const file = new File([blob], `voice-${stamp}.${ext}`, { type });
+        addFiles([file]);
+      };
+      rec.onerror = () => setRecError(t('录音出错了', 'Recording failed'));
+      recorderRef.current = rec;
+      rec.start();
+      setRecording(true);
+      setRecSeconds(0);
+      recTimerRef.current = setInterval(() => {
+        setRecSeconds(prev => {
+          if (prev + 1 >= REC_MAX_SECONDS) { stopRecorder(); return 0; }
+          return prev + 1;
+        });
+      }, 1000);
+    } catch (err) {
+      // 权限被拒 / 没有麦克风：把原因写出来，不要按钮点了没反应。
+      const name = (err as { name?: string })?.name || '';
+      setRecError(name === 'NotAllowedError'
+        ? t('麦克风权限被拒，请在浏览器设置里允许', 'Microphone permission denied')
+        : t('没有可用的麦克风', 'No microphone available'));
+    }
+  };
+
+  useEffect(() => () => {
+    // 组件卸载时停止录音与计时，避免离开面板后麦克风还开着。
+    if (recTimerRef.current) clearInterval(recTimerRef.current);
+    const rec = recorderRef.current;
+    if (rec && rec.state !== 'inactive') rec.stop();
+  }, []);
+
   const handlePaste = (e: React.ClipboardEvent<HTMLTextAreaElement>) => {
     const files = Array.from(e.clipboardData.files || []);
     if (files.length > 0) {
@@ -1779,6 +1857,25 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                     <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 6.5l-7.78 7.78a3 3 0 104.24 4.24l8.49-8.49a5 5 0 00-7.07-7.07L5.89 11.45a7 7 0 109.9 9.9l7.07-7.07" />
                   </svg>
                 </label>
+                <button
+                  type="button"
+                  onClick={() => (recording ? stopRecorder() : void startRecording())}
+                  aria-label={recording ? t('停止录音', 'Stop recording') : t('录一段语音', 'Record voice message')}
+                  aria-pressed={recording}
+                  data-testid="chat-voice-toggle"
+                  title={recording ? t('停止录音', 'Stop recording') : t('录一段语音', 'Record voice message')}
+                  className={`inline-flex min-h-[44px] min-w-[44px] -my-3 -mx-1.5 items-center justify-center rounded sm:min-h-0 sm:min-w-0 sm:m-0 sm:p-1 cursor-pointer hover:bg-[var(--accent)]/10 ${recording ? 'text-[var(--danger)]' : 'text-[var(--fg-dim)] hover:text-[var(--accent-text)]'}`}
+                >
+                  {recording ? (
+                    <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                      <rect x="7" y="7" width="10" height="10" rx="1.5" />
+                    </svg>
+                  ) : (
+                    <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2} aria-hidden="true">
+                      <path strokeLinecap="round" strokeLinejoin="round" d="M12 18.5a6 6 0 006-6V11m-12 1.5v.5a6 6 0 0012 0M12 18.5V22m0-19a3 3 0 013 3v6a3 3 0 11-6 0V6a3 3 0 013-3z" />
+                    </svg>
+                  )}
+                </button>
                 <select value={priority} onChange={e => setPriority(e.target.value)}
                   className="bg-transparent text-[9px] text-[var(--fg-dim)] focus:outline-none cursor-pointer">
                   <option value="normal">N</option>
@@ -1801,6 +1898,21 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
               )}
             </button>
           </div>
+          {(recording || recError) && (
+            <div className="mt-1 flex items-center gap-1.5 text-[10px]" role="status" data-testid="chat-voice-status">
+              {recording ? (
+                <>
+                  <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--danger)]" aria-hidden="true" />
+                  <span className="text-[var(--danger)]">
+                    {t('录音中', 'Recording')} {String(Math.floor(recSeconds / 60)).padStart(1, '0')}:{String(recSeconds % 60).padStart(2, '0')}
+                  </span>
+                  <span className="text-[var(--fg-dim)]">{t('再点一次停止并附加', 'Tap again to stop and attach')}</span>
+                </>
+              ) : (
+                <span className="text-[var(--danger)]">{recError}</span>
+              )}
+            </div>
+          )}
           {uploadProgress && (
             <div className="mt-1 flex items-center gap-1.5 text-[10px] text-[var(--accent-text)]" role="status">
               <span className="inline-block h-2.5 w-2.5 animate-spin rounded-full border-2 border-[var(--accent)]/30 border-t-cyan-400" />
