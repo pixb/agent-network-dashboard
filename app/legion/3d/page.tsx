@@ -1519,12 +1519,11 @@ export default function Legion3DPage() {
       // 还画字，就会出现能看见却读不清的幽灵标签（实拍）。用数字断言，不靠眼。
       let nodeTextAlphaMin = 1;
       const labelBodies: LabelEllipse[] = [];
-      // 可见实体包围盒：alpha<0.25 的节点实际看不见（深部/离线/空部门会到 0.12–0.42），
-      // 却照样参与取景包围盒——先把这个差值暴露出来量，再决定要不要改取景规则。
-      let visMinX = Infinity, visMinY = Infinity, visMaxX = -Infinity, visMaxY = -Infinity, visCount = 0;
+      // 可见实体包围盒（alpha≥0.25）：跨帧累计，暴露点读上一帧的完整结果。
+      // 深部/离线/空部门会淡到 0.12–0.42，却照样参与取景包围盒——先量出来再决定要不要改规则。
       const visBoundsRef = visBoundsAcc.current;
-      const thisFrameVis = visBoundsAcc.current;
       visBoundsAcc.current = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, count: 0 };
+      const thisFrameVis = visBoundsAcc.current;
       for (const sn of nodes) {
         const node = sn.item;
         const p = sn.projected;
