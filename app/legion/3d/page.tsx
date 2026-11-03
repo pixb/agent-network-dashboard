@@ -306,6 +306,7 @@ export default function Legion3DPage() {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
   const fitBoundsRef = useRef<LabelRect | null>(null);
+  const visBoundsAcc = useRef({ minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, count: 0 });
   const labelUiRectsRef = useRef<LabelRect[]>([]);
   const corePhaseRef = useRef(0);
   const flowTimeRef = useRef(0);
@@ -1506,6 +1507,9 @@ export default function Legion3DPage() {
       // 可见实体包围盒：alpha<0.25 的节点实际看不见（深部/离线/空部门会到 0.12–0.42），
       // 却照样参与取景包围盒——先把这个差值暴露出来量，再决定要不要改取景规则。
       let visMinX = Infinity, visMinY = Infinity, visMaxX = -Infinity, visMaxY = -Infinity, visCount = 0;
+      const visBoundsRef = visBoundsAcc.current;
+      const thisFrameVis = visBoundsAcc.current;
+      visBoundsAcc.current = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, count: 0 };
       for (const sn of nodes) {
         const node = sn.item;
         const p = sn.projected;
@@ -1544,9 +1548,24 @@ export default function Legion3DPage() {
             if (Number.isFinite(minX)) {
               canvasEl.dataset.fitBounds = `${Math.round(minX)},${Math.round(minY)},${Math.round(maxX)},${Math.round(maxY)}`;
               canvasEl.dataset.fitView = `${Math.round(size.width)}x${Math.round(size.height)}`;
-              if (Number.isFinite(visMinX)) {
-                canvasEl.dataset.visBounds = `${Math.round(visMinX)},${Math.round(visMinY)},${Math.round(visMaxX)},${Math.round(visMaxY)}`;
-                canvasEl.dataset.visCount = `${visCount}/${nodes.length}`;
+              const prevVis = visBoundsRef;
+              if (prevVis && Number.isFinite(prevVis.minX)) {
+                canvasEl.dataset.visBounds = `${Math.round(prevVis.minX)},${Math.round(prevVis.minY)},${Math.round(prevVis.maxX)},${Math.round(prevVis.maxY)}`;
+                canvasEl.dataset.visCount = `${prevVis.count}/${nodes.length}`;
+              } else {
+                delete canvasEl.dataset.visBounds;
+                canvasEl.dataset.visCount = `0/${nodes.length}`;
+              }
+              // 轨道采样点的包围盒：它们参与取景但几乎没有可见面积。
+              if (ringRadii.length) {
+                let rx1 = Infinity, ry1 = Infinity, rx2 = -Infinity, ry2 = -Infinity;
+                for (const ring of ringRadii) {
+                  for (const p of ringPath(ring.radius, RING_HEIGHT[ring.ring] ?? 0, cam, size, 64)) {
+                    if (p.x < rx1) rx1 = p.x; if (p.x > rx2) rx2 = p.x;
+                    if (p.y < ry1) ry1 = p.y; if (p.y > ry2) ry2 = p.y;
+                  }
+                }
+                if (Number.isFinite(rx1)) canvasEl.dataset.ringBounds = `${Math.round(rx1)},${Math.round(ry1)},${Math.round(rx2)},${Math.round(ry2)}`;
               }
               // 选中节点的屏幕坐标：手机上的详情卡会不会挡住焦点，用坐标判断。
               const focusedSn = nodes.find(sn => sn.item.id === selectedRef.current);
@@ -1611,11 +1630,12 @@ export default function Legion3DPage() {
         // leader router excludes its own body by reference, not by coordinates.
         const anchor = { x: p.x, y: p.y, rx: rx + 2, ry: ry + 2 };
         if (alpha >= 0.25) {
-          visCount += 1;
-          if (anchor.x - anchor.rx < visMinX) visMinX = anchor.x - anchor.rx;
-          if (anchor.y - anchor.ry < visMinY) visMinY = anchor.y - anchor.ry;
-          if (anchor.x + anchor.rx > visMaxX) visMaxX = anchor.x + anchor.rx;
-          if (anchor.y + anchor.ry > visMaxY) visMaxY = anchor.y + anchor.ry;
+          const acc = thisFrameVis;
+          acc.count += 1;
+          if (anchor.x - anchor.rx < acc.minX) acc.minX = anchor.x - anchor.rx;
+          if (anchor.y - anchor.ry < acc.minY) acc.minY = anchor.y - anchor.ry;
+          if (anchor.x + anchor.rx > acc.maxX) acc.maxX = anchor.x + anchor.rx;
+          if (anchor.y + anchor.ry > acc.maxY) acc.maxY = anchor.y + anchor.ry;
         }
         // Compact/expanded mobile framing can bring Agent dots beside the core
         // label. Every painted body participates, even when it has no label.
