@@ -1218,7 +1218,9 @@ export default function Legion3DPage() {
           // 聚焦时在「自然取景」之上再推进 10%：FOCUS_ZOOM 只是保底值，
           // 实测 1440 宽下 fit（145%）本来就大于保底（135%），max() 让它从不生效，
           // 于是「聚焦」只有转向和淡出、没有任何推进感。
-          const boost = focusZoomRef.current > 0 ? 1.1 : 1;
+          // 窄屏不推近：390 宽实测推 10% 后画面最右内容像素到 389（画布 390），
+          // 标签/头像贴到屏幕边缘；不推时最右 378，正好是 12px 安全边。
+          const boost = focusZoomRef.current > 0 && size.width >= 640 ? 1.1 : 1;
           const want = Math.min(MAX_ZOOM, Math.max(fit.zoom, focusZoomRef.current) * boost);
           const prevZoom = view.zoom;
           Object.assign(view, { ...fit, zoom: want });
