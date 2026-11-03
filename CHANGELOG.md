@@ -6,6 +6,12 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.327 — 2026-11-03
+
+### 军团 3D：部门盘更醒目
+
+- 部门椭圆填充（深色主题）0.24 → 0.30、描边 1.4 → 1.6px，密集场景里「部门」不再被成员点淹没；浅色 0.12 → 0.15（幅度更小，避免整块发灰）。
+
 ## 0.6.4-preview.326 — 2026-11-03
 
 ### 军团演示：画面再放大 4%

@@ -1685,10 +1685,12 @@ export default function Legion3DPage() {
         } else if (node.kind === 'group') {
           ctx.beginPath();
           ctx.ellipse(p.x, p.y, rx, ry, 0, 0, Math.PI * 2);
-          ctx.fillStyle = hexToRgba(color, dark ? 0.24 : 0.12);
+          // 部门盘是这张图的主角：深色 0.24 → 0.30，避免密集场景被成员点淹没；
+          // 浅色只从 0.12 提到 0.15——浅底再厚会整块发灰，文字对比度会掉。
+          ctx.fillStyle = hexToRgba(color, dark ? 0.30 : 0.15);
           ctx.fill();
           ctx.strokeStyle = color;
-          ctx.lineWidth = 1.4;
+          ctx.lineWidth = 1.6;
           ctx.stroke();
         } else if (face) {
           if (dark) {
