@@ -1843,10 +1843,10 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 onPaste={handlePaste}
                 placeholder={`Message ${alias}...`}
                 rows={1}
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-3 py-2.5 pr-24 text-base sm:px-4 sm:text-sm text-[var(--fg)] placeholder-[var(--fg-dim)] focus:border-[var(--accent)]/40 focus:outline-none resize-none transition-colors"
+                className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-3 py-2.5 pr-[6.75rem] text-base sm:px-4 sm:pr-24 sm:text-sm text-[var(--fg)] placeholder-[var(--fg-dim)] focus:border-[var(--accent)]/40 focus:outline-none resize-none transition-colors"
               />
               <div className="absolute right-2 bottom-1.5 flex items-center gap-1">
-                <label className="inline-flex min-h-[44px] min-w-[44px] -my-3 -mx-1.5 items-center justify-center sm:min-h-0 sm:min-w-0 sm:m-0 sm:p-1 text-[var(--fg-dim)] hover:text-[var(--accent-text)] cursor-pointer rounded hover:bg-[var(--accent)]/10" title={t('附加文件', 'Attach file')}>
+                <label className="inline-flex min-h-[44px] min-w-[44px] -my-3 items-center justify-center sm:min-h-0 sm:min-w-0 sm:m-0 sm:p-1 text-[var(--fg-dim)] hover:text-[var(--accent-text)] cursor-pointer rounded hover:bg-[var(--accent)]/10" title={t('附加文件', 'Attach file')}>
                   <input
                     type="file"
                     multiple
@@ -1864,7 +1864,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                   aria-pressed={recording}
                   data-testid="chat-voice-toggle"
                   title={recording ? t('停止录音', 'Stop recording') : t('录一段语音', 'Record voice message')}
-                  className={`inline-flex min-h-[44px] min-w-[44px] -my-3 -mx-1.5 items-center justify-center rounded sm:min-h-0 sm:min-w-0 sm:m-0 sm:p-1 cursor-pointer hover:bg-[var(--accent)]/10 ${recording ? 'text-[var(--danger)]' : 'text-[var(--fg-dim)] hover:text-[var(--accent-text)]'}`}
+                  className={`inline-flex min-h-[44px] min-w-[44px] -my-3 items-center justify-center rounded sm:min-h-0 sm:min-w-0 sm:m-0 sm:p-1 cursor-pointer hover:bg-[var(--accent)]/10 ${recording ? 'text-[var(--danger)]' : 'text-[var(--fg-dim)] hover:text-[var(--accent-text)]'}`}
                 >
                   {recording ? (
                     <svg className="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
@@ -1876,8 +1876,10 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                     </svg>
                   )}
                 </button>
+                {/* 窄屏隐藏：44px 的附件与语音按钮之后，这个下拉会把输入区再压掉一截
+                    （实测 320 下按钮块占 125px，输入框 212px，留给文本的只剩几十像素）。 */}
                 <select value={priority} onChange={e => setPriority(e.target.value)}
-                  className="bg-transparent text-[9px] text-[var(--fg-dim)] focus:outline-none cursor-pointer">
+                  className="hidden bg-transparent text-[9px] text-[var(--fg-dim)] focus:outline-none cursor-pointer sm:block">
                   <option value="normal">N</option>
                   <option value="high">H</option>
                   <option value="low">L</option>
