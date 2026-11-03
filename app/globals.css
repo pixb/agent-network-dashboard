@@ -2298,6 +2298,12 @@ html[data-legion-present='1'] [data-app-shell-nav] {
   transition: opacity 240ms ease, filter 240ms ease;
 }
 
+/* 演示态是整屏画面：应用级的固定浮层（右侧 Servers 抽屉把手等）要一起让位，
+   否则投屏/录屏时会在舞台之外留一个可点的黑框（`.310` 实拍在右上角）。 */
+html[data-legion-present='1'] [aria-label='Servers panel'] {
+  display: none;
+}
+
 /* 军团 2D：聚焦某个部门时，其它节点降透明度到 0.18。实体留着可以，
    但文字在 0.18 下只剩一团糊——和 3D 的「幽灵标签」是同一类问题（截图实测）。
    规则：被调暗的节点不画文字，只留盘子/扇区的轮廓。 */
