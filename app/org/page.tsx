@@ -337,14 +337,14 @@ function OrgContent() {
           <div className="flex items-center gap-2">
             <Link
               href="/legion"
-              className="rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+              className="inline-flex min-h-11 items-center rounded-md px-2.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] sm:min-h-0 sm:py-1.5"
             >
               军团图
             </Link>
             <button
               type="button"
               onClick={() => load(offset, true)}
-              className="rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] transition-colors hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+              className="inline-flex min-h-11 items-center rounded-md px-2.5 text-xs text-[var(--fg-muted)] transition-colors hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] sm:min-h-0 sm:py-1.5"
             >
               Refresh
             </button>
