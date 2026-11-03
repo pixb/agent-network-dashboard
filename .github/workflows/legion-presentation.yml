@@ -1,0 +1,49 @@
+# 军团演示深链的整屏契约（浏览器级）。
+#
+# 为什么单独一条 workflow：
+#   `npm test` 只跑 tests/**/*.test.{mjs,mts}，`tests/*.spec.ts`（playwright）此前
+#   **没有任何 workflow 调用**——规格写了也只是文件。gates.yml 的注释里也写着
+#   “需要 Playwright + dev server 的先不接”，结果就是这类回归只能靠人工跑。
+#
+# 这条规格守的是一次真实事故：`?present=1` 只设 `presenting` 没设 `cleanView`，
+# 投屏时页头/搜索框/图例全在画面上，取景又按“有页头页脚”的安全区算（900px 画布
+# 按 660px 布局，内容只占屏高 57%）。截图很难看出来，数字一眼就能看见。
+#
+# 刻意只锁军团路径，避免拖慢所有 PR；浏览器安装约 30s，整条 1–2 分钟。
+
+name: legion-presentation
+
+on:
+  pull_request:
+    paths:
+      - 'app/legion/**'
+      - 'app/lib/legion*.ts'
+      - 'app/globals.css'
+      - 'tests/e2e-legion-presentation.spec.ts'
+      - '.github/workflows/legion-presentation.yml'
+  workflow_dispatch:
+
+jobs:
+  presentation:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
+
+      - run: npm ci
+
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
+
+      # playwright.config.ts 的 webServer 自己起 dev server（COMMHUB_URL=localhost:9999），
+      # 规格内的进程内 stub Hub 会在这个端口提供只读夹具——不连生产、不读真实数据。
+      - name: Presentation deeplink contract
+        env:
+          ANET_DASHBOARD_PASSWORD: admin123
+          TEST_URL: http://localhost:3000
+        run: npx playwright test tests/e2e-legion-presentation.spec.ts --reporter=line
