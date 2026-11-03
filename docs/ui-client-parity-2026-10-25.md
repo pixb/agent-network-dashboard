@@ -1174,12 +1174,40 @@ responsibility 88 · summary 18 · tags 20 · tag-ops 26 · timeline 16`（+ 设
 - `next-release.py` 生成后自检：版本引用形状校验（release/preview/版本号/套件标签）、期望值与上一版对照告警。
 - 已知教训：生成器只换版本号会漏“上一版记录”引用；全局替换要先确认“不该命中”的地方。
 
-### 19.5 当前发布门（`.308`，同一 SHA）
+### 19.5 当前发布门（`.309`，同一 SHA）
 
 `archive 70 · board 142 · chat 13 · contrast 27 · create 11 · detail 109 · hydration 7 ·
-legion 228 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
+legion 236 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project 82 · recording 23 ·
 responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
+
+## 38. 2026-11-03 续十九：断点之间才是事故高发带
+
+`.309` 修的是一个只在 **640–1023** 出现的遮挡：状态横幅的左内边距在 `sm` 从 56px 降到 24px，
+而固定汉堡按钮要到 `lg`（1024）才消失，中间 34px 文字被盖住。
+
+它之所以藏了这么久，是因为**之前只测了两个极端宽度**（320/390 与 1440）。而 `sm` 生效、
+`lg` 未生效的狭窄区间，恰恰既不是“手机”也不是“桌面”。
+
+### 38.1 现在的断点矩阵
+| 页面 | 320 | 390 | 768 | 1024 | 1440 |
+|---|---|---|---|---|---|
+| 需求列表 / 看板 | ✅ | ✅ | ✅ | ✅ | ✅ |
+| 需求详情 | ✅ | — | ✅ | — | ✅ |
+| 军团 2D / 3D | — | ✅ | ✅ | ✅ | ✅ |
+
+1024 单独测的原因：它是外壳切换点——侧栏从抽屉变常驻、汉堡消失、主内容起点从 0 变成侧栏宽度，
+三件事同时发生。军团舞台又是 `relative w-full`，对这个宽度最敏感。
+
+### 38.2 新增判据
+- `board768:bannerClearsMenuButton`（横幅文字左 ≥ 按钮右）
+- `board1024:desktopShellActive` / `bannerStartsAfterSidebar` / `noPageOverflow`
+- `1024:2d/3dNoHorizontalOverflow`、`1024:2d/3dNoOverlap`
+- `layout:detail768NoOverflow` / `detail768TitleAboveFold` / `detail768TitleRowNoOverlap` / `detail768BannerClearsMenu`
+
+### 38.3 一个反向教训
+768 详情页截图里横幅文字看起来仍贴着按钮，我差点又去改代码；量完发现是 `textLeft 70` vs
+`btnRight 58`，与看板一致——**目视可疑时先量，别先改**。
 
 ## 37. 2026-11-03 续十八：手机端性能基线（有数字，才谈“流畅”）
 
