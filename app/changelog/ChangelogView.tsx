@@ -9,14 +9,14 @@ import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
 const components: Components = {
-  h1: props => <h1 className="mt-0 mb-2 text-base font-semibold text-[var(--fg)]" {...props} />,
+  h1: props => <h1 className="mt-0 mb-2 text-base font-semibold text-[var(--fg)] [overflow-wrap:anywhere]" {...props} />,
   h2: props => (
     <h2
-      className="mt-6 mb-2 border-t border-[var(--border)] pt-4 text-sm font-semibold text-[var(--fg)]"
+      className="mt-6 mb-2 border-t border-[var(--border)] pt-4 text-sm font-semibold text-[var(--fg)] [overflow-wrap:anywhere]"
       {...props}
     />
   ),
-  h3: props => <h3 className="mt-3 mb-1 text-[13px] font-medium text-[var(--fg)]" {...props} />,
+  h3: props => <h3 className="mt-3 mb-1 text-[13px] font-medium text-[var(--fg)] [overflow-wrap:anywhere]" {...props} />,
   // 窄屏实测：长串（版本号、`?present=1&tour=1` 这类内联代码）不换行，320px 下
   // 列表项横向溢出（ul 内容 496px 挤在 254px 里）。anywhere 让它优先换行而不是撑破。
   p: props => <p className="my-1.5 text-xs leading-relaxed text-[var(--fg-muted)] [overflow-wrap:anywhere]" {...props} />,
