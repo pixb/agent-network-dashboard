@@ -306,6 +306,7 @@ export default function Legion3DPage() {
   const headerRef = useRef<HTMLDivElement | null>(null);
   const footerRef = useRef<HTMLDivElement | null>(null);
   const fitBoundsRef = useRef<LabelRect | null>(null);
+  const visBoundsAcc = useRef({ minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, count: 0 });
   const labelUiRectsRef = useRef<LabelRect[]>([]);
   const corePhaseRef = useRef(0);
   const flowTimeRef = useRef(0);
@@ -497,6 +498,10 @@ export default function Legion3DPage() {
     if (params.get('present') !== '1') return;
     presentingRef.current = true;
     setPresenting(true);
+    // 深链必须和工具栏「演示模式」按钮做同一件事：只设 presenting 会让搜索框、
+    // 工具栏、图例都留在画面里，取景也按「有页头页脚」算（实测画布 900 只按 660 取景，
+    // 内容占屏高 57%）。一条链接投屏就该是干净的。
+    setCleanView(true);
     runPresentChecks();
     // ?tour=1 连巡礼一起开：录屏只放一条链接就能直接开始讲。
     // 减少动态效果时不自动开（与按钮的 aria-disabled 一致，避免「链接能开、按钮不能」的矛盾）。
@@ -837,6 +842,11 @@ export default function Legion3DPage() {
     const header = headerRef.current;
     const wrap = wrapRef.current;
     if (!header || !wrap) return;
+    // 进入/退出演示是一次有意的整体重取景。安全区在演示态是「变大」的（页头页脚让出），
+    // 而下面只有「变小」才置 fitPending——于是演示时画面一直停在按普通布局算出来的尺寸：
+    // 实测 1440×900 画布可用高度 852px，内容只占 512px（60%），投屏时图明显偏小。
+    // 用户手动调过机位就不抢（与原有的「扩大不移动手动机位」一致）。
+    if (!userAdjusted.current) fitPending.current = true;
     const measure = () => {
       const stage = wrap.getBoundingClientRect();
       const rect = (el: HTMLElement) => {
@@ -848,14 +858,20 @@ export default function Legion3DPage() {
       wrap.style.setProperty('--legion-list-top', `${top.y2 + 8}px`);
       const footer = footerRef.current;
       const bottom = footer && footer.offsetHeight > 0 ? rect(footer) : null;
-      labelUiRectsRef.current = cleanView ? [] : [top, ...(bottom ? [bottom] : [])];
+      // 演示（presenting）和净屏一样会把页头/页脚收起来，取景安全区必须一起放开：
+      // 之前只认 cleanView，演示态仍按普通布局留出页头页脚 → 画布 1440×900 只按 660px 取景，
+      // 内容占屏高 57%，投屏时白白空掉四成（实测 safe=[24,135,1392,660]）。
+      const uiHidden = cleanView || presenting;
+      labelUiRectsRef.current = uiHidden ? [] : [top, ...(bottom ? [bottom] : [])];
       const previous = fitBoundsRef.current;
       const bounds = {
         x1: 24, x2: stage.width - 24,
-        y1: cleanView ? 24 : top.y2 + 16,
-        y2: cleanView ? stage.height - 24 : (bottom?.y1 ?? stage.height - 24) - 24,
+        y1: uiHidden ? 24 : top.y2 + 16,
+        y2: uiHidden ? stage.height - 24 : (bottom?.y1 ?? stage.height - 24) - 24,
       };
       fitBoundsRef.current = bounds;
+      // 取景安全区镜像到 DOM：演示态到底按哪块区域取景，要能读到数字而不是推算。
+      wrap.dataset.safeBounds = `${Math.round(bounds.x1)},${Math.round(bounds.y1)},${Math.round(bounds.x2)},${Math.round(bounds.y2)}`;
       // Restoring controls can shrink the safe area without resizing the canvas.
       // Expanding it alone must not move a manually positioned camera.
       if (previous && !userAdjusted.current && (
@@ -871,7 +887,7 @@ export default function Legion3DPage() {
     observer.observe(wrap);
     measure();
     return () => observer.disconnect();
-  }, [cleanView]);
+  }, [cleanView, presenting]);
 
   /* ── 渲染循环 ───────────────────────────────────────────────────── */
 
@@ -1503,6 +1519,12 @@ export default function Legion3DPage() {
       // 还画字，就会出现能看见却读不清的幽灵标签（实拍）。用数字断言，不靠眼。
       let nodeTextAlphaMin = 1;
       const labelBodies: LabelEllipse[] = [];
+      // 可见实体包围盒：alpha<0.25 的节点实际看不见（深部/离线/空部门会到 0.12–0.42），
+      // 却照样参与取景包围盒——先把这个差值暴露出来量，再决定要不要改取景规则。
+      let visMinX = Infinity, visMinY = Infinity, visMaxX = -Infinity, visMaxY = -Infinity, visCount = 0;
+      const visBoundsRef = visBoundsAcc.current;
+      const thisFrameVis = visBoundsAcc.current;
+      visBoundsAcc.current = { minX: Infinity, minY: Infinity, maxX: -Infinity, maxY: -Infinity, count: 0 };
       for (const sn of nodes) {
         const node = sn.item;
         const p = sn.projected;
@@ -1541,6 +1563,25 @@ export default function Legion3DPage() {
             if (Number.isFinite(minX)) {
               canvasEl.dataset.fitBounds = `${Math.round(minX)},${Math.round(minY)},${Math.round(maxX)},${Math.round(maxY)}`;
               canvasEl.dataset.fitView = `${Math.round(size.width)}x${Math.round(size.height)}`;
+              const prevVis = visBoundsRef;
+              if (prevVis && Number.isFinite(prevVis.minX)) {
+                canvasEl.dataset.visBounds = `${Math.round(prevVis.minX)},${Math.round(prevVis.minY)},${Math.round(prevVis.maxX)},${Math.round(prevVis.maxY)}`;
+                canvasEl.dataset.visCount = `${prevVis.count}/${nodes.length}`;
+              } else {
+                delete canvasEl.dataset.visBounds;
+                canvasEl.dataset.visCount = `0/${nodes.length}`;
+              }
+              // 轨道采样点的包围盒：它们参与取景但几乎没有可见面积。
+              if (ringRadii.length) {
+                let rx1 = Infinity, ry1 = Infinity, rx2 = -Infinity, ry2 = -Infinity;
+                for (const ring of ringRadii) {
+                  for (const p of ringPath(ring.radius, RING_HEIGHT[ring.ring] ?? 0, cam, size, 64)) {
+                    if (p.x < rx1) rx1 = p.x; if (p.x > rx2) rx2 = p.x;
+                    if (p.y < ry1) ry1 = p.y; if (p.y > ry2) ry2 = p.y;
+                  }
+                }
+                if (Number.isFinite(rx1)) canvasEl.dataset.ringBounds = `${Math.round(rx1)},${Math.round(ry1)},${Math.round(rx2)},${Math.round(ry2)}`;
+              }
               // 选中节点的屏幕坐标：手机上的详情卡会不会挡住焦点，用坐标判断。
               const focusedSn = nodes.find(sn => sn.item.id === selectedRef.current);
               if (focusedSn) {
@@ -1603,6 +1644,14 @@ export default function Legion3DPage() {
         // This same object must reach bodies, labelQueue and the leader: the
         // leader router excludes its own body by reference, not by coordinates.
         const anchor = { x: p.x, y: p.y, rx: rx + 2, ry: ry + 2 };
+        if (alpha >= 0.25) {
+          const acc = thisFrameVis;
+          acc.count += 1;
+          if (anchor.x - anchor.rx < acc.minX) acc.minX = anchor.x - anchor.rx;
+          if (anchor.y - anchor.ry < acc.minY) acc.minY = anchor.y - anchor.ry;
+          if (anchor.x + anchor.rx > acc.maxX) acc.maxX = anchor.x + anchor.rx;
+          if (anchor.y + anchor.ry > acc.maxY) acc.maxY = anchor.y + anchor.ry;
+        }
         // Compact/expanded mobile framing can bring Agent dots beside the core
         // label. Every painted body participates, even when it has no label.
         labelBodies.push(anchor);
