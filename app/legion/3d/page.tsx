@@ -1011,6 +1011,9 @@ export default function Legion3DPage() {
             peak: !motionPreference.matches && delta >= 0.35 ? 0.2 : 0,
           };
           yawAnimRef.current = { t0: now, from: view.yaw, to: view.yaw + shortTo };
+          // 把「这次 tween 实际要转多少」镜像到 DOM：view-yaw 是 200ms 节流写入的，
+          // 用逐帧差值判断是否绕远路会被节流本身骗到（实测读到 1.3 rad 的假跳变）。
+          if (canvasRef.current) canvasRef.current.dataset.yawAnim = shortTo.toFixed(3);
         }
         const anim = yawAnimRef.current;
         const progress = Math.min(1, (now - anim.t0) / YAW_ANIM_MS);
