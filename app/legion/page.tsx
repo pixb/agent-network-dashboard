@@ -1029,7 +1029,9 @@ export default function LegionPage() {
           <div className={`grid gap-4 ${cleanView ? 'lg:grid-cols-1' : 'lg:grid-cols-[1fr_280px]'}`}>
             <div
               ref={stageCallbackRef}
-              className={`relative overflow-hidden rounded-xl bg-[var(--bg-secondary)] ${cleanView ? 'h-[calc(100dvh-3rem)]' : isFullscreen ? 'h-[calc(100dvh-10rem)] min-h-[420px]' : 'h-[62vh] min-h-[420px] sm:h-[calc(100dvh-9.5rem)]'}`}
+              // 净屏（?present=1）与 3D 演示同标准：铺满视口、盖住仍是淡色侧栏的
+              // 应用外壳（.293 在 3D 上修过同一问题；2D 只隐藏了自己的头部）。
+              className={`overflow-hidden rounded-xl bg-[var(--bg-secondary)] ${cleanView ? 'fixed inset-0 z-40' : `relative ${isFullscreen ? 'h-[calc(100dvh-10rem)] min-h-[420px]' : 'h-[62vh] min-h-[420px] sm:h-[calc(100dvh-9.5rem)]'}`}`}
               onWheel={onWheel}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
