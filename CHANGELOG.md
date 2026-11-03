@@ -6,6 +6,12 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.330 — 2026-11-04
+
+### 需求详情：归档按钮在窄屏达到 44px 触控宽度
+
+- 320px 下「归档」按钮实测 40×44，比 44px 触控下限窄 4px；现在 44×44，且与「重命名」不叠印。
+
 ## 0.6.4-preview.329 — 2026-11-04
 
 ### 更新日志：可直达某一版
