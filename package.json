@@ -1,8 +1,8 @@
 {
   "name": "@sleep2agi/agent-network-dashboard",
   "desktopName": "agent-network.desktop",
-  "version": "0.6.4-preview.333",
-  "description": "Agent Network Dashboard — Web UI for managing AI Agent networks",
+  "version": "0.6.4-preview.334",
+  "description": "Agent Network Dashboard \u2014 Web UI for managing AI Agent networks",
   "main": "apps/desktop/electron/main.cjs",
   "scripts": {
     "dev": "next dev",
@@ -23,7 +23,7 @@
     "app:ios:open": "npx cap open ios",
     "app:desktop": "electron apps/desktop/electron/main.cjs",
     "app:desktop:pack": "electron-builder --config electron-builder.json",
-    "prepublishOnly": "[ -f .next/BUILD_ID ] || (echo 'prepublishOnly: .next/BUILD_ID missing — run npm run build first (see commit 05c1ebf body for R224 chunk-500 root cause)' >&2 && exit 1)",
+    "prepublishOnly": "[ -f .next/BUILD_ID ] || (echo 'prepublishOnly: .next/BUILD_ID missing \u2014 run npm run build first (see commit 05c1ebf body for R224 chunk-500 root cause)' >&2 && exit 1)",
     "avatars:check": "node scripts/check-avatars.mjs",
     "ratchet": "node scripts/check-color-ratchet.mjs",
     "gates": "node scripts/check-no-build-artifacts.mjs && node scripts/check-color-ratchet.mjs && node scripts/check-avatars.mjs && node scripts/check-token-contrast.mjs && node scripts/check-accent-text-ratchet.mjs",
