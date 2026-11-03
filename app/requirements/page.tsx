@@ -1669,7 +1669,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                     key={col.key}
                     aria-label={`${col.label}列`}
                     data-testid={`requirements-column-${col.key}`}
-                    className={`snap-start shrink-0 rounded-xl border bg-[var(--bg-secondary)]/60 transition-colors ${isCollapsed ? 'w-12' : 'w-72 sm:w-[19rem]'} ${dragOverColumn === col.key ? 'border-[var(--hl)] bg-[var(--hover-tint)]' : 'border-[var(--border)]'}`}
+                    className={`snap-start shrink-0 rounded-xl border bg-[var(--bg-secondary)]/60 transition-colors ${isCollapsed ? 'w-12' : 'w-72 sm:w-[19rem] lg:w-[calc((100%-1.5rem)/3)] lg:max-w-[19rem]'} ${dragOverColumn === col.key ? 'border-[var(--hl)] bg-[var(--hover-tint)]' : 'border-[var(--border)]'}`}
                     onDragOver={event => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setDragOverColumn(col.key); }}
                     onDragLeave={event => { if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) setDragOverColumn(null); }}
                     onDrop={event => {
