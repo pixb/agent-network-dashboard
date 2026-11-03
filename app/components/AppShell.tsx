@@ -3,6 +3,7 @@
 import { usePathname } from 'next/navigation';
 import { Sidebar } from './Sidebar';
 import { HealthBanner } from './HealthBanner';
+import UpdateBanner from './UpdateBanner';
 import { CommandPalette } from './CommandPalette';
 import { HelpOverlay } from './HelpOverlay';
 import { ServersDrawer } from './ServersDrawer';
@@ -41,6 +42,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         className="flex-1 min-w-0 max-w-full overflow-x-hidden flex flex-col pt-[env(safe-area-inset-top)] outline-none"
       >
         <HealthBanner />
+        <UpdateBanner />
         <div className="flex-1 min-w-0 max-w-full overflow-x-hidden pb-[calc(5rem+env(safe-area-inset-bottom))] lg:pb-0">{children}</div>
       </main>
       <MobileNav />
