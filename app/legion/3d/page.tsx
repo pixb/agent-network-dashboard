@@ -1260,6 +1260,21 @@ export default function Legion3DPage() {
           const strength = (lit ? 0.3 : dark ? 0.2 : 0.13) * nearness;
           const radius = bodyRx * 1.7;
           ctx.save();
+          // 选中部门的光斑落在本体下方两三百像素，暗场里孤零零一团青绿，
+          // 看着像渲染残留而不是「在地上的影子」。补一道自上而下的柔光柱
+          // 把本体和光斑连起来，层高这件事才读得出来。
+          if (lit && dark) {
+            const shaft = ctx.createLinearGradient(sn.projected.x, sn.projected.y, hit.x, hit.y);
+            shaft.addColorStop(0, 'rgba(46, 196, 182, 0.16)');
+            shaft.addColorStop(1, 'rgba(46, 196, 182, 0.03)');
+            ctx.strokeStyle = shaft;
+            ctx.lineWidth = Math.max(6, bodyRx * 0.5);
+            ctx.lineCap = 'round';
+            ctx.beginPath();
+            ctx.moveTo(sn.projected.x, sn.projected.y);
+            ctx.lineTo(hit.x, hit.y);
+            ctx.stroke();
+          }
           ctx.translate(hit.x, hit.y);
           ctx.scale(1, 0.42);
           const pool = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
