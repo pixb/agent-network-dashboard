@@ -498,6 +498,10 @@ export default function Legion3DPage() {
     if (params.get('present') !== '1') return;
     presentingRef.current = true;
     setPresenting(true);
+    // 深链必须和工具栏「演示模式」按钮做同一件事：只设 presenting 会让搜索框、
+    // 工具栏、图例都留在画面里，取景也按「有页头页脚」算（实测画布 900 只按 660 取景，
+    // 内容占屏高 57%）。一条链接投屏就该是干净的。
+    setCleanView(true);
     runPresentChecks();
     // ?tour=1 连巡礼一起开：录屏只放一条链接就能直接开始讲。
     // 减少动态效果时不自动开（与按钮的 aria-disabled 一致，避免「链接能开、按钮不能」的矛盾）。
