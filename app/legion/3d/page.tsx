@@ -1296,10 +1296,10 @@ export default function Legion3DPage() {
         const bandColor = lit ? tk.accent : tk.info;
         const fillAlpha = activeSet
           ? (lit ? (focusingDept ? 0.26 : 0.22) : (focusingDept ? 0.015 : 0.04))
-          : (dark ? 0.085 : 0.11);
+          : (dark ? 0.10 : 0.11);
         const edgeAlpha = activeSet
           ? (lit ? (focusingDept ? 0.55 : 0.5) : (focusingDept ? 0.03 : 0.08))
-          : (dark ? 0.22 : 0.3);
+          : (dark ? 0.32 : 0.3);
 
         // 编制带：外侧渐隐的径向渐变 + 内侧高光，一眼看出「这块属于哪个部门」，
         // 同时不新增颜色（仍用 accent/info 单色系）。
@@ -1431,8 +1431,10 @@ export default function Legion3DPage() {
         ctx.moveTo(e.a.projected.x, e.a.projected.y);
         ctx.quadraticCurveTo(e.cx, e.cy, e.b.projected.x, e.b.projected.y);
         ctx.strokeStyle = e.lit && (activeSet || e.trunk) ? tk.accent : tk.info;
-        ctx.globalAlpha = e.lit ? (activeSet ? 0.65 : e.trunk ? (dark ? 0.5 : 0.58) : (dark ? 0.13 : 0.2)) : 0.045;
-        ctx.lineWidth = e.trunk ? 1.5 : huge ? 0.7 : e.lit && activeSet ? 1.4 : 0.8;
+        // 暗场实测：叶子连线 0.13/0.8px 在深底上几乎读不出来，整张图看着像散点。
+        // 只提暗场（浅底 0.2 已经足够），并把主干提高到 0.62——层级关系要一眼看见。
+        ctx.globalAlpha = e.lit ? (activeSet ? 0.65 : e.trunk ? (dark ? 0.62 : 0.58) : (dark ? 0.2 : 0.2)) : 0.045;
+        ctx.lineWidth = e.trunk ? 1.5 : huge ? 0.7 : e.lit && activeSet ? 1.4 : dark ? 0.95 : 0.8;
         ctx.stroke();
       }
       // Continuous tapered trails read as light flow rather than scattered dots.
