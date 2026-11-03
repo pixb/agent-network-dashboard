@@ -2318,24 +2318,12 @@ html[data-legion-present='1'] [aria-label='Servers panel'] {
 /* 军团页：面板/工具栏里的按钮与链接在键盘聚焦时必须看得见。
    之前这些按钮都只有 hover 样式，Tab 过去屏幕上没有任何反馈；用一条作用域规则覆盖，
    比给每个按钮单独加类名更不容易漏（新增按钮自动继承）。 */
-[data-legion-root] :is(button, a, [role="option"]):focus-visible {
+/* 3D 舞台自己也是 Tab 停点（tabIndex=0 的裸 div）。它原本只有一个 1px accent ring，
+   而全站标准是 2px var(--hl)：深色画布上偏细、且与其它控件不一致。内描边
+   （offset -2px）是因为演示态舞台铺满视口，外描边会被裁掉一半。 */
+[data-legion-root]:focus-visible {
   outline: 2px solid var(--hl);
-  outline-offset: 2px;
-}
-
-/* 需求页：键盘焦点统一成与军团页一致的样子。
-   之前这里没有规则，靠浏览器默认焦点环——深色主题下颜色/粗细不受控，
-   与军团页的 2px 高亮环也不一致。 */
-[data-requirements-root] :is(button, a[data-req-row], [role="option"], input, select, textarea):focus-visible {
-  outline: 2px solid var(--hl);
-  outline-offset: 2px;
-}
-
-/* 需求详情页：与列表页/军团页同一套键盘焦点视觉（此前详情页没有任何焦点规则，
-   靠浏览器默认环，深色主题下不一致也不够清楚）。 */
-[data-detail-root] :is(button, a, input, select, textarea):focus-visible {
-  outline: 2px solid var(--hl);
-  outline-offset: 2px;
+  outline-offset: -2px;
 }
 
 /* 全站键盘焦点：此前只有需求页、详情页、军团页各自配了作用域规则，其它页面

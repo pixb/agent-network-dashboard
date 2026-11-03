@@ -1000,11 +1000,20 @@ export default function Legion3DPage() {
           // 差角取环上的最短距离：从 6.2 rad 转到 0.1 rad 是 0.18，不是 6.1。
           const raw = Math.abs(yawTarget.current - view.yaw) % (Math.PI * 2);
           const delta = Math.min(raw, Math.PI * 2 - raw);
+          // 存进 tween 的必须是「回到 from 附近」的目标角：之前存原始角度，
+          // 差角按最短算（0.18 rad，弧线峰值 0）、实际却走 6.1 rad，
+          // 于是镜头在 480ms 内飞转 350°。atan2 天然跨界，点部门与巡礼切层都会走到。
+          let shortTo = (yawTarget.current - view.yaw) % (Math.PI * 2);
+          if (shortTo > Math.PI) shortTo -= Math.PI * 2;
+          if (shortTo < -Math.PI) shortTo += Math.PI * 2;
           camArcRef.current = {
             t0: now,
             peak: !motionPreference.matches && delta >= 0.35 ? 0.2 : 0,
           };
-          yawAnimRef.current = { t0: now, from: view.yaw, to: yawTarget.current };
+          yawAnimRef.current = { t0: now, from: view.yaw, to: view.yaw + shortTo };
+          // 把「这次 tween 实际要转多少」镜像到 DOM：view-yaw 是 200ms 节流写入的，
+          // 用逐帧差值判断是否绕远路会被节流本身骗到（实测读到 1.3 rad 的假跳变）。
+          if (canvasRef.current) canvasRef.current.dataset.yawAnim = shortTo.toFixed(3);
         }
         const anim = yawAnimRef.current;
         const progress = Math.min(1, (now - anim.t0) / YAW_ANIM_MS);
@@ -2659,7 +2668,7 @@ export default function Legion3DPage() {
       // position 必须二选一：`relative` 与 `fixed` 同在一条 class 里时，胜负由样式表
       // 顺序决定（实测 relative 赢），元素留在文档流里只被拉大成 100vw，量出来是
       // 「从侧栏右边开始的一大块」——.293 第一版就这么错了。
-      className={`${presenting ? 'fixed inset-0 z-40' : 'relative w-full'} overflow-hidden bg-[var(--bg)] outline-none focus-visible:ring-1 focus-visible:ring-[var(--accent)]`}
+      className={`${presenting ? 'fixed inset-0 z-40' : 'relative w-full'} overflow-hidden bg-[var(--bg)] outline-none`}
       aria-label="军团 3D 网络拓扑"
       data-testid="legion-3d-stage"
       data-hover-depth={depthPreview ?? ''}
