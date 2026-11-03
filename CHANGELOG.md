@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.331 — 2026-11-04
+
+### 组织页：页头操作在手机达到 44px
+
+- 320px 下「军团图」与「刷新」实测 28px 高，现在是 44px（桌面仍是紧凑高度）。
+- 部门行内的「看军团」与 Agent 标签保持原样：它们是次级内联链接，加高会撑开每一行。
+
 ## 0.6.4-preview.330 — 2026-11-04
 
 ### 需求详情：归档按钮在窄屏达到 44px 触控宽度
