@@ -697,7 +697,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
                 disabled={busy}
                 title="归档后列表默认不显示，可在「包含已归档」里找到"
                 onClick={() => void sendPatch({ archived: true })}
-                className="shrink-0 rounded border border-[var(--border)] px-2 py-1 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] disabled:opacity-60"
+                className="inline-flex min-w-11 shrink-0 items-center justify-center rounded border border-[var(--border)] px-2 py-1 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] disabled:opacity-60"
               >
                 归档
               </button>
