@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.326 — 2026-11-03
+
+### 军团演示：画面再放大 4%
+
+- 自动取景的目标占比从 0.90 提到 0.94：1440 下内容占屏高 **0.740 → 0.772**，390 下 **0.312 → 0.326**。
+- 内容仍完整落在画布内（1440 四边留白 373/89/336/116），新增断言 `present:contentWithinCanvas` 守住「放大但不能裁掉边缘」。
+
 ## 0.6.4-preview.324 — 2026-11-03
 
 ### 更新日志补齐 .312–.323
