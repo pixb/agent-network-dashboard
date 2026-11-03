@@ -100,6 +100,15 @@ export default function LegionPage() {
   // 悬停/聚焦只影响亮度，不改布局：图不能因为鼠标划过就重排。
   const [hovered, setHovered] = useState<string | null>(null);
   const [focusGroup, setFocusGroup] = useState<string | null>(null);
+  // 净屏也打同一枚标记：应用级浮层（如 Servers 抽屉把手）靠这条 CSS 让位，
+  // 否则 2D 截图右上角仍会有一个可点的黑框（.312 实测）。
+  useEffect(() => {
+    if (typeof document === 'undefined') return;
+    if (cleanView) document.documentElement.setAttribute('data-legion-present', '1');
+    else document.documentElement.removeAttribute('data-legion-present');
+    return () => document.documentElement.removeAttribute('data-legion-present');
+  }, [cleanView]);
+
   // ?present=1：与 3D 对齐，直接进净屏（演示/截图用一条链接）。
   // 只读一次 URL，退出后不回写——按 Esc 退出就该退出。
   const presentDeeplinkSettled = useRef(false);
