@@ -1181,6 +1181,50 @@ legion 236 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project
 responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
 
+## 40. 2026-11-03 续二十一：把演示契约放进 CI（第一次是红着进的）
+
+### 40.1 出发点：规格写了，但没人跑
+
+`npm test` 只覆盖 `tests/**/*.test.{mjs,mts}`；`tests/*.spec.ts`（Playwright）**没有任何
+workflow 调用**——`gates.yml` 里甚至写着“需要浏览器和 dev server 的先不接”。于是
+`.315`/`.316` 那类演示回归只能靠人工跑套件。
+
+现在有一条独立门禁 `legion-presentation`，只对 `app/legion/**`、`app/lib/legion*.ts`、
+`app/globals.css` 与规格自身触发（1–2 分钟），锁三条**环境无关**的不变量：
+
+| 断言 | 防的缺陷 |
+|---|---|
+| 页头 `visibility: hidden` | 深链进了演示但界面没让位 |
+| `data-safe-bounds` 贴到画布边缘 | 取景按“有页头页脚”算，画面小三成 |
+| Esc 后页头恢复、安全区回退 | 退出演示后布局不回退 |
+
+**刻意不放**内容填充比：生产构建 1440×900 读到 0.72–0.76，dev server 同视口只有
+0.616，而修复前是 0.567——放进 CI 判不出回归，只会变成一条看心情的红线。比例断言
+留在用生产构建跑的全量套件里。
+
+### 40.2 我的失误：门禁红着合并
+
+第一次合并（#340）时这条 job 在 CI 上是红的：
+
+```
+Error: Playwright does not support chromium on ubuntu26.04-x64
+```
+
+`ubuntu-latest` 现在解析到 26.04，Playwright 1.59.1 不支持。PR 只按**必需检查**
+（scrub / unit-tests / readiness）判定，新 job 不在必需列表里，于是红着进了 main。
+
+这正好印证 gates.yml 那句话的另一半：**“一条没人跑的 gate 保护不了任何东西”，
+一条红着进来的 gate 同样保护不了**。
+
+修复（#341）：runner 钉到 `ubuntu-24.04`，并且**等这条 job 自己在 PR 上跑绿**再合并。
+
+### 40.3 新增的合并规则
+
+> 新增 CI job 的合并条件 = **该 job 在 PR 上跑过且绿**，不看它是否在必需检查列表里。
+
+比“本地跑过”更硬：CI 环境与本地不同（这次就是 Ubuntu 版本差异），且本地没有
+`--with-deps` 的依赖安装路径可验证。
+
 ## 39. 2026-11-03 续二十：演示深链整屏，以及「先探针、后套件」
 
 ### 39.1 真问题：一条链接投屏带着工具栏
