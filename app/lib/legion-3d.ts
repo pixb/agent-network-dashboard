@@ -188,7 +188,7 @@ export function fitProjectedBodies(
   if (!initial.length || view.zoom <= 0 || bounds.x2 <= bounds.x1 || bounds.y2 <= bounds.y1) return null;
   // 短轴密度的目标占比。原来是 0.82，画布四周留白偏多、投屏时图显得小；
   // 0.90 仍留出标签与图例的空间（fitBounds 已经把标题/工具栏/图例扣掉）。
-  const target = Math.min(bounds.x2 - bounds.x1, bounds.y2 - bounds.y1) * 0.90;
+  const target = Math.min(bounds.x2 - bounds.x1, bounds.y2 - bounds.y1) * 0.94;
   if (typeof bodies === 'function') {
     // Extents are monotonic in zoom for a fixed orientation. Binary search
     // handles the 16px disc floor without pretending that it scales down.
