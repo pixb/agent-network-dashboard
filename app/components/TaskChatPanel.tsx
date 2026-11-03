@@ -1846,7 +1846,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-3 py-2.5 pr-[6.75rem] text-base sm:px-4 sm:pr-24 sm:text-sm text-[var(--fg)] placeholder-[var(--fg-dim)] focus:border-[var(--accent)]/40 focus:outline-none resize-none transition-colors"
               />
               <div className="absolute right-2 bottom-1.5 flex items-center gap-1">
-                <label className="inline-flex min-h-[44px] min-w-[44px] -my-3 -mx-1.5 items-center justify-center sm:min-h-0 sm:min-w-0 sm:m-0 sm:p-1 text-[var(--fg-dim)] hover:text-[var(--accent-text)] cursor-pointer rounded hover:bg-[var(--accent)]/10" title={t('附加文件', 'Attach file')}>
+                <label className="inline-flex min-h-[44px] min-w-[44px] -my-3 items-center justify-center sm:min-h-0 sm:min-w-0 sm:m-0 sm:p-1 text-[var(--fg-dim)] hover:text-[var(--accent-text)] cursor-pointer rounded hover:bg-[var(--accent)]/10" title={t('附加文件', 'Attach file')}>
                   <input
                     type="file"
                     multiple
