@@ -334,6 +334,9 @@ export default function Legion3DPage() {
   // 巡礼可以暂停：讲解时不会被动跟着镜头跑。
   const tourPausedRef = useRef(false);
   const [tourPaused, setTourPaused] = useState(false);
+  // 演示时控制条 4 秒不动就淡出：投屏/讲解画面更干净；动鼠标或按键立刻恢复。
+  // 只淡出、不移除，也不改 pointer-events —— 套件里有大量点击演示控件的用例。
+  const [chromeIdle, setChromeIdle] = useState(false);
   // 进度条（第 N/M 步 + 本步剩余比例）。每帧 setState 会把画布拖垮，
   // 所以节流到 ~4Hz。
   const [tourProgress, setTourProgress] = useState<{ index: number; total: number; frac: number } | null>(null);
@@ -714,6 +717,27 @@ export default function Legion3DPage() {
     return () => { root.removeAttribute('data-legion-present'); };
   }, [presenting]);
   useEffect(() => { tourRef.current = tour; }, [tour]);
+
+  // 演示态下 4 秒无鼠标/键盘动作就把控制条淡出；任何输入立即恢复。
+  useEffect(() => {
+    if (!presenting) { setChromeIdle(false); return; }
+    let timer = 0;
+    const wake = () => {
+      setChromeIdle(false);
+      if (timer) window.clearTimeout(timer);
+      timer = window.setTimeout(() => setChromeIdle(true), 4000);
+    };
+    wake();
+    window.addEventListener('mousemove', wake);
+    window.addEventListener('keydown', wake);
+    window.addEventListener('touchstart', wake);
+    return () => {
+      if (timer) window.clearTimeout(timer);
+      window.removeEventListener('mousemove', wake);
+      window.removeEventListener('keydown', wake);
+      window.removeEventListener('touchstart', wake);
+    };
+  }, [presenting]);
   useEffect(() => {
     try { setExportHigh(localStorage.getItem('legion3d-export-1080') === '1'); } catch { /* ignore */ }
   }, []);
@@ -2643,7 +2667,11 @@ export default function Legion3DPage() {
       {presenting && (
         // 演示控制条放右下角：右上角是工具栏（导出循环、复制视角…），
         // 放在同一角会直接盖住那些按钮——鼠标点不到，实测导出按钮被拦截。
-        <div className="pointer-events-auto absolute bottom-3 right-3 z-20 flex max-w-[70vw] flex-wrap items-center justify-end gap-2">
+        <div
+          data-testid="legion-3d-present-bar"
+          data-idle={chromeIdle ? '1' : '0'}
+          className={`pointer-events-auto absolute bottom-3 right-3 z-20 flex max-w-[70vw] flex-wrap items-center justify-end gap-2 transition-opacity duration-500 ${chromeIdle ? 'opacity-0' : 'opacity-100'}`}
+        >
           <button
             type="button"
             data-testid="legion-3d-step-prev"
