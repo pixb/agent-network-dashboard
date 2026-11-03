@@ -22,4 +22,14 @@ assert.ok(/CHANGELOG\.md/.test(page), '页面必须显式引用 CHANGELOG.md');
 const sidebar = read('app/components/Sidebar.tsx');
 assert.ok(/href: '\/changelog'/.test(sidebar), '侧栏必须有 /changelog 入口，否则页面等于不存在');
 
-console.log(`changelog page contract ok (${versions.length} versions)`);
+// 窄屏换行：CHANGELOG 里有大量长串（版本号、?present=1&tour=1 这类内联代码）。
+// 实测 320px 下曾有 5 个列表项横向溢出（ul 内容 496px 挤在 254px 里），
+// 所以这里锁住「正文/列表/标题都允许任意断行」这条规则。
+const view = read('app/changelog/ChangelogView.tsx');
+for (const tag of ['p', 'li', 'h3']) {
+  const line = view.split('\n').find(l => l.trim().startsWith(`${tag}:`));
+  assert.ok(line, `ChangelogView 缺少 ${tag} 渲染分支`);
+  assert.ok(/overflow-wrap:anywhere/.test(line), `${tag} 必须允许任意断行，否则窄屏会长串溢出`);
+}
+
+console.log(`changelog page contract ok (${versions.length} versions, wrap guarded)`);
