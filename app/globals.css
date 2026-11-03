@@ -2289,8 +2289,12 @@ html[data-skin="slack"] [data-topo-showcase] [class*="bg-cyan"] { background-col
 /* 军团演示模式：应用级导航（侧栏 / 手机底栏）跟着淡出。
    画布在演示态切到深场，若侧栏还是浅色会显得割裂；透明度降下来但保持可点，
    免得用户以为界面坏了。退出演示（Esc / 按钮）立即恢复。 */
+/* 演示态彻底让位：0.18 透明度在 390px 手机上仍是一条 61px 的可见带子，
+   投屏时压在全屏画布上（实测 display:block、h:61）。退出入口在演示控制条里，
+   不依赖这条导航，所以这里可以直接隐藏并取消点击。 */
 html[data-legion-present='1'] [data-app-shell-nav] {
-  opacity: 0.18;
+  opacity: 0;
+  pointer-events: none;
   filter: saturate(0.6);
   transition: opacity 240ms ease, filter 240ms ease;
 }
