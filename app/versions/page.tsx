@@ -36,7 +36,17 @@ export default function VersionsPage() {
 
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 text-[var(--fg)]">
-      <h1 className="text-lg font-semibold">版本</h1>
+      <div className="flex flex-wrap items-center justify-between gap-2">
+        <h1 className="text-lg font-semibold">版本</h1>
+        {/* 版本对照看完，下一个问题通常是「这版改了什么」——直接给入口。 */}
+        <Link
+          href="/changelog"
+          data-testid="versions-changelog-link"
+          className="inline-flex min-h-11 items-center rounded-md px-2.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] sm:min-h-0 sm:py-1"
+        >
+          更新日志 →
+        </Link>
+      </div>
       <p className="mt-1 text-sm text-[var(--fg-muted)]">
         只读。对照已发布的 agent-node <code className="font-mono">{PUBLISHED_AGENT_NODE}</code>。这里没有升级按钮。
       </p>
