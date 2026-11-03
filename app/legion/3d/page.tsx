@@ -854,12 +854,16 @@ export default function Legion3DPage() {
       wrap.style.setProperty('--legion-list-top', `${top.y2 + 8}px`);
       const footer = footerRef.current;
       const bottom = footer && footer.offsetHeight > 0 ? rect(footer) : null;
-      labelUiRectsRef.current = cleanView ? [] : [top, ...(bottom ? [bottom] : [])];
+      // 演示（presenting）和净屏一样会把页头/页脚收起来，取景安全区必须一起放开：
+      // 之前只认 cleanView，演示态仍按普通布局留出页头页脚 → 画布 1440×900 只按 660px 取景，
+      // 内容占屏高 57%，投屏时白白空掉四成（实测 safe=[24,135,1392,660]）。
+      const uiHidden = cleanView || presenting;
+      labelUiRectsRef.current = uiHidden ? [] : [top, ...(bottom ? [bottom] : [])];
       const previous = fitBoundsRef.current;
       const bounds = {
         x1: 24, x2: stage.width - 24,
-        y1: cleanView ? 24 : top.y2 + 16,
-        y2: cleanView ? stage.height - 24 : (bottom?.y1 ?? stage.height - 24) - 24,
+        y1: uiHidden ? 24 : top.y2 + 16,
+        y2: uiHidden ? stage.height - 24 : (bottom?.y1 ?? stage.height - 24) - 24,
       };
       fitBoundsRef.current = bounds;
       // 取景安全区镜像到 DOM：演示态到底按哪块区域取景，要能读到数字而不是推算。
@@ -879,7 +883,7 @@ export default function Legion3DPage() {
     observer.observe(wrap);
     measure();
     return () => observer.disconnect();
-  }, [cleanView]);
+  }, [cleanView, presenting]);
 
   /* ── 渲染循环 ───────────────────────────────────────────────────── */
 
