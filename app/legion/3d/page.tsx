@@ -1503,6 +1503,9 @@ export default function Legion3DPage() {
       // 还画字，就会出现能看见却读不清的幽灵标签（实拍）。用数字断言，不靠眼。
       let nodeTextAlphaMin = 1;
       const labelBodies: LabelEllipse[] = [];
+      // 可见实体包围盒：alpha<0.25 的节点实际看不见（深部/离线/空部门会到 0.12–0.42），
+      // 却照样参与取景包围盒——先把这个差值暴露出来量，再决定要不要改取景规则。
+      let visMinX = Infinity, visMinY = Infinity, visMaxX = -Infinity, visMaxY = -Infinity, visCount = 0;
       for (const sn of nodes) {
         const node = sn.item;
         const p = sn.projected;
@@ -1541,6 +1544,10 @@ export default function Legion3DPage() {
             if (Number.isFinite(minX)) {
               canvasEl.dataset.fitBounds = `${Math.round(minX)},${Math.round(minY)},${Math.round(maxX)},${Math.round(maxY)}`;
               canvasEl.dataset.fitView = `${Math.round(size.width)}x${Math.round(size.height)}`;
+              if (Number.isFinite(visMinX)) {
+                canvasEl.dataset.visBounds = `${Math.round(visMinX)},${Math.round(visMinY)},${Math.round(visMaxX)},${Math.round(visMaxY)}`;
+                canvasEl.dataset.visCount = `${visCount}/${nodes.length}`;
+              }
               // 选中节点的屏幕坐标：手机上的详情卡会不会挡住焦点，用坐标判断。
               const focusedSn = nodes.find(sn => sn.item.id === selectedRef.current);
               if (focusedSn) {
@@ -1603,6 +1610,13 @@ export default function Legion3DPage() {
         // This same object must reach bodies, labelQueue and the leader: the
         // leader router excludes its own body by reference, not by coordinates.
         const anchor = { x: p.x, y: p.y, rx: rx + 2, ry: ry + 2 };
+        if (alpha >= 0.25) {
+          visCount += 1;
+          if (anchor.x - anchor.rx < visMinX) visMinX = anchor.x - anchor.rx;
+          if (anchor.y - anchor.ry < visMinY) visMinY = anchor.y - anchor.ry;
+          if (anchor.x + anchor.rx > visMaxX) visMaxX = anchor.x + anchor.rx;
+          if (anchor.y + anchor.ry > visMaxY) visMaxY = anchor.y + anchor.ry;
+        }
         // Compact/expanded mobile framing can bring Agent dots beside the core
         // label. Every painted body participates, even when it has no label.
         labelBodies.push(anchor);
