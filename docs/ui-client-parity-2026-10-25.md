@@ -1181,6 +1181,60 @@ legion 236 · mine 23 · network 54 · nodes-kbd 14 · plan-health 44 · project
 responsibility 88 · summary 18 · tags 22 · tag-ops 26 · timeline 19`（+ 设计师探针 6/6），
 外加单测 49 个文件、四项 main CI、本机与公网各 9/9。
 
+## 41. 2026-11-03 续二十二：设计师三条建议的核实与落地（`.317`）
+
+三条都由通信设计师提供（标了行号、声称可逆），我逐条核实后实施。**核实不是走过场**：三条里有一条前提写错了。
+
+### 41.1 舞台焦点环：前提错，方向对
+
+报告说 `[data-legion-root]` 是“裸 div、浏览器默认环、没有 outline-none”。实测
+`getComputedStyle` 得到 `outline-style: none` + `box-shadow: 0 0 0 1px rgb(94,155,255)`
+——它是**受控的 1px accent ring**，不是浏览器默认环。
+
+所以真正的缺口不是“从无到有”，而是**与全站 2px `var(--hl)` 不一致**。改为：
+
+```css
+[data-legion-root]:focus-visible { outline: 2px solid var(--hl); outline-offset: -2px; }
+```
+
+内描边（`-2px`）是因为演示态舞台是 `fixed inset-0`，外描边会被视口裁掉一半；
+同时移除元素上的 `focus-visible:ring-1`，避免 outline 与 ring 叠两层。
+
+### 41.2 三条作用域焦点规则：确认逐字重复，删除
+
+legion / requirements / detail 三条与全站规则声明完全相同，且全站那条在后。
+删除后 `a[data-req-row]` 由全站 `a[href]` 覆盖（无 `href` 的 `a` 本来也不可 Tab）。
+
+### 41.3 镜头绕远路：确认是 bug
+
+`camArc` 已经按环上最短差角计算峰值（6.2 → 0.1 记 0.18 rad），但 tween 存的是
+**原始目标角**：`{ from: view.yaw, to: yawTarget.current }`。于是弧线按 0.18 rad 判定
+（峰值 0），实际却在 480ms 内走完 6.1 rad —— 镜头飞转 350°。`atan2` 天然跨 ±π，
+点部门与巡礼切层都会遇到。
+
+修复：存之前把目标角拉回 `from` 附近（±π 归一），tween 用 `from + shortTo`。
+
+### 41.4 新增断言
+
+| 断言 | 实测 |
+|---|---|
+| `a11y:stageFocusRing` | 宽度 2 / solid / offset −2 |
+| `cam:noLongWayRound` | 逐次 tween `Δ ∈ [0.165, 1.571, …]`，worst 1.571 ≤ π（修复前跨界 ≈6.1） |
+
+镜头判据读的是 `data-yaw-anim`（tween 计划角度），**不是**逐帧 `view-yaw`：
+后者是 200ms 节流写入，用它算逐帧差会造出 1.3 rad 的假跳变。
+
+### 41.5 我在判据上连错三次（产品代码一次写对）
+
+| 错误 | 后果 |
+|---|---|
+| 角度回绕少减一次 π | 负增量被算成接近 2π 的大跳变 |
+| 在 `reducedMotion: reduce` 上下文里测动画 | 吸附是设计行为，被判成“绕远路” |
+| 用 200ms 节流的 `view-yaw` 算逐帧差 | 造出 1.3 rad 假跳变 |
+
+规律：**先确认被测场景的预期行为（动效偏好、主题、节流），再写阈值**；
+否则量出来的“缺陷”其实是自己判据的形状。
+
 ## 40. 2026-11-03 续二十一：把演示契约放进 CI（第一次是红着进的）
 
 ### 40.1 出发点：规格写了，但没人跑
