@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.329 — 2026-11-04
+
+### 更新日志：可直达某一版
+
+- 顶部新增最近 12 个版本的索引入口，点一下跳到对应版本。
+- 每一版都有锚点（如 `/changelog#v0.6.4-preview.290`）：直接发链接给对方，打开即展开那一版。
+
 ## 0.6.4-preview.328 — 2026-11-03
 
 ### 更新日志改为按版本折叠
