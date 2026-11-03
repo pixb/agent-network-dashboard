@@ -28,9 +28,9 @@
 
 | # | 能力 | 客户端证据 | Dashboard | 阻塞 | 预计 |
 |---|---|---|---|---|---|
-| 1 | 语音输入 | `src/voice-wav.ts`（MediaRecorder） | 0 处 | 无 | 3–4 小时 |
-| 2 | 更新日志页 | `src/ChangelogScreen.tsx` | 无路由 | 需定内容来源 | 3 小时 |
-| 3 | 通知设置/诊断 | `NotifyDiagnosticsPanel.tsx` | 0 处 | 需定 Web 端形态 | 3 小时 |
+| 1 | ~~语音输入~~ ✅ `.320` | `src/voice-wav.ts`（MediaRecorder） | 已实现 | — | — |
+| 2 | ~~更新日志页~~ ✅ `.319` | `src/ChangelogScreen.tsx` | `/changelog` 已上线 | — | — |
+| 3 | ~~通知设置/诊断~~ **不适用** | `NotifyDiagnosticsPanel.tsx`（手机系统通知运行时：权限/勿扰/渠道） | 无对应子系统 | — | — |
 | 4 | 部门维度筛选 | `department_id` 12 文件 | 2 处、缺口径 | Hub `#3276` | 1.5–2 小时 |
 
 **撤回的误报**（避免误导后续决策）：消息翻译（客户端 `translate` 是 i18n，Dashboard 是 CSS
