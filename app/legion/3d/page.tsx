@@ -1020,12 +1020,17 @@ export default function Legion3DPage() {
         const ease = 1 - Math.pow(1 - progress, 3);
         view.yaw = anim.from + (anim.to - anim.from) * ease;
         if (progress >= 1) {
-          view.yaw = anim.to;
+          // 角度归一化到 [-π, π)：巡礼/点部门每次都只转短边，但 yaw 会一直累加
+          // （实测连点 8 次「下一部门」后是 11.785 rad = 675°），于是「复制视角链接」
+          // 会写出 ?view=11.785,…。渲染不受影响（三角函数周期），归一化只是让
+          // 链接与观测值回到正常区间。此刻 yawTarget 已清空，不会触发重跑。
+          view.yaw = ((anim.to + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
           yawTarget.current = null;
           yawAnimRef.current = null;
         }
       } else if (!capture && !motionPreference.matches && spinRef.current && now - lastInteract.current > IDLE_BEFORE_SPIN) {
-        view.yaw += SPIN_RAD_PER_SEC * dt;
+        // 空闲自转同样会无界累加：同样归一化，避免长时间挂机后链接里出现巨大角度。
+        view.yaw = ((view.yaw + SPIN_RAD_PER_SEC * dt + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
       }
       // 小屏用更长的焦距把图放大：375 宽时 min(w,h) 只有 375，
       // 按桌面系数算整张图只有硬币大，留白像坏了。
