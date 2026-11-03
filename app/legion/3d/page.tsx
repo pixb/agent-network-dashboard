@@ -838,6 +838,11 @@ export default function Legion3DPage() {
     const header = headerRef.current;
     const wrap = wrapRef.current;
     if (!header || !wrap) return;
+    // 进入/退出演示是一次有意的整体重取景。安全区在演示态是「变大」的（页头页脚让出），
+    // 而下面只有「变小」才置 fitPending——于是演示时画面一直停在按普通布局算出来的尺寸：
+    // 实测 1440×900 画布可用高度 852px，内容只占 512px（60%），投屏时图明显偏小。
+    // 用户手动调过机位就不抢（与原有的「扩大不移动手动机位」一致）。
+    if (!userAdjusted.current) fitPending.current = true;
     const measure = () => {
       const stage = wrap.getBoundingClientRect();
       const rect = (el: HTMLElement) => {
