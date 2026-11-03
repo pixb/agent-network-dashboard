@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Suspense } from 'react';
@@ -319,6 +319,30 @@ function NodeFullPanel({ alias, session, sse, sendMsg, setSendMsg, sending, send
 }) {
   const [tab, setTab] = useState<'chat' | 'events' | 'info'>('chat');
   const { hasUnread, unreadCount } = useChatUnread();
+  // 面板高度按「视口底部还剩多少」实测，而不是写死 calc(100vh - 140px)：
+  // 页头在 390 宽会换行变高，写死的减法算不准，输入区的语音按钮会被切在
+  // 折线下方 11px。外壳（AppShell）根是 min-h、HealthBanner 在流内，文档
+  // 本来就比视口高，所以只量 rect.top（视口坐标），滚动时重测——
+  // 与 NodesView 的 #Stage D 同一套做法。
+  const panelRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    const el = panelRef.current;
+    if (!el) return;
+    const apply = () => {
+      const top = el.getBoundingClientRect().top;
+      el.style.height = `${Math.max(240, window.innerHeight - top)}px`;
+    };
+    apply();
+    window.addEventListener('resize', apply);
+    window.addEventListener('scroll', apply, { passive: true });
+    const ro = new ResizeObserver(apply);
+    ro.observe(document.body);
+    return () => {
+      window.removeEventListener('resize', apply);
+      window.removeEventListener('scroll', apply);
+      ro.disconnect();
+    };
+  }, []);
   const [events, setEvents] = useState<Array<{ id: number; event_type: string; from_status: string; to_status: string; detail: string; created_at: string }>>([]);
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const chatUnread = hasUnread(alias);
@@ -333,7 +357,7 @@ function NodeFullPanel({ alias, session, sse, sendMsg, setSendMsg, sending, send
   }, [tab, eventsLoaded]);
 
   return (
-    <div className="bg-[var(--bg-secondary)] rounded-xl overflow-hidden h-[calc(100vh-140px)] flex flex-col">
+    <div ref={panelRef} data-testid="node-chat-panel" className="bg-[var(--bg-secondary)] rounded-xl overflow-hidden h-[calc(100dvh-9rem)] flex flex-col">
       {/* Tab bar — round 40: emoji icons (💬 📋 📊) replaced with stroke
           SVG to drop the "AI generated" tell. */}
       <div className="flex border-b border-[var(--col-line)] bg-[var(--bg)] shrink-0">
