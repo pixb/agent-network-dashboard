@@ -6,12 +6,12 @@
 
 | 项 | 值 |
 |---|---|
-| 版本 | `0.6.4-preview.308` |
-| main | `df889098ab4a176d348af814e5c69466acc5be76` |
-| BUILD_ID | `DaBwVhPkz6XSx_seiyJH2` |
-| PID / 文件数 | 4068260 / 1437 |
+| 版本 | `0.6.4-preview.309` |
+| main | `f37fb332575aabecd61ab8e5f0e805ad6b490037` |
+| BUILD_ID | `qHXmZgLAMrDuHLa0t1JA-` |
+| PID / 文件数 | 4116014 / 1437 |
 | 回查 | 本机 9/9、公网 9/9 |
-| 回滚包 | `releases/preview.307-fd00477`（冻结，可直接切回） |
+| 回滚包 | `releases/preview.308-df88909`（冻结，可直接切回） |
 
 发布口径不变：**同一 SHA 构建 + 二十套验收 + 四项 main CI + 本机/公网各 9/9**，预检会校验「断言数不下降 / SHA 一致 / BUILD_ID 一致」三者。
 
@@ -19,8 +19,8 @@
 
 | 套件 | 断言数 | 套件 | 断言数 |
 |---|---|---|---|
-| legion（2D+3D+演示） | 231 | board（看板/列表/窄屏） | 153 |
-| detail | 111 | timeline | 21 |
+| legion（2D+3D+演示） | 236 | board（看板/列表/窄屏） | 162 |
+| detail | 115 | timeline | 21 |
 | contrast（三主题+窄屏深色） | 31 | summary | 19 |
 | mine | 23 | archive | 70 |
 | responsibility | 88 | tag-ops / tags | 26 / 22 |
