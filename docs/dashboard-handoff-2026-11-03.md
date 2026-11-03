@@ -21,6 +21,22 @@
 
 发布口径不变：**同一 SHA 构建 + 二十套验收 + 四项 main CI + 本机/公网各 9/9**，预检会校验「断言数不下降 / SHA 一致 / BUILD_ID 一致」三者。
 
+## 1.5 与客户端 APP 的能力差异（2026-11-03 只读对照）
+
+方法：先按**页面级**对表（Dashboard `app/**/page.tsx` vs 客户端 `src/*Screen.tsx`），
+再对可疑项做**用法级**核实。清单与证据见工作区 `evidence/capability-diff-20261103.md`。
+
+| # | 能力 | 客户端证据 | Dashboard | 阻塞 | 预计 |
+|---|---|---|---|---|---|
+| 1 | 语音输入 | `src/voice-wav.ts`（MediaRecorder） | 0 处 | 无 | 3–4 小时 |
+| 2 | 更新日志页 | `src/ChangelogScreen.tsx` | 无路由 | 需定内容来源 | 3 小时 |
+| 3 | 通知设置/诊断 | `NotifyDiagnosticsPanel.tsx` | 0 处 | 需定 Web 端形态 | 3 小时 |
+| 4 | 部门维度筛选 | `department_id` 12 文件 | 2 处、缺口径 | Hub `#3276` | 1.5–2 小时 |
+
+**撤回的误报**（避免误导后续决策）：消息翻译（客户端 `translate` 是 i18n，Dashboard 是 CSS
+`translateY`，双方都没有该功能）、子回复/线索（Dashboard 命中是滚动注释）、引用回复
+（是 markdown 引用块）。教训：grep 命中数不是能力证据，先看用法再下结论。
+
 ## 2. 套件现状（同一 SHA、发布目录构建）
 
 | 套件 | 断言数 | 套件 | 断言数 |
