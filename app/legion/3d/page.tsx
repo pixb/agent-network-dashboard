@@ -376,6 +376,8 @@ export default function Legion3DPage() {
   // 让「只看这个部门」在画面上也有换视角的实感。走的是既有取景逻辑，
   // 不另起一套动画——之前那版独立缓动就是被取景覆盖掉的（实测停在 86%）。
   const focusZoomRef = useRef(0);
+  // 聚焦/解除聚焦时的缩放缓动；没有它，镜头会一帧内跳到位（偏航是缓动的，缩放却在跳）。
+  const zoomAnimRef = useRef<{ t0: number; from: number; to: number } | null>(null);
   // 层级预览：鼠标停在某部门（或键盘停在列表某行）时，其它层压暗、同层保持，
   // 并在画面上标明「第 N 层 · 同层 M 个部门」。渲染读 ref，DOM 角标读 state。
   const depthPreviewRef = useRef<number | null>(null);
@@ -1034,6 +1036,17 @@ export default function Legion3DPage() {
       }
       // 小屏用更长的焦距把图放大：375 宽时 min(w,h) 只有 375，
       // 按桌面系数算整张图只有硬币大，留白像坏了。
+      if (zoomAnimRef.current && !introRef.current) {
+        const a = zoomAnimRef.current;
+        const t = Math.min(1, (now - a.t0) / 420);
+        const ease = 1 - Math.pow(1 - t, 3);
+        view.zoom = a.from + (a.to - a.from) * ease;
+        if (t >= 1) {
+          view.zoom = a.to;
+          zoomAnimRef.current = null;
+          setZoomPct(Math.round(a.to * 100));
+        }
+      }
       if (introRef.current) {
         const a = introRef.current;
         const t = Math.min(1, (now - a.t0) / 900);
@@ -1202,9 +1215,21 @@ export default function Legion3DPage() {
         // If controls exhaust the usable area, keep drawing the current scene.
         // A later valid bounds measurement will request another fit.
         if (fit) {
-          const want = Math.min(MAX_ZOOM, Math.max(fit.zoom, focusZoomRef.current));
+          // 聚焦时在「自然取景」之上再推进 10%：FOCUS_ZOOM 只是保底值，
+          // 实测 1440 宽下 fit（145%）本来就大于保底（135%），max() 让它从不生效，
+          // 于是「聚焦」只有转向和淡出、没有任何推进感。
+          const boost = focusZoomRef.current > 0 ? 1.1 : 1;
+          const want = Math.min(MAX_ZOOM, Math.max(fit.zoom, focusZoomRef.current) * boost);
+          const prevZoom = view.zoom;
           Object.assign(view, { ...fit, zoom: want });
-          setZoomPct(Math.round(want * 100));
+          const reduceMotion = typeof window !== 'undefined'
+            && window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+          if (Math.abs(want - prevZoom) > 0.005 && !reduceMotion && !introRef.current) {
+            view.zoom = prevZoom;
+            zoomAnimRef.current = { t0: now, from: prevZoom, to: want };
+          } else {
+            setZoomPct(Math.round(want * 100));
+          }
           // 首次进入：先落在 62% 处，再缓动到目标（镜头推近的感觉）。
           if (!introDone.current) {
             introDone.current = true;
