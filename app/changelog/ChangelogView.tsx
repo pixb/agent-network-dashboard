@@ -9,7 +9,7 @@
 // 分节折叠：243 个版本全展开时，1440 下页面高约 50,000px、320 下 86,572px，
 // 用户要找某一版只能一路滚。按 `## ` 拆成 <details>，默认只展开最新 3 版，
 // 其余点开看——首屏就能看到最新变更，页面高度也降到可操作范围。
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import ReactMarkdown, { type Components } from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 
@@ -62,8 +62,25 @@ function splitSections(markdown: string) {
   return { preamble: preamble.join('\n'), sections };
 }
 
+const slugOf = (title: string) => `v${title.split('—')[0].trim().replace(/[^0-9A-Za-z.\-]/g, '')}`;
+
 export default function ChangelogView({ markdown }: { markdown: string }) {
   const { preamble, sections } = useMemo(() => splitSections(markdown), [markdown]);
+  // 深链：`/changelog#v0.6.4-preview.290` 要能直接展开那一节并跳过去。
+  // <details> 不会因为 hash 自动展开，所以这里按 hash 打开对应项。
+  const [opened, setOpened] = useState<Set<string>>(new Set());
+  useEffect(() => {
+    const apply = () => {
+      const hash = window.location.hash.replace(/^#/, '');
+      if (!hash) return;
+      setOpened(prev => new Set(prev).add(hash));
+      const el = document.getElementById(hash);
+      if (el) el.scrollIntoView({ block: 'start' });
+    };
+    apply();
+    window.addEventListener('hashchange', apply);
+    return () => window.removeEventListener('hashchange', apply);
+  }, []);
   return (
     <article
       data-testid="changelog-body"
@@ -71,12 +88,26 @@ export default function ChangelogView({ markdown }: { markdown: string }) {
       className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]/60 px-4 py-3"
     >
       {preamble.trim() ? <div className="mb-2">{renderMarkdown(preamble)}</div> : null}
+      {/* 版本索引：243 条折叠后仍有 8.5k px，给最近 12 个版本一个直达入口。 */}
+      <nav data-testid="changelog-index" aria-label="最近版本" className="mb-2 flex flex-wrap gap-x-3 gap-y-1 border-b border-[var(--border)]/60 pb-2">
+        <span className="text-[11px] text-[var(--fg-dim)]">最近</span>
+        {sections.slice(0, 12).map(section => (
+          <a
+            key={`index-${section.title}`}
+            href={`#${slugOf(section.title)}`}
+            className="text-[11px] text-[var(--fg-muted)] underline-offset-2 hover:text-[var(--hl)] hover:underline"
+          >
+            {section.title.split('—')[0].trim().replace('0.6.4-preview.', '')}
+          </a>
+        ))}
+      </nav>
       {sections.map((section, index) => (
         <details
           key={section.title}
+          id={slugOf(section.title)}
           data-testid="changelog-section"
           // 只展开最新 3 版：再往前用户通常用浏览器查找，不需要一次铺满。
-          open={index < 3}
+          open={index < 3 || opened.has(slugOf(section.title))}
           className="group border-t border-[var(--border)]/60 py-2 first:border-t-0"
         >
           <summary
