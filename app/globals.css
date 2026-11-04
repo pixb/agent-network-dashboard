@@ -1444,7 +1444,10 @@ joining the R145
   --border:       #e3e6eb;
   --border-hover: #c8cdd6;
   --scrim:        rgba(17, 17, 19, 0.35);
-  --accent:       #007a61; /* was #009e7e — 3.39:1 as text on white */
+  /* 对齐客户端的晴蓝：客户端 theme.ts 的 light.accent=#1b65db，并写明
+     「Vincent 2026-10-04『感觉这个绿色是真的丑』→ 换掉墨青」。
+     此前这里是 #007a61 墨青绿，正是被否掉的那一版。对比度 4.98:1（对 --bg）/5.34:1（白底）。 */
+  --accent:       #1b65db;
   --accent-text:  var(--accent); /* 浅底上 accent 本身就够深 */
   --accent-fg:    #ffffff;
   --success:      #047857; /* was #059669 — 3.7:1 as text on white */
@@ -2247,7 +2250,7 @@ html[data-skin="slack"] [data-topo-showcase] [class*="bg-cyan"] { background-col
   --col-hairline: #e9ebf0;
   --badge-muted-bg: #CBD5E1;
   --badge-muted-fg: #334155;
-  --hl:          #0369a1; /* was #0284c7 — 4.1:1 as text/按钮上白字在浅底不够 */
+  --hl:          #1b65db; /* 与 --accent 同色：客户端只有一个晴蓝；白字压色 5.34:1 */
   --menu-bg:     #ffffff;
   --bubble-in:   #F1F5F9;
   --bubble-out:  #DBEAFE;
