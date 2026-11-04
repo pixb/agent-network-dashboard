@@ -2060,3 +2060,10 @@ canvas 本身不可 Tab 遍历，因此有 `role=listbox` 的节点列表作为�
 方向键在列表内移动、回车选中——这条路径此前没有套件覆盖，本次为人工实测。
 
 复测方法：`/legion/3d` → 焦点到 `data-testid="legion-3d-list-toggle"` → Enter → 方向键 → Enter。
+
+**已固化为断言（同日）**：`verify-legion.mjs` 新增两条——
+`kbd:listOpensAndFocusesFirstOption`、`kbd:arrowEnterSelectsNode`，实测 **269/269**（views 仍 97）。
+
+> 发布侧注意：`publish-<label>.py` 里写死了 `legion=267`，下一版生成后必须改成 **269**，
+> 否则预检会以「期望 267 / 实际 269」判 mismatch。套件文件在 `evidence/`（非本仓），
+> 改动不在 git 历史里，这条已写进文档以免丢失。
