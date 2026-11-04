@@ -118,7 +118,7 @@
     "app/components/TopoGraph.tsx": 22,
     "app/components/UpdateBanner.tsx": 2,
     "app/components/UserBar.tsx": 1,
-    "app/legion/3d/page.tsx": 39,
+    "app/legion/3d/page.tsx": 6,
     "app/legion/page.tsx": 29,
     "app/login/page.tsx": 2,
     "app/logs/page.tsx": 4,
