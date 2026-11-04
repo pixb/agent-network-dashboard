@@ -48,6 +48,10 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ## 0.6.4-preview.345 — 2026-11-04
 
+- **npm 源慢的根因与出口**：构建期一次容器内 `npm ci` 实测 40 分钟未完成（本机 registry 镜像报 "免费节点当前繁忙"，与 registry 504 同源）。`Dockerfile.source` 加 `ARG NPM_REGISTRY`（只影响镜像层，默认 registry.npmjs.org，不读宿主 .npmrc → 定义可分享），并把 npm 缓存做成跨构建复用的 `--mount=type=cache`：命中后 `npm ci` 31 秒。
+- **部署演练抓到 matcher 少写 `:path*`（已修）**：源码镜像在一次性端口实测 `/messages` → 307 而 `/messages/inbox` → 200。`proxy.ts` 注释记录着 2026-07-31 同类事故（`/nodes/:path*` 漏，`/nodes/<alias>` 无 cookie 返回 200 + 36KB 页面壳）与规则（新增带子路由的页面 = matcher 加 `:path*` + 加进 `tests/e2e-proxy-auth-boundary.spec.ts` 清单）。我加 inbox 子页时两条都没做，现已补齐。门是逐页 cookie 存在性重定向、不是认证，取数侧 `/api/hub/*` 自带会话校验，所以这条是页面壳可达、不是数据可读。
+- **挂载 `~/.anet` 时 uid 决定成败**：镜像默认 uid 10001 读不到宿主 600/uid 1000 的 `config.json`（EACCES → 每个 API 请求 500）。compose 定义里的 `user: "1000:1000"` 是必需项，不是可选优化。
+
 ### 网络抖动与键盘操作纳入自动验收
 
 - 断线重连、断网发送的重发、军团 3D 的键盘路径都已写进自动验收（本次为验证版：套件数的三处变化在真实流水线里跑通）。

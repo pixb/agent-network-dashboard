@@ -64,7 +64,7 @@ export const config = {
     '/node',
     '/tasks', '/tasks/:path*',
     '/nodes', '/nodes/:path*',
-    '/messages',
+    '/messages', '/messages/:path*',
     '/logs',
     '/settings', '/settings/:path*',
     '/admin',
