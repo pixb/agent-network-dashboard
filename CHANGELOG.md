@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.346 — 2026-11-04
+
+### 发布与验收链路的两处加固（用户无感）
+
+- 发布重启前先等端口真正释放，避免新旧进程抢 3001（历史日志里累计约 3.4 万条 EADDRINUSE）。
+- 验收套件新增：断网上传后仍可重发、重发会真正重传附件。
+
 ## 0.6.4-preview.345 — 2026-11-04
 
 ### 网络抖动与键盘操作纳入自动验收
