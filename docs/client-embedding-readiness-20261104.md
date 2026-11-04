@@ -1,0 +1,61 @@
+# Dashboard 进客户端：包体与性能评估（2026-11-04）
+
+> 全部为实测数据，来源 `0.6.4-preview.343 / bb82cf3` 的生产构建与服务端渲染结果。
+> 探针：`/tmp/opencode/probes/{bundle-cost,hidden-cost,vis-sim}.mjs`（方法见文末）。
+
+## 1. 包体增量
+
+| 项 | 数值 |
+|---|---:|
+| 静态资源合计（`/login` 之外的全部 chunk） | **2.35 MB** |
+| 其中 JS | 2.11 MB（51 个 chunk） |
+| gzip 后合计 | **0.76 MB** |
+| `.next` 目录 107 MB | **不需要进客户端**（服务端 + 构建缓存） |
+
+按路由首屏（encoded JS）：
+
+| 路由 | JS |
+|---|---:|
+| `/` | 278 KB |
+| `/nodes` | 430 KB |
+| `/changelog` | 482 KB |
+| `/legion/3d` | 598 KB |
+| `/requirements` | 644 KB |
+| `/legion`（2D） | 794 KB |
+
+放进典型 Electron 客户端（120–200 MB）增量约 **1%–2%**；Next 按路由拆包，3D 只有打开时才拉那 598 KB。
+
+## 2. 运行开销（主线程 TaskDuration）
+
+稳态（页面加载完 2.5 秒后测 3 秒）：
+
+| 路由 | 前台 | 隐藏（模拟） |
+|---|---:|---:|
+| `/` | 0.04 s | 0.02 s |
+| `/nodes` | 0.02 s | 0.02 s |
+| `/legion`（2D） | 0.01 s | 0.01 s |
+| `/tasks` `/messages` `/scheduled-tasks` `/requirements` `/changelog` | 0.01–0.02 s | 0.01 s |
+| **`/legion/3d`** | **2.5–3.7 s（≈83–92% 单核）** | **0.05 s**（`.343` 起） |
+
+JS 堆：各页 7–9 MB；DOM 节点 `/nodes` 988、3D 页 379。
+
+## 3. 结论
+
+1. **包体不是问题**：gzip 0.76 MB，量级远小于客户端自身。
+2. **性能不是问题**：除 3D 外，所有页面稳态近乎空闲（3 秒内 0.01–0.04 秒）；没有发现后台轮询空转。
+3. **3D 是有意的重负载**：前台约 83–92% 单核，这是持续 60fps Canvas 渲染的固有成本；
+   `.343` 起页面不可见即暂停（0.05 s / 3 s），切回来正常续帧（2.52 s / 3 s）。
+
+## 4. 进客户端时必须保持的三件事
+
+1. **按路由拆包**：不要把所有路由打进首屏包；3D 必须保持独立 chunk（当前 598 KB）。
+2. **不可见即暂停**：3D 已做（`visibilitychange`）。新增任何逐帧动画页面都要照做。
+3. **降级路径不要删**：`heavy/huge` 分级与 `prefers-reduced-motion` 分支是低端机与录屏场景的兜底。
+
+## 5. 方法（可复跑）
+
+- 包体：`du`/`gzip` 扫 `.next/static`，配合 Playwright 采集 `resource.encodedBodySize` 得逐路由首屏。
+- 运行开销：CDP `Performance.enable` 读 `TaskDuration`，稳态测 3 秒；
+  **隐藏状态必须模拟**——无头 Chromium 里后台页仍报 `visibilityState=visible`，
+  直接「开第二个标签」测出来的数不能用于判断暂停是否生效
+  （本项第一版就因此得到「修复无效」的假结论，后改写 getter + 派发 `visibilitychange` 才测得准）。
