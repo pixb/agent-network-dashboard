@@ -306,6 +306,23 @@ export default function SettingsPage() {
               >
                 {notifyOn ? '已开启 · 点击关闭' : '开启桌面通知'}
               </button>
+              {notifyOn && (
+                <button
+                  type="button"
+                  data-testid="settings-desktop-notify-test"
+                  onClick={() => {
+                    // 权限类功能没这个按钮，用户只能等真实消息才知道有没有生效。
+                    try {
+                      const n = new Notification('Agent Network · 测试通知', { body: '看到这条说明桌面通知已经生效。', tag: 'anet-test' });
+                      n.onclick = () => { try { window.focus(); n.close(); } catch { /* 忽略 */ } };
+                      setNotifyHint('');
+                    } catch { setNotifyHint('发送失败，请检查浏览器通知权限'); }
+                  }}
+                  className="ml-2 inline-flex min-h-11 items-center rounded-lg px-3 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]"
+                >
+                  发送测试通知
+                </button>
+              )}
               {notifyHint && <p role="status" className="mt-2 text-[11px] text-[var(--warning)]">{notifyHint}</p>}
             </div>
           </section>
