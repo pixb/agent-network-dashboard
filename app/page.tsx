@@ -13,6 +13,9 @@ const MemoTopoGraph = memo(TopoGraph);
 
 /** 桌面通知：仅在用户开启、已授权、且页面不可见时弹系统通知。
  *  载荷在 SSE 事件的 data 里，这里摊平后交给纯函数判定。 */
+// 同一事件可能因 SSE 重连被重放（实测：桩流关闭后重连，一条事件弹了 4 次）。
+// 浏览器原生会按 tag 覆盖，但这里再加 10 秒去重，避免重复构造/闪烁。
+const notifiedTags = new Map<string, number>();
 function maybeDesktopNotify(event: { type?: string; data?: unknown }) {
   if (typeof window === 'undefined' || typeof document === 'undefined') return;
   if (!('Notification' in window)) return;
@@ -22,6 +25,11 @@ function maybeDesktopNotify(event: { type?: string; data?: unknown }) {
     { enabled: readNotifyPreference(window.localStorage), permission: Notification.permission, hidden: document.hidden },
   );
   if (!message) return;
+  const now = Date.now();
+  const last = notifiedTags.get(message.tag) ?? 0;
+  if (now - last < 10_000) return;
+  if (notifiedTags.size > 50) notifiedTags.clear();
+  notifiedTags.set(message.tag, now);
   try { new Notification(message.title, { body: message.body, tag: message.tag }); } catch { /* 权限被回收等情况忽略 */ }
 }
 import { AgentCard } from './components/AgentCard';
