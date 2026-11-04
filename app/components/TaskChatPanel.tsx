@@ -1922,7 +1922,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             </div>
           )}
           {attachLimitHit && (
-            <div className="mt-1 text-[10px] text-amber-400" role="status">{t('最多同时附带 6 个附件', 'Up to 6 attachments at a time')}</div>
+            <div className="mt-1 text-[11px] text-amber-400" role="status">{t('最多同时附带 6 个附件', 'Up to 6 attachments at a time')}</div>
           )}
           {attachedFiles.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">

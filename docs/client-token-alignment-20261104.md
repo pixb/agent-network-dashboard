@@ -1,6 +1,6 @@
 # Dashboard ↔ 客户端设计 token 对照（含两处自我更正）
 
-> 依据：客户端仓库 `agent-network-app` @ `e3dec7ef`（0.2.446）的
+> 依据：客户端仓库 客户端仓库（本机另一检出）@ `e3dec7ef`（0.2.446）的
 > `src/theme.ts`（`radius` 第 272 行、`type` 第 314 行）。这是权威来源，
 > 不再依据任何节点的转述或 Dashboard 内部注释。
 
@@ -78,7 +78,7 @@ pill  999  — chip / tag / badge / pill，以及所有圆
 ## 5. 复现方式
 
 ```bash
-git -C /home/vansin/agent-network-app log --oneline -1        # e3dec7ef
-sed -n '272,290p;314p' /home/vansin/agent-network-app/src/theme.ts
-grep -rn "fontSize: 10[,}]" /home/vansin/agent-network-app/src | wc -l   # 34
+git -C <client-checkout> log --oneline -1        # e3dec7ef
+sed -n '272,290p;314p' <client-checkout>/src/theme.ts
+grep -rn "fontSize: 10[,}]" <client-checkout>/src | wc -l   # 34
 ```

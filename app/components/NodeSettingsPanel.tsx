@@ -183,7 +183,7 @@ function MuteSection({ alias }: { alias: string }) {
           <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${muted ? 'translate-x-4.5' : 'translate-x-0.5'}`} style={{ transform: muted ? 'translateX(18px)' : 'translateX(2px)' }} />
         </span>
       </button>
-      <p className="mt-1.5 text-[10px] text-[var(--fg-dim)]">置顶=列表最前；静音=未读只显红点、不计入全局数字（均存本浏览器）</p>
+      <p className="mt-1.5 text-[11px] text-[var(--fg-dim)]">置顶=列表最前；静音=未读只显红点、不计入全局数字（均存本浏览器）</p>
     </section>
   );
 }
@@ -276,7 +276,7 @@ function AvatarSection({ alias }: { alias: string }) {
             ) : saveState === 'saved' ? (
               <span className="text-[10px] text-emerald-400" data-testid="avatar-save-ok">已保存，全设备同步</span>
             ) : (
-              <span className="text-[10px] text-[var(--fg-dim)]">保存后跨设备同步（经 hub）</span>
+              <span className="text-[11px] text-[var(--fg-dim)]">保存后跨设备同步（经 hub）</span>
             )}
           </div>
         </div>
@@ -862,10 +862,10 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
               );
             })()}
             {snapUnavailable && (
-              <p className="mt-1 text-[10px] text-[var(--warning)]/80">无法读取该节点的配置快照（Hub 不可达或节点离线），暂不能保存。</p>
+              <p className="mt-1 text-[11px] text-[var(--warning)]/80">无法读取该节点的配置快照（Hub 不可达或节点离线），暂不能保存。</p>
             )}
             {!snapUnavailable && !capable && (
-              <p className="mt-1 text-[10px] text-[var(--fg-dim)]">该节点未在 W1 supervisor 下运行，重启类改动可能不生效。</p>
+              <p className="mt-1 text-[11px] text-[var(--fg-dim)]">该节点未在 W1 supervisor 下运行，重启类改动可能不生效。</p>
             )}
           </section>
 

@@ -1186,7 +1186,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
                   ))}
                 </ul>
               )}
-              <p className="mt-1 text-[10px] text-gray-600">最多 5 层、不能成环（Hub 校验）；改父级不改卡片其它字段。</p>
+              <p className="mt-1 text-[11px] text-gray-600">最多 5 层、不能成环（Hub 校验）；改父级不改卡片其它字段。</p>
             </div>
           )}
           {childError && <p role="alert" className="mb-2 text-[11px] text-[var(--danger)]">{childError}</p>}
@@ -1227,7 +1227,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
               {childBusy ? '创建中…' : '新建子需求'}
             </button>
           </div>
-          <p className="mt-1 text-[10px] text-gray-600">同一网络、最多 5 层、不能成环（由 Hub 校验）。</p>
+          <p className="mt-1 text-[11px] text-gray-600">同一网络、最多 5 层、不能成环（由 Hub 校验）。</p>
         </section>
 
         <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
