@@ -204,7 +204,7 @@ export function NodeLifecycleMenu({
         </svg>
       </button>
       {menuOpen && (
-        <div role="menu" className="absolute right-0 z-40 mt-1 w-44 overflow-hidden rounded-md border border-[#26262b] bg-[#161618] shadow-xl">
+        <div role="menu" className="absolute right-0 z-40 mt-1 w-44 overflow-hidden rounded-lg border border-[#26262b] bg-[#161618] shadow-xl">
           {items.map(item => (
             <button
               key={item.key}

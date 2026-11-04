@@ -1067,7 +1067,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                 void load();
               }}
             />
-            <div role="group" aria-label="视图切换" className="flex flex-wrap items-center gap-0.5 rounded-md border border-[var(--border)] p-0.5">
+            <div role="group" aria-label="视图切换" className="flex flex-wrap items-center gap-0.5 rounded-lg border border-[var(--border)] p-0.5">
               {[{ key: '', label: '列表', test: 'list' }, { key: 'board', label: '看板', test: 'board' }, { key: 'timeline', label: '时间线', test: 'timeline' }].map(option => {
                 const active = timeline ? option.key === 'timeline' : (option.key === 'board') === board;
                 return (

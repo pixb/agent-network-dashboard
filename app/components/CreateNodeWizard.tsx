@@ -333,7 +333,7 @@ export function CreateNodeWizard({
               )}
               {step === 5 && (
                 <div className="space-y-2 text-sm">
-                  <div className="rounded-md border border-[var(--border)] bg-[var(--bg)] divide-y divide-[#1c1c1f]">
+                  <div className="rounded-lg border border-[var(--border)] bg-[var(--bg)] divide-y divide-[#1c1c1f]">
                     {[
                       ['服务器', daemonNodeId ? `${daemonNodeId.slice(0, 24)}…` : '—'],
                       ['名字', name.trim() || '—'],
