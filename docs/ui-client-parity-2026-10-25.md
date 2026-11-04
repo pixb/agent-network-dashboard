@@ -2041,3 +2041,22 @@ Playwright 的 `touchscreen` 只有 tap，多指必须用 CDP `Input.dispatchTou
 `grep -rn "innerHeight -" app` 与 `grep -rln "addEventListener('scroll'" app` 取交集。
 2026-11-04 复查全站：仅上述两处，均已改为文档坐标；`/legion/3d` 一直用文档坐标，
 `/legion`（2D）只用 `innerHeight` 做可见性判断、不设高度，均安全。
+
+## 27. 2026-11-04 续二：军团 3D 的键盘可达性（实测）
+
+用纯键盘走一遍，不做任何鼠标操作：
+
+| 步骤 | 实测 |
+|---|---|
+| 聚焦「节点列表」按钮 + `Enter` | 列表（`role=listbox`）打开，焦点自动落到第一个选项「网络军团」 |
+| `↓` `↓` | 焦点移到「成员 有主成员…」 |
+| `Enter` | 选中成功，详情面板出现（`legion-3d-detail`） |
+| 舞台 `+` / `R` | 缩放 105→115、重置回 105 |
+| 演示模式 `Esc` | 正常退出演示 |
+| 舞台 `?` / `Esc` | 速查表与退出均正常 |
+
+**结论：3D 军团纯键盘可完成「选节点 → 看详情 → 退出」，无需鼠标。**
+canvas 本身不可 Tab 遍历，因此有 `role=listbox` 的节点列表作为键盘/读屏入口，
+方向键在列表内移动、回车选中——这条路径此前没有套件覆盖，本次为人工实测。
+
+复测方法：`/legion/3d` → 焦点到 `data-testid="legion-3d-list-toggle"` → Enter → 方向键 → Enter。
