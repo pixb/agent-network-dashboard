@@ -1133,7 +1133,7 @@ export default function LegionPage() {
                       </button>
                     ))}
                   {layout.stats.people > LEGION_LABEL_PEOPLE && (
-                    <p className="px-2 py-1 text-[10px] text-[var(--fg-dim)]">成员超过 60，只列部门与核心；找成员请用搜索或直接点图。</p>
+                    <p className="px-2 py-1 text-[11px] text-[var(--fg-dim)]">成员超过 60，只列部门与核心；找成员请用搜索或直接点图。</p>
                   )}
                 </div>
               )}
