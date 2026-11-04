@@ -30,7 +30,11 @@ function maybeDesktopNotify(event: { type?: string; data?: unknown }) {
   if (now - last < 10_000) return;
   if (notifiedTags.size > 50) notifiedTags.clear();
   notifiedTags.set(message.tag, now);
-  try { new Notification(message.title, { body: message.body, tag: message.tag }); } catch { /* 权限被回收等情况忽略 */ }
+  try {
+    const n = new Notification(message.title, { body: message.body, tag: message.tag });
+    // 点通知把窗口拉回前台：否则用户点了没反应，还得自己找窗口。
+    n.onclick = () => { try { window.focus(); n.close(); } catch { /* 忽略 */ } };
+  } catch { /* 权限被回收等情况忽略 */ }
 }
 import { AgentCard } from './components/AgentCard';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
