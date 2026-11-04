@@ -328,18 +328,19 @@ function NodeFullPanel({ alias, session, sse, sendMsg, setSendMsg, sending, send
   useEffect(() => {
     const el = panelRef.current;
     if (!el) return;
+    // 必须用「文档坐标」而不是视口坐标：外壳的文档本来就比视口高（横幅 + 底部留白），
+    // 若按 rect.top 算高度，每次滚动都会把面板撑高、文档再变高，形成自激增长
+    // （实测 981→1077→1173，滚动多少次涨多少次）。
     const apply = () => {
-      const top = el.getBoundingClientRect().top;
+      const top = el.getBoundingClientRect().top + window.scrollY;
       el.style.height = `${Math.max(240, window.innerHeight - top)}px`;
     };
     apply();
     window.addEventListener('resize', apply);
-    window.addEventListener('scroll', apply, { passive: true });
     const ro = new ResizeObserver(apply);
     ro.observe(document.body);
     return () => {
       window.removeEventListener('resize', apply);
-      window.removeEventListener('scroll', apply);
       ro.disconnect();
     };
   }, []);
