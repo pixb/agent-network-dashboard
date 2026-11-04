@@ -2797,7 +2797,7 @@ export default function Legion3DPage() {
         <span
           role="status"
           data-testid="legion-3d-depth-chip"
-          className="pointer-events-none absolute bottom-3 left-3 z-20 rounded-md bg-[var(--bg-secondary)]/92 px-2 py-1 text-[11px] text-[var(--fg-muted)] backdrop-blur"
+          className="pointer-events-none absolute bottom-3 left-3 z-20 rounded-lg bg-[var(--bg-secondary)]/92 px-2 py-1 text-[11px] text-[var(--fg-muted)] backdrop-blur"
         >
           第 {depthPreview} 层 · 同层 {layout.nodes.filter(n => n.kind === 'group' && Math.max(1, n.depth ?? 1) === depthPreview).length} 个部门
         </span>
@@ -2819,7 +2819,7 @@ export default function Legion3DPage() {
             onClick={() => stepDept(-1)}
             aria-label="上一个部门"
             title="上一个部门（减少动态效果时也可用）"
-            className="rounded-md border border-[var(--border)] bg-[var(--bg-secondary)]/90 px-2.5 py-1.5 text-xs text-[var(--fg-muted)] backdrop-blur hover:text-[var(--fg)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)]/90 px-2.5 py-1.5 text-xs text-[var(--fg-muted)] backdrop-blur hover:text-[var(--fg)]"
           >
             ← 上一部门
           </button>
@@ -2829,7 +2829,7 @@ export default function Legion3DPage() {
             onClick={() => stepDept(1)}
             aria-label="下一个部门"
             title="下一个部门（减少动态效果时也可用）"
-            className="rounded-md border border-[var(--border)] bg-[var(--bg-secondary)]/90 px-2.5 py-1.5 text-xs text-[var(--fg-muted)] backdrop-blur hover:text-[var(--fg)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)]/90 px-2.5 py-1.5 text-xs text-[var(--fg-muted)] backdrop-blur hover:text-[var(--fg)]"
           >
             下一部门 →
           </button>
@@ -2849,7 +2849,7 @@ export default function Legion3DPage() {
               tourIndex.current = depts.length ? 0 : -1;
               if (depts[0]) { setFocus(depts[0].id); yawTarget.current = depts[0].angle; }
             }}
-            className={`rounded-md border px-2.5 py-1.5 text-xs backdrop-blur transition-colors ${tour ? 'border-[var(--accent)] bg-[var(--bg-secondary)]/90 text-[var(--accent-text)]' : 'border-[var(--border)] bg-[var(--bg-secondary)]/90 text-[var(--fg-muted)] hover:text-[var(--fg)]'} ${reducedMotion ? 'opacity-50' : ''}`}
+            className={`rounded-lg border px-2.5 py-1.5 text-xs backdrop-blur transition-colors ${tour ? 'border-[var(--accent)] bg-[var(--bg-secondary)]/90 text-[var(--accent-text)]' : 'border-[var(--border)] bg-[var(--bg-secondary)]/90 text-[var(--fg-muted)] hover:text-[var(--fg)]'} ${reducedMotion ? 'opacity-50' : ''}`}
           >
             部门巡礼{reducedMotion ? '（静止）' : ''}
           </button>
@@ -2866,14 +2866,14 @@ export default function Legion3DPage() {
                 // 恢复时把本步的计时起点往后挪，避免一恢复就立刻跳到下一步。
                 if (!next) tourAt.current = 0;
               }}
-              className={`rounded-md border px-2.5 py-1.5 text-xs backdrop-blur transition-colors ${tourPaused ? 'border-[var(--accent)] bg-[var(--bg-secondary)]/90 text-[var(--accent-text)]' : 'border-[var(--border)] bg-[var(--bg-secondary)]/90 text-[var(--fg-muted)] hover:text-[var(--fg)]'}`}
+              className={`rounded-lg border px-2.5 py-1.5 text-xs backdrop-blur transition-colors ${tourPaused ? 'border-[var(--accent)] bg-[var(--bg-secondary)]/90 text-[var(--accent-text)]' : 'border-[var(--border)] bg-[var(--bg-secondary)]/90 text-[var(--fg-muted)] hover:text-[var(--fg)]'}`}
             >
               {tourPaused ? '继续' : '暂停'}
             </button>
           )}
           {tour && (
             <span role="status" aria-live="polite" data-testid="legion-3d-tour-status"
-              className="rounded-md bg-[var(--bg-secondary)]/90 px-2 py-1 text-[11px] text-[var(--fg-muted)] backdrop-blur">
+              className="rounded-lg bg-[var(--bg-secondary)]/90 px-2 py-1 text-[11px] text-[var(--fg-muted)] backdrop-blur">
               {(() => {
                 const node = layout.nodes.find(n => n.id === focus);
                 if (!node) return '巡礼中';
@@ -2904,7 +2904,7 @@ export default function Legion3DPage() {
             <span
               role="status"
               data-testid="legion-3d-present-checks"
-              className={`max-w-[60vw] rounded-md px-2 py-1 text-[11px] backdrop-blur ${presentChecks.length ? 'bg-[var(--danger)]/15 text-[var(--danger)]' : 'bg-[var(--bg-secondary)]/90 text-[var(--fg-muted)]'}`}
+              className={`max-w-[60vw] rounded-lg px-2 py-1 text-[11px] backdrop-blur ${presentChecks.length ? 'bg-[var(--danger)]/15 text-[var(--danger)]' : 'bg-[var(--bg-secondary)]/90 text-[var(--fg-muted)]'}`}
             >
               演示检查：{presentChecks.length ? presentChecks.join(' · ') : '就绪'}
             </span>
@@ -2913,7 +2913,7 @@ export default function Legion3DPage() {
             type="button"
             data-testid="legion-3d-present-exit"
             onClick={exitPresenting}
-            className="rounded-md border border-[var(--border)] bg-[var(--bg-secondary)]/90 px-2.5 py-1.5 text-xs text-[var(--fg-muted)] backdrop-blur transition-colors hover:text-[var(--fg)]"
+            className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)]/90 px-2.5 py-1.5 text-xs text-[var(--fg-muted)] backdrop-blur transition-colors hover:text-[var(--fg)]"
           >
             退出演示（Esc）
           </button>
@@ -2952,7 +2952,7 @@ export default function Legion3DPage() {
         );
       })()}
       {capturing && (
-        <div role="status" data-testid="legion-3d-capture-status" className="pointer-events-auto absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-md bg-[var(--bg-secondary)]/92 px-3 py-1 text-xs text-[var(--fg-muted)] backdrop-blur">
+        <div role="status" data-testid="legion-3d-capture-status" className="pointer-events-auto absolute bottom-4 left-1/2 z-20 flex -translate-x-1/2 items-center gap-3 rounded-lg bg-[var(--bg-secondary)]/92 px-3 py-1 text-xs text-[var(--fg-muted)] backdrop-blur">
           <span>录屏中 {Math.round(captureProgress * 100)}% · {LOOP_DURATION_MS / 1000} 秒无缝循环</span>
           <button
             type="button"
@@ -2965,12 +2965,12 @@ export default function Legion3DPage() {
         </div>
       )}
       {captureInfo && !capturing && (
-        <p role="status" data-testid="legion-3d-capture-info" className="pointer-events-none absolute bottom-4 left-1/2 z-20 max-w-[92vw] -translate-x-1/2 rounded-md bg-[var(--bg-secondary)]/92 px-3 py-1 text-center text-xs text-[var(--fg-muted)] backdrop-blur">
+        <p role="status" data-testid="legion-3d-capture-info" className="pointer-events-none absolute bottom-4 left-1/2 z-20 max-w-[92vw] -translate-x-1/2 rounded-lg bg-[var(--bg-secondary)]/92 px-3 py-1 text-center text-xs text-[var(--fg-muted)] backdrop-blur">
           {captureInfo}
         </p>
       )}
       {captureError && (
-        <p role="alert" data-testid="legion-3d-capture-error" className="pointer-events-none absolute bottom-4 left-1/2 z-20 max-w-[92vw] -translate-x-1/2 rounded-md border border-red-500/30 bg-[var(--bg-secondary)]/95 px-3 py-1 text-center text-xs text-red-300 backdrop-blur">
+        <p role="alert" data-testid="legion-3d-capture-error" className="pointer-events-none absolute bottom-4 left-1/2 z-20 max-w-[92vw] -translate-x-1/2 rounded-lg border border-red-500/30 bg-[var(--bg-secondary)]/95 px-3 py-1 text-center text-xs text-red-300 backdrop-blur">
           {captureError}
         </p>
       )}
@@ -3010,7 +3010,7 @@ export default function Legion3DPage() {
             placeholder="搜索成员 / 部门 / Agent"
             aria-label="搜索军团成员"
             data-testid="legion-3d-search"
-            className="w-44 rounded-md bg-[var(--bg-secondary)]/85 px-2.5 py-1 text-xs text-[var(--fg)] placeholder:text-[var(--fg-dim)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] sm:w-56"
+            className="w-44 rounded-lg bg-[var(--bg-secondary)]/85 px-2.5 py-1 text-xs text-[var(--fg)] placeholder:text-[var(--fg-dim)] focus:outline-none focus:ring-1 focus:ring-[var(--accent)] sm:w-56"
           />
           {query.trim() !== '' && (
             // 与 2D 同口径：搜索要有数量反馈，读屏器才知道筛出了几个节点。
@@ -3025,7 +3025,7 @@ export default function Legion3DPage() {
               type="button"
               onClick={() => setQuery('')}
               aria-label="清空搜索"
-              className="rounded-md px-1.5 py-0.5 text-[11px] text-[var(--fg-dim)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+              className="rounded px-1.5 py-0.5 text-[11px] text-[var(--fg-dim)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
             >
               ✕
             </button>
@@ -3116,7 +3116,7 @@ export default function Legion3DPage() {
           aria-pressed={spin && !reducedMotion}
           aria-disabled={reducedMotion}
           data-testid="legion-3d-spin"
-          className={`max-sm:order-last rounded-md px-2.5 py-1.5 text-xs transition-colors ${spin && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
+          className={`max-sm:order-last rounded-lg px-2.5 py-1.5 text-xs transition-colors ${spin && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
         >
           {reducedMotion ? '自转静止' : spin ? '自转中' : '自转已停'}
         </button>
@@ -3127,14 +3127,14 @@ export default function Legion3DPage() {
           aria-disabled={reducedMotion}
           title="光流仅示意组织连接，不表示节点在线或任务运行；系统减少动态效果时保持静止"
           data-testid="legion-3d-flow"
-          className={`min-h-11 rounded-md px-2.5 py-1.5 text-xs transition-colors sm:min-h-0 ${flow && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]'} focus-visible:outline-2 focus-visible:outline-[var(--accent-text)] max-sm:order-last`}
+          className={`min-h-11 rounded-lg px-2.5 py-1.5 text-xs transition-colors sm:min-h-0 ${flow && !reducedMotion ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]'} focus-visible:outline-2 focus-visible:outline-[var(--accent-text)] max-sm:order-last`}
         >
           {reducedMotion ? '光流静止' : flow ? '光流开启' : '光流暂停'}
         </button>
         <button
           type="button"
           onClick={resetView}
-          className="max-sm:order-last rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+          className="max-sm:order-last rounded-lg px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
         >
           重置视角
         </button>
@@ -3142,7 +3142,7 @@ export default function Legion3DPage() {
           type="button"
           data-testid="legion-3d-copy-view"
           onClick={() => void copyViewLink()}
-          className="max-sm:order-last rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+          className="max-sm:order-last rounded-lg px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
         >
           复制视角链接
         </button>
@@ -3164,7 +3164,7 @@ export default function Legion3DPage() {
           aria-expanded={listOpen}
           aria-controls="legion-3d-node-list"
           data-testid="legion-3d-list-toggle"
-          className="rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+          className="rounded-lg px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
         >
           {listOpen ? '收起列表' : '节点列表'}
         </button>
@@ -3175,7 +3175,7 @@ export default function Legion3DPage() {
           aria-expanded={toolsOpen}
           aria-controls="legion-3d-more-tools"
           data-testid="legion-3d-tools-toggle"
-          className="rounded-md border border-[var(--border)] bg-[var(--bg-secondary)]/85 px-2.5 py-1.5 text-xs text-[var(--fg)] hover:bg-[var(--hover-tint)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] sm:hidden"
+          className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)]/85 px-2.5 py-1.5 text-xs text-[var(--fg)] hover:bg-[var(--hover-tint)] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--accent)] sm:hidden"
         >
           {toolsOpen ? '收起操作' : '更多操作'}
         </button>
@@ -3192,7 +3192,7 @@ export default function Legion3DPage() {
           aria-pressed={isFullscreen}
           aria-label={isFullscreen ? '退出全屏' : '全屏查看'}
           data-testid="legion-3d-fullscreen"
-          className={`rounded-md px-2.5 py-1.5 text-xs transition-colors ${isFullscreen ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
+          className={`rounded-lg px-2.5 py-1.5 text-xs transition-colors ${isFullscreen ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
         >
           {isFullscreen ? '退出全屏' : '全屏'}
         </button>
@@ -3202,7 +3202,7 @@ export default function Legion3DPage() {
           aria-pressed={cleanView}
           aria-label={cleanView ? '恢复界面' : '净屏（隐藏界面）'}
           data-testid="legion-3d-clean"
-          className={`rounded-md px-2.5 py-1.5 text-xs transition-colors ${cleanView ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
+          className={`rounded-lg px-2.5 py-1.5 text-xs transition-colors ${cleanView ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
         >
           {cleanView ? '恢复界面' : '净屏'}
         </button>
@@ -3212,7 +3212,7 @@ export default function Legion3DPage() {
           aria-pressed={presenting}
           title="隐藏界面、鼠标与悬浮提示，匀速环绕；按 Esc 退出"
           data-testid="legion-3d-present"
-          className={`rounded-md px-2.5 py-1.5 text-xs transition-colors ${presenting ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
+          className={`rounded-lg px-2.5 py-1.5 text-xs transition-colors ${presenting ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'}`}
         >
           演示模式
         </button>
@@ -3222,13 +3222,13 @@ export default function Legion3DPage() {
           disabled={capturing}
           title={`录制一圈 16 秒，导出 ${exportHigh ? '1920×1080' : '1280×720'} 无缝循环视频`}
           data-testid="legion-3d-record"
-          className="rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] transition-colors hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] disabled:opacity-60"
+          className="rounded-lg px-2.5 py-1.5 text-xs text-[var(--fg-muted)] transition-colors hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] disabled:opacity-60"
         >
           {capturing ? `录屏 ${Math.round(captureProgress * 100)}%` : '导出循环'}
         </button>
         <label
           title="默认 720p（PPT 最稳）；1080p 仅用于其他场合"
-          className="flex items-center gap-1 rounded-md px-1.5 py-1.5 text-[10px] text-[var(--fg-muted)]"
+          className="flex items-center gap-1 rounded-lg px-1.5 py-1.5 text-[10px] text-[var(--fg-muted)]"
         >
           <input
             type="checkbox"
@@ -3245,13 +3245,13 @@ export default function Legion3DPage() {
           onClick={exportPng}
           disabled={exporting}
           data-testid="legion-3d-export"
-          className="rounded-md bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs text-[var(--fg)] hover:bg-[var(--hover-tint)] disabled:opacity-50"
+          className="rounded-lg bg-[var(--bg-elevated)] px-2.5 py-1.5 text-xs text-[var(--fg)] hover:bg-[var(--hover-tint)] disabled:opacity-50"
         >
           {exporting ? '导出中…' : '导出 PNG'}
         </button>
         <Link
           href="/legion/plaza"
-          className="flex min-h-11 items-center justify-center rounded-md px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] sm:min-h-0"
+          className="flex min-h-11 items-center justify-center rounded-lg px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] sm:min-h-0"
         >
           平台视角
         </Link>
@@ -3260,7 +3260,7 @@ export default function Legion3DPage() {
         <Link
           href={focus ? `/legion?focus=${encodeURIComponent(layout.nodes.find(n => n.id === focus)?.label || '')}` : '/legion'}
           data-testid="legion-3d-2d"
-          className="absolute right-0 top-0 flex min-h-11 items-center justify-center rounded-md border border-[var(--border)] bg-[var(--bg-secondary)]/85 px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] sm:static sm:min-h-0 sm:border-0 sm:bg-transparent"
+          className="absolute right-0 top-0 flex min-h-11 items-center justify-center rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)]/85 px-2.5 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] sm:static sm:min-h-0 sm:border-0 sm:bg-transparent"
         >
           2D 视图
         </Link>
@@ -3421,7 +3421,7 @@ export default function Legion3DPage() {
                   if (selected === n.id) openNode(n);
                   else pickNode(n);
                 }}
-                className={`flex w-full items-center gap-2 rounded-md px-2 py-1 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--hl)] focus-visible:outline-offset-1 ${
+                className={`flex w-full items-center gap-2 rounded-lg px-2 py-1 text-left transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-[var(--hl)] focus-visible:outline-offset-1 ${
                   selected === n.id
                     ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]'
                     : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'
@@ -3525,7 +3525,7 @@ export default function Legion3DPage() {
                 setSelected(null);
               }}
               aria-label="关闭详情"
-              className="shrink-0 rounded-md px-1.5 py-0.5 text-xs text-[var(--fg-dim)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+              className="shrink-0 rounded px-1.5 py-0.5 text-xs text-[var(--fg-dim)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
             >
               ✕
             </button>
@@ -3544,7 +3544,7 @@ export default function Legion3DPage() {
                     yawTarget.current = viewRef.current.yaw + delta;
                   }
                 }}
-                className="rounded-md px-2 py-1 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+                className="rounded-lg px-2 py-1 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
               >
                 聚焦所在部门
               </button>
@@ -3567,7 +3567,7 @@ export default function Legion3DPage() {
                   yawTarget.current = null;
                 }
               }}
-              className="mt-2 mr-3 rounded-md px-2 py-1 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+              className="mt-2 mr-3 rounded-lg px-2 py-1 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
             >
               {focus === selectedNode.id ? '取消聚焦' : '聚焦此部门'}
             </button>
@@ -3575,7 +3575,7 @@ export default function Legion3DPage() {
             {selectedNode.kind === 'agent' && (
               <button type="button" onClick={() => openNode(selectedNode)} data-testid="legion-3d-chat"
                 onKeyDown={e => e.stopPropagation()}
-                className="min-h-11 rounded-md px-3 text-xs text-[var(--accent-text)] hover:bg-[var(--hover-tint)]">开始对话</button>
+                className="min-h-11 rounded-lg px-3 text-xs text-[var(--accent-text)] hover:bg-[var(--hover-tint)]">开始对话</button>
             )}
             {(selectedNode.kind === 'person' || selectedNode.kind === 'group') && (
               <Link
@@ -3614,7 +3614,7 @@ export default function Legion3DPage() {
             <button
               type="button"
               onClick={() => { void people.mutate(); void hierarchy.mutate(); void status.mutate(); }}
-              className="mt-3 rounded-md bg-[var(--bg-elevated)] px-3 py-1.5 text-xs text-[var(--fg)] hover:bg-[var(--hover-tint)]"
+              className="mt-3 rounded-lg bg-[var(--bg-elevated)] px-3 py-1.5 text-xs text-[var(--fg)] hover:bg-[var(--hover-tint)]"
             >
               重试
             </button>
