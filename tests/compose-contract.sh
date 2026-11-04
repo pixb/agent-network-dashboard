@@ -32,6 +32,26 @@ chk "镜像内跑源码构建（npm run build），不是去 registry 取产物"
   "grep -q 'npm run build' $DS"
 chk "部署身份写进镜像 label（docker inspect 能回答「在跑的是哪份代码」）" \
   "grep -q 'SOURCE_REV' $DS && grep -q 'org.opencontainers.image.revision' $DS"
+
+# 构建期两个实测教训，写成门，防止「能构建」退回「40 分钟 / 2.9GB」。
+chk "npm ci 跳过 electron 二进制下载（electron 是 devDep，postinstall 下载会断流杀死构建）" \
+  "grep -q 'ELECTRON_SKIP_BINARY_DOWNLOAD=1' deploy/compose/Dockerfile.source"
+chk "构建后剪掉 dev 依赖（next 在 dependencies 里，next start 不需要 electron/capacitor/playwright）" \
+  "grep -q 'npm prune --omit=dev' deploy/compose/Dockerfile.source"
+chk "NPM_REGISTRY 是 ARG 且有默认值（换源不改判据）" \
+  "grep -q 'ARG NPM_REGISTRY=https://registry.npmjs.org' deploy/compose/Dockerfile.source"
+chk "npm 缓存跨构建复用（--mount=type=cache）" \
+  "grep -q 'mount=type=cache' deploy/compose/Dockerfile.source"
+# 探针端口不许写死：写死时改端口跑 = 服务正常而健康状态恒 unhealthy，依赖门会锁死下游。
+for f in deploy/compose/Dockerfile.source deploy/compose/compose.yaml; do
+  chk "$f 的探针从 process.env.PORT 取端口" "grep -q 'process.env.PORT' $f"
+  chk "$f 的探针探 /login（公开 200；/api/* 无会话 401、/ 未登录 307）" "grep -q '/login' $f"
+done
+# 页面门：带子路由的页面必须在 matcher 里有 :path* 变体（proxy.ts 注释记录的 2026-07-31 规则）。
+chk "matcher 含 /messages/:path*（新增子路由页时漏写会让无 cookie 访客拿到 200 页面壳）" \
+  "grep -q "/messages/:path\\*" proxy.ts"
+chk "e2e 边界测试清单含 /messages/inbox（规则要求 matcher 与测试清单同时补）" \
+  "grep -q '/messages/inbox' tests/e2e-proxy-auth-boundary.spec.ts"
 chk "compose 传入 SOURCE_REV（换版本 = 换提交，记录在 compose 侧）" \
   "grep -q 'SOURCE_REV:' $CF"
 chk "构建上下文 = 仓库根（../..），根目录 .dockerignore 才生效" \

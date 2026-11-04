@@ -116,17 +116,62 @@ clone 这个仓库 + 重建镜像 **不会**恢复任何生产数据。要备份
 
 compose 路径不挂任何数据卷，正是为了让这一点显式：没有卷 = 没有隐藏状态。
 
-## 构建期 npm 源（重建路径上的实测瓶颈）
+## 构建期慢与失败：根因是 electron，不是 npm 源（2026-11-04 实测，纠正此前的判断）
 
-`Dockerfile.source` 里 `npm ci` 走 `ARG NPM_REGISTRY`（默认官方源），compose 侧对应
-`ANET_NPM_REGISTRY`。这条旋钮是实测逼出来的：本机 registry 镜像出现过
-「免费节点当前繁忙」，一次容器内 `npm ci` 跑了 40 分钟仍未完成 —— 重建路径如果只能
-连一个源，故障现场就不是重建，是等待。npm 缓存用 `--mount=type=cache` 跨构建复用，
-同一棵树重复构建不必重新下载。
+先前把「一次容器内 `npm ci` 跑 40 分钟未完成」归因于 registry 镜像报「免费节点当前繁忙」。
+那次归因**不准确**。真实链条是：`npm ci` 默认连 devDependencies 一起装，而 `electron`
+（devDependency，移动端外壳工具链带进来的）的 postinstall 要下载二进制包。
+
+```
+npm error path /src/node_modules/electron
+npm error command sh -c node install.js
+npm error RequestError: socket hang up
+```
+
+镜像里永不启动 electron，所以修法是让它不下载：`ENV ELECTRON_SKIP_BINARY_DOWNLOAD=1`。
+效果是同一条 `npm ci` 从 40 分钟未完成变成 **43 秒**（同一台机器、冷缓存、官方源）。
+
+`ARG NPM_REGISTRY` 保留，但写清它的边界：`npm ci` 认 `package-lock.json` 里记录的 resolved URL，
+所以换源只是部分生效，不是总开关；实测换 npmmirror 时 electron 的下载照样断流。
+真正稳定生效的是 `--mount=type=cache` 的 npm 缓存复用 —— 注意 `docker builder prune` 会把
+这个缓存一起清掉，清完第一次构建会明显变慢。
+
+## 构建身份：必须先提交、后构建
+
+镜像内容 = 构建那一刻的**工作树**，label 里写的是**传入的 commit**。两者可以分叉：
+本轮实测踩到两次 —— label 记 `3ef356b`，而当时的 proxy matcher 修复**还没提交**。
+之后任何人按 label 去 `git checkout`，都还原不出在跑的镜像。
 
 ```bash
-ANET_NPM_REGISTRY=https://<你可用的镜像源> docker compose build
+git status --porcelain          # 必须为空，否则 label 指向的提交不包含在跑的改动
+git push origin pixb            # 部署身份要在远端可取，否则 label 无法还原
+export ANET_DASHBOARD_SOURCE_REV=$(git rev-parse HEAD)
+docker compose build
+docker inspect anet-dashboard:pixb --format '{{index .Config.Labels "org.opencontainers.image.revision"}}'
 ```
+
+## 构建产物体积（同一棵树，剪不剪 dev 的差别）
+
+| 定义 | 镜像体积 |
+|---|---|
+| `Dockerfile.source` 整树拷贝（旧） | 2.94GB |
+| `Dockerfile.source` + `npm prune --omit=dev` | 1.65GB |
+| `Dockerfile`（装发布包，`--omit=dev`） | ~250MB |
+
+`next` / `react` / `react-dom` 都在 `dependencies` 里（读过 package.json），`next start`
+不需要 electron / electron-builder / `@capacitor/*` / `@playwright/test`，所以剪掉是纯收益。
+本包没有 `output: 'standalone'`，不能只拷 `.next`。
+
+## 运行形状的两个实测坑
+
+1. **`~/.anet` 挂载：uid 与路径形状都要对。** 容器要找的是 `$HOME/.anet/config.json`。
+   - 缺文件 → 每个 API 请求 500（`ENOENT ... /home/node/.anet/config.json`）；
+   - 有文件但 uid 不对 → 500（`EACCES`：镜像默认 uid 10001 读不到宿主 600/uid 1000 的文件），
+     所以 compose 里 `user: "1000:1000"` 是必需项；
+   - 挂载点写错（挂到 `/home/anet` 而不是 `/home/anet/.anet`）同样 500，报错文本会直接告诉你它找哪个路径。
+2. **探针端口从 `process.env.PORT` 取，不许写死。** 写死 3001 时，改端口跑（演练用 3099）
+   服务正常（`/login`=200）而容器健康状态恒为 `unhealthy`；有 `service_healthy` 依赖门时
+   会把依赖方一起锁死。修后在 3099 上实测 `healthy`。
 
 ## 启动
 
@@ -134,6 +179,8 @@ ANET_NPM_REGISTRY=https://<你可用的镜像源> docker compose build
 cd deploy/compose
 cp dashboard.env.template dashboard.env   # 填真实值；不要提交
 # 多 hub 场景必须显式设 COMMHUB_URL，否则连的是代码里的默认 hub
+# 顺序要求：工作树必须干净（git status --porcelain 为空）且已推送，
+# 这样 label 里的 commit 才真的对应镜像里在跑的代码。
 export ANET_DASHBOARD_SOURCE_REV=$(git -C ../.. rev-parse HEAD)   # 本次部署的 pixb 提交
 docker compose build      # compose.yaml 会把 SOURCE_REV 传成镜像 label
 docker compose up -d
@@ -157,4 +204,6 @@ bash tests/compose-contract.sh
 
 覆盖：基础镜像主版本、版本 ARG 钉法、`--include=optional`、非 root、
 `HOSTNAME=127.0.0.1`、host 网络且无 `ports:`、探针用 `/login`、
-env 名字与代码对齐、模板不含真实值。
+env 名字与代码对齐、模板不含真实值、`ELECTRON_SKIP_BINARY_DOWNLOAD` 与
+`npm prune --omit=dev` 在位、探针从 `process.env.PORT` 取端口、
+matcher 含 `/messages/:path*` 且 e2e 清单同步（proxy.ts 注释记录的 2026-07-31 规则）。
