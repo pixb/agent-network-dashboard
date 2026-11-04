@@ -13,6 +13,7 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 - 新增 `/messages/inbox`（「我的收件箱」）：读 Hub 的 `user_inbox`（`GET /api/messages?scope=user`），按发件节点分组，带未读（acked=0）提示与 kind 计数。
 - 之前节点用 `send_desktop_message` 发的私信（kind=`agent_message`）与 Hub 代发的任务过期 / 疑似孤儿通知（`task_expired` / `task_orphan_suspected`）只存在于 `user_inbox`，而 Messages 页读的是 `inbox` 表 —— 生产实测（net_b91c0d535346）admin 有 42 行、全部未确认，界面上却一行都没有。
 - Messages 页头部加入口（带未读数）；入口刻意不受「本页有消息才显示 chrome」的门控制：消息流为空时正好是私信最多的时候。
+- 端到端验收脚本 `tests/inbox-e2e/run.sh`：一次性 Hub + 一次性 Dashboard dev server，真登录、真会话 cookie，四条判据全过（代理带 `scope=user` 回 1 行 `kind=agent_message`、`unread=1`；别名读路径里没有那条私信；`/messages/inbox` 渲染；消息流页有入口）。
 
 ## 0.6.4-preview.345 — 2026-11-04
 
