@@ -58,3 +58,23 @@ test('incremental pages stay ordered without dropping live or same-second rows',
     ['tie-y', 'tie-z', 'server-task'],
   );
 });
+
+// SSE 重连后 Hub 可能重放同一批事件，前端会再拉一次「最新一页」。
+// 合并必须幂等：同一页到达两次，列表不得出现重复行。
+test('replaying the same page twice stays idempotent', () => {
+  const page = [row('b', '2026-01-05 00:00:02'), row('a', '2026-01-05 00:00:01')];
+  const once = mergeTaskHistoryPage([], page);
+  const twice = mergeTaskHistoryPage(once, page);
+  const thrice = mergeTaskHistoryPage(twice, page);
+  assert.deepEqual(twice.map((task) => task.task_id), ['a', 'b']);
+  assert.deepEqual(thrice.map((task) => task.task_id), ['a', 'b']);
+});
+
+// 重连后拉到的一页会与本地已有窗口部分重叠（新消息 + 已存在的旧消息）。
+// 重叠部分按 task_id 去重，不能变成两条；顺序仍按时间。
+test('overlapping refetch dedupes shared rows and keeps order', () => {
+  const current = [row('m3', '2026-01-05 00:00:03'), row('m2', '2026-01-05 00:00:02')];
+  const refetched = [row('m4', '2026-01-05 00:00:04'), row('m3', '2026-01-05 00:00:03')];
+  const merged = mergeTaskHistoryPage(current, refetched);
+  assert.deepEqual(merged.map((task) => task.task_id), ['m2', 'm3', 'm4']);
+});
