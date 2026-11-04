@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.352 — 2026-11-04
+
+### 桌面通知：同一条消息不会重复弹
+
+- 实时连接重连时，同一条新消息可能被重放；此前会连续弹出多次系统通知。
+- 现在同一条消息 10 秒内只提示一次。
+
 ## 0.6.4-preview.351 — 2026-11-04
 
 ### 桌面通知（默认关闭）
