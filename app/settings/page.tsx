@@ -18,13 +18,14 @@
 // 边框（信息卡不描边）、字重上限 600、选中态用中性 rowActive 而不是
 // 强调色块。
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useAnetConfig, useHealth } from '../lib/hooks';
 import { applyTheme } from '../components/ThemeSwitcher';
 import { DASHBOARD_VERSION } from '../lib/version';
 import { clearPrivateChatStorage } from '../lib/chat-outbox';
 import { SETTINGS_SECTIONS, SETTINGS_LINKS, SETTINGS_THEMES } from '../lib/settings-model';
+import { readNotifyPreference, writeNotifyPreference } from '../lib/desktop-notify';
 
 function GroupHeading({ id, label }: { id: string; label: string }) {
   return (
@@ -37,6 +38,22 @@ function GroupHeading({ id, label }: { id: string; label: string }) {
   );
 }
 
+// 通知开关存在 localStorage；用 useSyncExternalStore 读取，避免「effect 里 setState」
+// 带来的级联渲染（lint 会报 react-hooks/set-state-in-effect），SSR 快照固定 false。
+const notifyListeners = new Set<() => void>();
+function subscribeNotify(listener: () => void) {
+  notifyListeners.add(listener);
+  return () => { notifyListeners.delete(listener); };
+}
+function notifySnapshot(): boolean {
+  return readNotifyPreference(typeof window !== 'undefined' ? window.localStorage : null);
+}
+function setNotifyPreference(enabled: boolean): boolean {
+  const ok = writeNotifyPreference(typeof window !== 'undefined' ? window.localStorage : null, enabled);
+  for (const listener of notifyListeners) listener();
+  return ok;
+}
+
 export default function SettingsPage() {
   const { config } = useAnetConfig();
   const { health, error: healthError } = useHealth();
@@ -44,6 +61,8 @@ export default function SettingsPage() {
   // hydration 不匹配：服务端渲染 cyber，客户端首帧读 localStorage 得到 light。
   // 挂载后再同步到真实选择（这时已经 hydrate 完，不会打架）。
   const [theme, setTheme] = useState<string>('cyber');
+  const [notifyHint, setNotifyHint] = useState('');
+  const notifyOn = useSyncExternalStore(subscribeNotify, notifySnapshot, () => false);
   useEffect(() => {
     try {
       const saved = localStorage.getItem('anet-theme');
@@ -255,6 +274,39 @@ export default function SettingsPage() {
                   </button>
                 ))}
               </div>
+            </div>
+          </section>
+
+          {/* ── 通知（对齐客户端 NotifySettings 的最小实现：默认关闭）── */}
+          <section id="notify" data-settings-group="notify" aria-labelledby="notify-heading" className="space-y-3 scroll-mt-6">
+            <GroupHeading id="notify" label="Notifications" />
+            <div className={cardClass}>
+              <h3 className="mb-2 text-sm font-semibold">桌面通知</h3>
+              <p className="mb-3 text-[11px] text-[var(--fg-dim)]">
+                页面在后台时，收到发给你的新消息会弹系统通知。默认关闭；开启需要浏览器授权，权限可随时在浏览器设置里撤销。
+              </p>
+              <button
+                type="button"
+                data-testid="settings-desktop-notify"
+                aria-pressed={notifyOn}
+                onClick={async () => {
+                  if (notifyOn) {
+                    setNotifyPreference(false);
+                    return;
+                  }
+                  if (!('Notification' in window)) { setNotifyHint('当前浏览器不支持通知'); return; }
+                  const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+                  if (permission !== 'granted') { setNotifyHint('未获得授权，通知保持关闭'); return; }
+                  setNotifyPreference(true);
+                  setNotifyHint('');
+                }}
+                className={`inline-flex min-h-11 items-center rounded-lg px-3 text-xs transition-colors ${
+                  notifyOn ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'bg-[var(--bg-elevated)] text-[var(--fg)] hover:bg-[var(--hover-tint)]'
+                }`}
+              >
+                {notifyOn ? '已开启 · 点击关闭' : '开启桌面通知'}
+              </button>
+              {notifyHint && <p role="status" className="mt-2 text-[11px] text-[var(--warning)]">{notifyHint}</p>}
             </div>
           </section>
 
