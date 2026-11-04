@@ -31,7 +31,13 @@ COPY package.json package-lock.json ./
 # `npm ci` 精确按 lockfile 装，不解析出第二套依赖树。
 # 构建需要 devDependencies（next build 本身要用 dev 里的构建期依赖），
 # 所以这里不用 --omit=dev。
-RUN npm ci --include=optional
+# NPM_REGISTRY 是构建期旋钮：这台机器的 registry 镜像出现过「免费节点当前繁忙」，
+# 一次 `npm ci` 在容器构建里实测跑了 40 分钟仍未完成。重建路径如果只能连一个源，
+# 故障现场就不是重建，是等待。默认走官方源，需要换源时 compose 侧传 ANET_NPM_REGISTRY。
+# --mount=type=cache 让 npm 缓存在多次构建之间复用：同一棵树重复构建不必重新下载。
+ARG NPM_REGISTRY=https://registry.npmjs.org
+RUN --mount=type=cache,id=anet-npm,target=/root/.npm \
+    npm ci --include=optional --prefer-offline --registry="${NPM_REGISTRY}"
 
 # 依赖就位后再拷源码：build 层只在源码变化时重跑。
 COPY . .

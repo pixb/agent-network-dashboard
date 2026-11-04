@@ -36,6 +36,10 @@ chk "compose 传入 SOURCE_REV（换版本 = 换提交，记录在 compose 侧�
   "grep -q 'SOURCE_REV:' $CF"
 chk "构建上下文 = 仓库根（../..），根目录 .dockerignore 才生效" \
   "grep -q 'context: ../..' $CF"
+chk "构建期 npm 源是可换的 ARG（镜像源十分钟不出货时不用改 Dockerfile；实测一次 npm ci 跑了 40 分钟）" \
+  "grep -q 'ARG NPM_REGISTRY=' $DS && grep -q 'NPM_REGISTRY:' $CF"
+chk "npm 缓存跨构建复用（--mount=type=cache，同一棵树重复构建不重新乍载）" \
+  "grep -q -- '--mount=type=cache' $DS"
 chk "非 root 运行" "grep -q '^USER ' $DS"
 chk "CMD 跑包声明的入口 bin/start.js" "grep -q 'bin/start.js' $DS"
 chk "监听地址用 HOST（bin/start.js 优先级是 HOST > HOSTNAME > 默认）" \
@@ -94,7 +98,7 @@ chk "COMMHUB_URL 显式声明（逐字符敏感：COMM_HUB_URL 会静默连默�
   "grep -q '^COMMHUB_URL=' $ENVT"
 absent "模板里不出现 COMM_HUB_URL 这个错名字" \
   "grep -q '^COMM_HUB_URL=' $ENVT"
-chk "DASHBOARD_PASSWORD 显式声明（容器内无 ~/.config/anet/cli.json，缺它则登录口令回落成空串，谁都登不进去，而 /login 照常 200）" \
+chk "DASHBOARD_PASSWORD 显式声明（只影响 dashboard 口令通路；网页登录走 /api/auth/v3 由 hub 校验。回落读 ~/.anet/config.json，容器里没有 → 该通路不可用）" \
   "grep -q '^DASHBOARD_PASSWORD=' $ENVT"
 
 # 值形状扫描：模板只允许空值与带 REPLACE_ME 的占位符。

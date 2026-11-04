@@ -26,6 +26,8 @@ services:
         # 部署身份：本次部署的 pixb 提交。写进镜像 label，`docker inspect` 可查。
         # 换版本 = 改这里（或直接 `git -C ../ checkout <sha>` 后重建），随后 up -d --build。
         SOURCE_REV: ${ANET_DASHBOARD_SOURCE_REV:-unknown}
+        # 构建期 npm 源。镜像源慢/繁忙时换这一个，不用改 Dockerfile。
+        NPM_REGISTRY: ${ANET_NPM_REGISTRY:-https://registry.npmjs.org}
     image: anet-dashboard:${ANET_DASHBOARD_IMAGE_TAG:-pixb}
     container_name: anet-dashboard
     restart: unless-stopped

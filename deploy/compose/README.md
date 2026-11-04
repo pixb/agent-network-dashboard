@@ -116,6 +116,18 @@ clone 这个仓库 + 重建镜像 **不会**恢复任何生产数据。要备份
 
 compose 路径不挂任何数据卷，正是为了让这一点显式：没有卷 = 没有隐藏状态。
 
+## 构建期 npm 源（重建路径上的实测瓶颈）
+
+`Dockerfile.source` 里 `npm ci` 走 `ARG NPM_REGISTRY`（默认官方源），compose 侧对应
+`ANET_NPM_REGISTRY`。这条旋钮是实测逼出来的：本机 registry 镜像出现过
+「免费节点当前繁忙」，一次容器内 `npm ci` 跑了 40 分钟仍未完成 —— 重建路径如果只能
+连一个源，故障现场就不是重建，是等待。npm 缓存用 `--mount=type=cache` 跨构建复用，
+同一棵树重复构建不必重新下载。
+
+```bash
+ANET_NPM_REGISTRY=https://<你可用的镜像源> docker compose build
+```
+
 ## 启动
 
 ```bash
