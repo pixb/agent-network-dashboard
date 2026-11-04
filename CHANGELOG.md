@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.347 — 2026-11-04
+
+### 说明与错误提示的字号提到可读档
+
+- 节点设置的说明与错误（含「Hub 不可达」「supervisor 不在位」）、附件数量上限提示、军团列表说明、需求详情里的父级规则说明，共 8 处由 10px 提到 11px。
+- 密集信息位（计数、时间戳、徽标、按钮标签）仍保持 10px——与客户端一致：它的 token 里也留了 10px 给这类位置。
+
 ## 0.6.4-preview.346 — 2026-11-04
 
 ### 发布与验收链路的两处加固（用户无感）
