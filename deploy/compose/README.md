@@ -11,6 +11,7 @@
   不再是日常路径；需要对外发布时（未来若有外部用户）才重新启用，且仍只从 main 发。
 
 现网现状（2026-11-04 实测，**不是 pm2**）：dashboard 跑在 compose 容器里。
+2026-11-04 19:11 起，该容器跑的是本文件的源码构建产物（pixb `71c895c`）；装发布包那条降级为**回滚件的权威描述**，现网回滚标签 `anet-dashboard:rollback-20261104`（preview.56）。
 
 ```
 docker ps → anet-dashboard-1   镜像 anet-dashboard:compose   宿主 3200 -> 容器 3000
@@ -27,7 +28,7 @@ docker history → 镜像里烘的是 **npm 发布包 0.6.3-preview.56**（ARG D
 
 | 路径 | 定位 | 部署身份 | 权威副本 |
 |---|---|---|---|
-| compose 容器 `anet-dashboard-1` | **现网在跑的就是这条**（宿主 `:3200`） | 镜像（当前 = 烘进去的 preview.56，无提交 label） | `agent-network/deploy/compose/compose.yaml`（本轮补入 git） |
+| compose 容器 `anet-dashboard-1` | **现网在跑的就是这条**（宿主 `:3200`） | 镜像（现网在跑 = pixb 源码构建产物（2026-11-04 19:11 起，提交 `71c895c` 进 label）
 | compose + `Dockerfile.source`（本目录） | **主路径（pixb 源码构建）** | 镜像 label `org.opencontainers.image.revision` | 本目录 |
 | pm2 + 固化安装 | 历史路径（vNN 目录名当身份） | 运行时目录名（对应某源码提交） | `agent-network` 仓库 `deploy/dashboard/` |
 | compose + `Dockerfile` | 装发布包，= 现网镜像的可复现描述 | `build.args.VERSION` | 本目录 |

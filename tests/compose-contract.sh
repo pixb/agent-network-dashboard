@@ -168,6 +168,8 @@ fi
 echo "── 恢复文档回答六个问题里的关键几条"
 chk "README 说清现网跑哪条、主路径是哪条" \
   "grep -qi 'pm2' $DIR/README.md && grep -qi 'pixb' $DIR/README.md"
+chk "README 记录现网在跑的提交与回滚标签名（覆盖标签前先 docker tag 留件）" \
+  "grep -q rollback-20261104 $DIR/README.md && grep -qiE \"现网在跑|现网现状\" $DIR/README.md"
 chk "README 给出「真实生效」的证明方式（pm2 script path / docker inspect revision）" \
   "grep -qE 'pm2 describe|script path' $DIR/README.md && grep -q 'org.opencontainers.image.revision' $DIR/README.md"
 chk "README 说明 dashboard 无状态、要备份的是 hub 侧数据" \
