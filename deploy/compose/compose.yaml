@@ -49,7 +49,9 @@ services:
     healthcheck:
       # /login 是公开页，200 才算就绪。
       # 不要用 /api/hub/health：无会话返回 401，`curl -f` 判不健康（实测）。
-      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      # 探针端口取 process.env.PORT（compose 里下面 environment 给了 PORT=3001）。
+# 写死端口 = 改端口跑时服务正常而健康状态恒为 unhealthy（2026-11-04 演练实测）。
+      test: ["CMD", "node", "-e", "const p=process.env.PORT||3001; fetch('http://127.0.0.1:'+p+'/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
       interval: 30s
       timeout: 5s
       start_period: 30s

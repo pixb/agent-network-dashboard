@@ -36,13 +36,22 @@ COPY package.json package-lock.json ./
 # 故障现场就不是重建，是等待。默认走官方源，需要换源时 compose 侧传 ANET_NPM_REGISTRY。
 # --mount=type=cache 让 npm 缓存在多次构建之间复用：同一棵树重复构建不必重新下载。
 ARG NPM_REGISTRY=https://registry.npmjs.org
+# electron / electron-builder 是 devDependency（移动端外壳与打包工具链），npm ci 默认连 dev 一起装，
+# 而 electron 的 postinstall 会去下载二进制包。2026-11-04 实测：这一步 TLS 断流
+# （RequestError: socket hang up at node_modules/electron/install.js）直接把构建判死，
+# 慢的时候是 40 分钟不起。镜像里永不启动 electron，跳过它的二进制下载是纯收益。
+ENV ELECTRON_SKIP_BINARY_DOWNLOAD=1
 RUN --mount=type=cache,id=anet-npm,target=/root/.npm \
     npm ci --include=optional --prefer-offline --registry="${NPM_REGISTRY}"
 
 # 依赖就位后再拷源码：build 层只在源码变化时重跑。
 COPY . .
 ENV NEXT_TELEMETRY_DISABLED=1
-RUN npm run build
+# 构建产物就位后把 dev 依赖剪掉：next/react/react-dom 都在 dependencies 里（量过），
+# `next start` 运行时不需要 electron / electron-builder / @capacitor/* / @playwright/test。
+# 不剪的话这些全进最终镜像 —— 现网那条装发布包的路径用 --omit=dev，镜像 ~250MB；
+# 本路径此前整树拷贝，构建出来 2.9GB。
+RUN npm run build && npm prune --omit=dev
 
 FROM ${NODE_IMAGE}
 
@@ -76,8 +85,11 @@ EXPOSE 3001
 # 就绪探针用 /login（公开页）。
 # 不要用 /api/hub/health：无会话时返回 401，`curl -f` 把「活着」判成「不健康」
 # （2026-11-04 实测 /login=200、/api/hub/health=401）。
+# 探针端口从 process.env.PORT 取，不写死：写死 3001 时，任何改端口的运行方式
+# （演练用 3099 实测）服务正常而健康状态恒为 unhealthy，有 service_healthy 依赖门时
+# 会把依赖方一起锁死。start-period 60s：Next 生产启动 + 首次 /login 编译需要时间。
 HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
-  CMD node -e "fetch('http://127.0.0.1:3001/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+  CMD node -e "const p=process.env.PORT||3001; fetch('http://127.0.0.1:'+p+'/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
 
 # 运行时环境变量（COMMHUB_URL / DASHBOARD_PASSWORD 等）只声明名字，值由 env_file 提供。
 # 跑 bin/start.js = 包声明的入口（`npx next start`，cwd=包目录），
