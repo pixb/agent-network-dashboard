@@ -1,0 +1,58 @@
+# Dashboard 常驻服务的 compose 定义（可重建路径）。
+#
+# 现状说明（不要误读）：生产上 dashboard 目前由 **pm2** 托管
+# （`deploy/dashboard/dash-start.sh` + `ecosystem.config.cjs`，README 里有实测链）。
+# 本文件不是「当前在跑的东西」，是**空机器复现**用的权威定义：
+# 任一台机器被清空后，只靠仓库 + 这个文件 + env_file 指向的密钥来源，
+# 应该能把它重新跑起来。两条路径并存时以 pm2 那条为准，切换要显式评审。
+#
+# 六个恢复问题在这个文件里的答案：
+#   1) 常驻服务怎么起 → 本文件 `restart: unless-stopped` + 镜像 CMD
+#   2) 反代/端口写在哪 → network_mode: host + HOSTNAME=127.0.0.1 + PORT=3001
+#      （Caddy :3000 / frpc :3100 反代到 127.0.0.1:3001，见 README）
+#   3) 密钥从哪来 → env_file，变量名在 dashboard.env.template，值不入库
+#   4) 怎么换版本 → 只改 build.args.VERSION，随后 `docker compose up -d --build`
+#   5) 怎么回滚 → VERSION 改回旧值重建（发布包不可变，旧版本永远装得到）
+#   6) 哪些状态不在这里 → 登录用户/token 数据在 hub 侧，dashboard 无状态；
+#      真正要备份的是 hub 的 SQLite，不是这里
+services:
+  anet-dashboard:
+    build:
+      context: ..
+      dockerfile: deploy/compose/Dockerfile
+      args:
+        # 与 hub / anet / agent-node 的成对发布一样：对外产物只从发布分支出。
+        # 这个版本号就是「部署了哪个 dashboard」的唯一记录，换版本只改这里。
+        VERSION: "0.9.0-preview.56"
+        PACKAGE: "@sleep2agi/agent-network-dashboard"
+    image: anet-dashboard:${ANET_DASHBOARD_IMAGE_TAG:-latest}
+    container_name: anet-dashboard
+    restart: unless-stopped
+    # 容器里跑的是 bin/start.js，它只把 SIGINT 转发给子进程，不处理 SIGTERM。
+    # `docker stop` 发的正是 SIGTERM，所以由 init 接管 PID 1 做信号转发与孤儿回收。
+    init: true
+    stop_grace_period: 30s
+    # host 网络，与 hub 的 compose 一致，且是端口契约的一部分：
+    # Caddy 与 frpc 都按 127.0.0.1:3001 反代。桥接网络 + ports 映射会改变
+    # 这条契约（源地址变成 docker bridge），排查时看不到真实客户端地址。
+    network_mode: host
+    env_file:
+      - ${ANET_DASHBOARD_ENV_FILE:-dashboard.env}
+    environment:
+      # 名字在这里钉住（值在 env_file）。留空 = 用镜像/代码内默认值，
+      # 只适用于单 hub 开发机；多 hub 场景下必须显式设 COMMHUB_URL。
+      COMMHUB_URL: ${COMMHUB_URL:-}
+      NEXT_TELEMETRY_DISABLED: "1"
+    healthcheck:
+      # /login 是公开页，200 才算就绪。
+      # 不要用 /api/hub/health：无会话返回 401，`curl -f` 判不健康（实测）。
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:3001/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"]
+      interval: 30s
+      timeout: 5s
+      start_period: 30s
+      retries: 3
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
