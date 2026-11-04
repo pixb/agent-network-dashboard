@@ -24,12 +24,17 @@ Format: chronological release notes; each entry lists what *changed for a user* 
     「网络消息 0 行 + 收件箱 42 行」这个真实形状下搜索框会整块消失）。
   - `hub-error-propagation.test.mjs` 的空态守卫同步放宽到合并后的列表：继续写死 `messages.length`
     会在「读失败 + 收件箱有行」时渲染 EmptyState，正是该测试要拦的「把读失败伪装成很安静」。
-- **dashboard 的 compose 部署定义**：`deploy/compose/{Dockerfile,compose.yaml,dashboard.env.template,README.md}`。
+- **dashboard 的 compose 部署定义**：`deploy/compose/{Dockerfile,Dockerfile.source,compose.yaml,dashboard.env.template,README.md}`。
   背后可重建规则的缺口是：compose 定义只存在于运行机上，仓库里没有权威副本（pm2 那条有）。
-  钉住的约定：基础镜像 `node:24-slim`（#1272 lockfile 主版本一致）、版本由 `ARG VERSION` 传入且记录在
-  compose 的 build args、`--include=optional`、非 root、**只监听 127.0.0.1:3001**（`HOSTNAME` +
-  `network_mode: host`，不用 `ports:`）、就绪探针用 `/login` 不用 `/api/hub/health`（后者无会话时 401，
-  实测）、`init: true`（`bin/start.js` 不转发 SIGTERM）、CMD 跑 `bin/start.js`（本包无 standalone `server.js`）。
+  **分支模型同时重新定义**：`pixb` 是我们自己的生产分支、只在本地部署、**不发 npm**；`main`
+  只作为上游同步分支。于是部署身份从「npm 版本号」改成「pixb 的源码提交」：主路径是
+  `Dockerfile.source`（`npm ci` + `npm run build`，提交写进镜像 label
+  `org.opencontainers.image.revision`）；`Dockerfile`（装发布包）保留作现网形态的权威描述。
+  钉住的约定：基础镜像 `node:24-slim`（#1272 lockfile 主版本一致）、`--include=optional`、非 root、
+  **只监听 127.0.0.1:3001**（源码路径用 `HOST`，因为 bin/start.js 的优先级是 HOST > HOSTNAME > 默认；
+  配 `network_mode: host`，不用 `ports:`）、就绪探针用 `/login` 不用 `/api/hub/health`（后者无会话时 401，
+  实测）、`init: true`（bin/start.js 只转发 SIGINT，docker stop 发的是 SIGTERM）、CMD 跑 `bin/start.js`
+  （本包无 standalone `server.js`）、最终镜像拷完整工作树（next.config.ts 无 standalone 输出）。
   `DASHBOARD_PASSWORD` 在容器里是**必设项**：代码回落读 `~/.config/anet/cli.json`，容器里无该文件
   → 口令为空串 → 谁都登不进去，而 `/login` 照常 200。env 模板只记录变量名与占位符，不含密钥值与真实地址。
 - 新增 `/messages/inbox`（「我的收件箱」）：读 Hub 的 `user_inbox`（`GET /api/messages?scope=user`），按发件节点分组，带未读（acked=0）提示与 kind 计数。

@@ -17,15 +17,16 @@
 #      真正要备份的是 hub 的 SQLite，不是这里
 services:
   anet-dashboard:
+    # 主路径：从 pixb 源码构建。**我们不发 npm**，所部署身份就是源码提交，
+    # 不是 npm 版本号（现网旧路径是「装发布包 + 固化运行时目录」，见 README）。
     build:
-      context: ..
-      dockerfile: deploy/compose/Dockerfile
+      context: ../..
+      dockerfile: deploy/compose/Dockerfile.source
       args:
-        # 与 hub / anet / agent-node 的成对发布一样：对外产物只从发布分支出。
-        # 这个版本号就是「部署了哪个 dashboard」的唯一记录，换版本只改这里。
-        VERSION: "0.9.0-preview.56"
-        PACKAGE: "@sleep2agi/agent-network-dashboard"
-    image: anet-dashboard:${ANET_DASHBOARD_IMAGE_TAG:-latest}
+        # 部署身份：本次部署的 pixb 提交。写进镜像 label，`docker inspect` 可查。
+        # 换版本 = 改这里（或直接 `git -C ../ checkout <sha>` 后重建），随后 up -d --build。
+        SOURCE_REV: ${ANET_DASHBOARD_SOURCE_REV:-unknown}
+    image: anet-dashboard:${ANET_DASHBOARD_IMAGE_TAG:-pixb}
     container_name: anet-dashboard
     restart: unless-stopped
     # 容器里跑的是 bin/start.js，它只把 SIGINT 转发给子进程，不处理 SIGTERM。
