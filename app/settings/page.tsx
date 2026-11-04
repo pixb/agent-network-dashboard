@@ -18,14 +18,14 @@
 // 边框（信息卡不描边）、字重上限 600、选中态用中性 rowActive 而不是
 // 强调色块。
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useAnetConfig, useHealth } from '../lib/hooks';
 import { applyTheme } from '../components/ThemeSwitcher';
 import { DASHBOARD_VERSION } from '../lib/version';
 import { clearPrivateChatStorage } from '../lib/chat-outbox';
 import { SETTINGS_SECTIONS, SETTINGS_LINKS, SETTINGS_THEMES } from '../lib/settings-model';
-import { NOTIFY_STORAGE_KEY, readNotifyPreference, writeNotifyPreference } from '../lib/desktop-notify';
+import { readNotifyPreference, writeNotifyPreference } from '../lib/desktop-notify';
 
 function GroupHeading({ id, label }: { id: string; label: string }) {
   return (
@@ -38,6 +38,22 @@ function GroupHeading({ id, label }: { id: string; label: string }) {
   );
 }
 
+// 通知开关存在 localStorage；用 useSyncExternalStore 读取，避免「effect 里 setState」
+// 带来的级联渲染（lint 会报 react-hooks/set-state-in-effect），SSR 快照固定 false。
+const notifyListeners = new Set<() => void>();
+function subscribeNotify(listener: () => void) {
+  notifyListeners.add(listener);
+  return () => { notifyListeners.delete(listener); };
+}
+function notifySnapshot(): boolean {
+  return readNotifyPreference(typeof window !== 'undefined' ? window.localStorage : null);
+}
+function setNotifyPreference(enabled: boolean): boolean {
+  const ok = writeNotifyPreference(typeof window !== 'undefined' ? window.localStorage : null, enabled);
+  for (const listener of notifyListeners) listener();
+  return ok;
+}
+
 export default function SettingsPage() {
   const { config } = useAnetConfig();
   const { health, error: healthError } = useHealth();
@@ -45,9 +61,8 @@ export default function SettingsPage() {
   // hydration 不匹配：服务端渲染 cyber，客户端首帧读 localStorage 得到 light。
   // 挂载后再同步到真实选择（这时已经 hydrate 完，不会打架）。
   const [theme, setTheme] = useState<string>('cyber');
-  const [notifyOn, setNotifyOn] = useState(false);
   const [notifyHint, setNotifyHint] = useState('');
-  useEffect(() => { setNotifyOn(readNotifyPreference(window.localStorage)); }, []);
+  const notifyOn = useSyncExternalStore(subscribeNotify, notifySnapshot, () => false);
   useEffect(() => {
     try {
       const saved = localStorage.getItem('anet-theme');
@@ -276,15 +291,13 @@ export default function SettingsPage() {
                 aria-pressed={notifyOn}
                 onClick={async () => {
                   if (notifyOn) {
-                    writeNotifyPreference(window.localStorage, false);
-                    setNotifyOn(false);
+                    setNotifyPreference(false);
                     return;
                   }
                   if (!('Notification' in window)) { setNotifyHint('当前浏览器不支持通知'); return; }
                   const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
                   if (permission !== 'granted') { setNotifyHint('未获得授权，通知保持关闭'); return; }
-                  writeNotifyPreference(window.localStorage, true);
-                  setNotifyOn(true);
+                  setNotifyPreference(true);
                   setNotifyHint('');
                 }}
                 className={`inline-flex min-h-11 items-center rounded-lg px-3 text-xs transition-colors ${
