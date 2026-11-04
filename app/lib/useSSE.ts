@@ -77,6 +77,7 @@ function connectChannel(url: string) {
         broadcastStatus(ch);
         return;
       }
+      ch.probeAbort = null; // 探测结束：留着它会让后续 needsConnect 永远为 false
       ch.supported = true;
       const es = new EventSource(url);
       ch.es = es;
@@ -102,9 +103,17 @@ function connectChannel(url: string) {
     })
     .catch(() => {
       if (ch.subscribers.size === 0) return;
+      ch.probeAbort = null;
       ch.connected = false;
       ch.supported = false;
       broadcastStatus(ch);
+      // 探测失败（典型：断网、Hub 重启）此前只改状态、不重试，SSE 会一直死到刷新页面。
+      // 与 onerror 同一套重连节流：清掉旧定时器再排一次，避免多处同时排。
+      if (ch.reconnectTimer) clearTimeout(ch.reconnectTimer);
+      ch.reconnectTimer = setTimeout(() => {
+        ch.reconnectTimer = null;
+        if (ch.subscribers.size > 0) connectChannel(url);
+      }, ch.reconnectDelay);
     });
 }
 
