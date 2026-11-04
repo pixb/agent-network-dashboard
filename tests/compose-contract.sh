@@ -9,15 +9,17 @@
 #
 # 覆盖三组：镜像与版本钉法 / 端口与探针 / 环境变量名字对齐 + 泄密扫描 + 文件可解析。
 set -euo pipefail
+SELF="$(cd "$(dirname "$0")" && pwd)/$(basename "$0")"   # 脚本会 cd，之后 $0 不再指向自己
 cd "$(dirname "$0")/.."
 fail=0
+ran_lines=""   # 执行过的 chk/absent 声明行号（末尾去重比对）
 DIR=deploy/compose
 DF=$DIR/Dockerfile            # 现网形态：装发布包
 DS=$DIR/Dockerfile.source     # 主路径：pixb 源码构建
 CF=$DIR/compose.yaml
 ENVT=$DIR/dashboard.env.template
-chk() { if eval "$2"; then echo "  ok: $1"; else echo "  MISSING: $1" >&2; fail=1; fi; }
-absent() { if ! eval "$2"; then echo "  ok: $1"; else echo "  FORBIDDEN: $1" >&2; fail=1; fi; }
+chk() { ran_lines="$ran_lines ${BASH_LINENO[0]}"; if eval "$2"; then echo "  ok: $1"; else echo "  MISSING: $1" >&2; fail=1; fi; }
+absent() { ran_lines="$ran_lines ${BASH_LINENO[0]}"; if ! eval "$2"; then echo "  ok: $1"; else echo "  FORBIDDEN: $1" >&2; fail=1; fi; }
 for f in "$DF" "$DS" "$CF" "$ENVT" "$DIR/README.md"; do
   [ -f "$f" ] || { echo "缺文件: $f" >&2; fail=1; }
 done
@@ -26,6 +28,8 @@ done
 echo "── 主路径：源码构建（不发 npm，部署身份 = pixb 提交）"
 chk "基础镜像主版本 = lockfile 验证用的 Node 主版本（node:24，#1272）" \
   "grep -q 'ARG NODE_IMAGE=node:24' $DS"
+chk "基础镜像钉了 digest（只写 tag 时同一提交不同日子构出不同运行时）" \
+  "grep -qE 'ARG NODE_IMAGE=node:24-slim@sha256:[0-9a-f]{64}' $DS"
 chk "依赖按 lockfile 精确安装（npm ci，不解析出第二套依赖树）" \
   "grep -q 'npm ci' $DS"
 chk "镜像内跑源码构建（npm run build），不是去 registry 取产物" \
@@ -171,4 +175,16 @@ chk "README 说明 dashboard 无状态、要备份的是 hub 侧数据" \
 chk "README 写明分支模型（pixb 生产 / main 只同步 / 不发 npm）" \
   "grep -qiE '不发 npm|不发.*npm' $DIR/README.md"
 
+# 自检（本轮踩过两次）：`chk "描述" \` 与它的参数行是一对；中间插进别的内容会被 bash 续行
+# 拼接拆开，chk 收到的是字符串 "chk"，检查静默失效 —— 输出全绿而什么都没测。
+# 声明条数必须等于真正执行过的条数。
+declared="$(grep -c '^[[:space:]]*\(chk\|absent\) "' "$SELF" || true)"
+executed="$(for n in $ran_lines; do echo "$n"; done | sort -u | grep -c '^[0-9]')";
+if [ "${declared:-0}" != "${executed:-0}" ]; then
+  echo "  FAIL: 声明 $declared 条检查，真正执行过的声明行只有 $executed 条（chk 被拆开 = 假绿）" >&2
+  echo "  FAIL: 声明 $declared 条检查，真正执行过的声明行只有 $executed 条（chk 被拆开 = 假绿）" >&2
+  fail=1
+else
+  echo "  ok: 声明的 $declared 条检查全部真正执行（无拆开的 chk 假绿）"
+fi
 [ "$fail" = 0 ] && echo "compose 契约: PASS" || { echo "compose 契约: FAIL"; exit 1; }

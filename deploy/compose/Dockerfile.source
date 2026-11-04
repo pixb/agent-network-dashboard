@@ -18,7 +18,11 @@
 # 3. 部署身份 = 源码提交，写进镜像 label，不靠 npm 版本号。
 #    `SOURCE_REV` 是构建时由 compose 传入的 pixb 提交；label 让「在跑的是哪份代码」
 #    可以用 `docker inspect` 查出来，不必去问某台机器上装的是哪个目录。
-ARG NODE_IMAGE=node:24-slim
+# 基础镜像钉 tag+digest（与 parent 仓库 Dockerfile.dashboard 同一个门，#1740）：
+# 只写 `node:24-slim` 时，同一个源码提交在不同日子会构建出不同的运行时，
+# 「部署身份 = 源码提交」这句话就不成立了。digest 取自本机拉取时的 RepoDigests。
+# 需要换基础镜像时显式覆盖 ARG NODE_IMAGE（换版本是一个决定，不是一个意外）。
+ARG NODE_IMAGE=node:24-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c
 FROM ${NODE_IMAGE} AS build
 
 WORKDIR /src
