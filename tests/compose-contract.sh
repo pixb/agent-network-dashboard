@@ -38,6 +38,12 @@ chk "npm ci 跳过 electron 二进制下载（electron 是 devDep，postinstall 
   "grep -q 'ELECTRON_SKIP_BINARY_DOWNLOAD=1' deploy/compose/Dockerfile.source"
 chk "构建后剪掉 dev 依赖（next 在 dependencies 里，next start 不需要 electron/capacitor/playwright）" \
   "grep -q 'npm prune --omit=dev' deploy/compose/Dockerfile.source"
+chk "镜像里预置 \$HOME/.anet/config.json（缺了它认证请求 ENOENT 500，现网装包路径早就有）" \
+  "grep -q '.anet/config.json' deploy/compose/Dockerfile.source && grep -q 'useradd' deploy/compose/Dockerfile.source"
+chk "HOME 显式写死（config.json 的位置不依赖运行方式）" \
+  "grep -q 'ENV HOME=' deploy/compose/Dockerfile.source"
+chk "预置的 config.json 里不含 token / 真实主机（只有中性 hub 默认地址）" \
+  "! grep -qE 'utok_|atok_|ntok_|192\\.168' deploy/compose/Dockerfile.source"
 chk "NPM_REGISTRY 是 ARG 且有默认值（换源不改判据）" \
   "grep -q 'ARG NPM_REGISTRY=https://registry.npmjs.org' deploy/compose/Dockerfile.source"
 chk "npm 缓存跨构建复用（--mount=type=cache）" \

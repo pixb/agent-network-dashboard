@@ -70,8 +70,23 @@ WORKDIR /app
 COPY --from=build /src ./
 
 # 不以 root 跑常驻服务。
-RUN useradd -r -u 10001 dashboard && chown -R dashboard:dashboard /app
+# 非 root + `$HOME/.anet/config.json` 必须同时到位。
+#
+# config.json 缺失时 dashboard 在认证请求上直接 ENOENT 500（2026-10-08 记过，
+# 2026-11-04 部署演练里又撞到一次：日志 `ENOENT ... /home/dashboard/.anet/config.json`）。
+# 现网那条装发布包的路径（parent 仓库 Dockerfile.dashboard）早就在镜像里预置了这份文件，
+# 源码构建路径此前没有 —— 部署到现网形状（无 volume）就是 500。
+#
+# 内容是中性的 hub 默认地址；真实地址由 compose.yaml 的 COMMHUB_URL 环境变量给
+# （env 压过 config.json，已实测）。这里不写任何 token 或主机地址。
+RUN useradd -r -u 10001 -d /home/dashboard dashboard \
+    && mkdir -p /home/dashboard/.anet \
+    && printf '{"hub":"http://127.0.0.1:9200"}\n' > /home/dashboard/.anet/config.json \
+    && chown -R dashboard:dashboard /home/dashboard /app
 USER dashboard
+# HOME 显式写死：容器里 HOME 由镜像的 passwd 条目推导，写死后「config.json 在哪」
+# 不依赖运行方式（docker run / compose / -u 覆盖 uid 都一样可诊断）。
+ENV HOME=/home/dashboard
 
 # 监听地址契约：只绑 127.0.0.1。
 # bin/start.js 的优先级是 HOST > HOSTNAME > 默认，所以这里用 HOST ——
