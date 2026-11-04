@@ -25,6 +25,7 @@ import { applyTheme } from '../components/ThemeSwitcher';
 import { DASHBOARD_VERSION } from '../lib/version';
 import { clearPrivateChatStorage } from '../lib/chat-outbox';
 import { SETTINGS_SECTIONS, SETTINGS_LINKS, SETTINGS_THEMES } from '../lib/settings-model';
+import { NOTIFY_STORAGE_KEY, readNotifyPreference, writeNotifyPreference } from '../lib/desktop-notify';
 
 function GroupHeading({ id, label }: { id: string; label: string }) {
   return (
@@ -44,6 +45,9 @@ export default function SettingsPage() {
   // hydration 不匹配：服务端渲染 cyber，客户端首帧读 localStorage 得到 light。
   // 挂载后再同步到真实选择（这时已经 hydrate 完，不会打架）。
   const [theme, setTheme] = useState<string>('cyber');
+  const [notifyOn, setNotifyOn] = useState(false);
+  const [notifyHint, setNotifyHint] = useState('');
+  useEffect(() => { setNotifyOn(readNotifyPreference(window.localStorage)); }, []);
   useEffect(() => {
     try {
       const saved = localStorage.getItem('anet-theme');
@@ -255,6 +259,41 @@ export default function SettingsPage() {
                   </button>
                 ))}
               </div>
+            </div>
+          </section>
+
+          {/* ── 通知（对齐客户端 NotifySettings 的最小实现：默认关闭）── */}
+          <section id="notify" data-settings-group="notify" aria-labelledby="notify-heading" className="space-y-3 scroll-mt-6">
+            <GroupHeading id="notify" label="Notifications" />
+            <div className={cardClass}>
+              <h3 className="mb-2 text-sm font-semibold">桌面通知</h3>
+              <p className="mb-3 text-[11px] text-[var(--fg-dim)]">
+                页面在后台时，收到发给你的新消息会弹系统通知。默认关闭；开启需要浏览器授权，权限可随时在浏览器设置里撤销。
+              </p>
+              <button
+                type="button"
+                data-testid="settings-desktop-notify"
+                aria-pressed={notifyOn}
+                onClick={async () => {
+                  if (notifyOn) {
+                    writeNotifyPreference(window.localStorage, false);
+                    setNotifyOn(false);
+                    return;
+                  }
+                  if (!('Notification' in window)) { setNotifyHint('当前浏览器不支持通知'); return; }
+                  const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+                  if (permission !== 'granted') { setNotifyHint('未获得授权，通知保持关闭'); return; }
+                  writeNotifyPreference(window.localStorage, true);
+                  setNotifyOn(true);
+                  setNotifyHint('');
+                }}
+                className={`inline-flex min-h-11 items-center rounded-lg px-3 text-xs transition-colors ${
+                  notifyOn ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'bg-[var(--bg-elevated)] text-[var(--fg)] hover:bg-[var(--hover-tint)]'
+                }`}
+              >
+                {notifyOn ? '已开启 · 点击关闭' : '开启桌面通知'}
+              </button>
+              {notifyHint && <p role="status" className="mt-2 text-[11px] text-[var(--warning)]">{notifyHint}</p>}
             </div>
           </section>
 

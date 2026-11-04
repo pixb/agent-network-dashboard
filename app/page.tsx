@@ -10,6 +10,20 @@ import { TopoGraph } from './components/TopoGraph';
 // changes (SWR structural sharing / health object / rare rename state),
 // so a memo wrapper skips the redraw entirely on unrelated state churn.
 const MemoTopoGraph = memo(TopoGraph);
+
+/** 桌面通知：仅在用户开启、已授权、且页面不可见时弹系统通知。
+ *  载荷在 SSE 事件的 data 里，这里摊平后交给纯函数判定。 */
+function maybeDesktopNotify(event: { type?: string; data?: unknown }) {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  if (!('Notification' in window)) return;
+  const data = (event.data && typeof event.data === 'object') ? event.data as Record<string, unknown> : {};
+  const message = notificationFor(
+    { ...data, type: event.type ?? '' },
+    { enabled: readNotifyPreference(window.localStorage), permission: Notification.permission, hidden: document.hidden },
+  );
+  if (!message) return;
+  try { new Notification(message.title, { body: message.body, tag: message.tag }); } catch { /* 权限被回收等情况忽略 */ }
+}
 import { AgentCard } from './components/AgentCard';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { NodesEmptyState as EmptyState } from './components/EmptyState';
@@ -18,6 +32,7 @@ import { useSessions, useHealth, useTasks, useStats } from './lib/hooks';
 import { useChatUnread } from './lib/chat-unread';
 import { isPinned, usePinVersion } from './lib/chat-pin';
 import { useSSE } from './lib/useSSE';
+import { notificationFor, readNotifyPreference } from './lib/desktop-notify';
 import { isOnline as presenceIsOnline, sseCountFor as presenceSseCountFor, presenceStatus } from './lib/presence';
 import { useSWRConfig } from 'swr';
 
@@ -53,6 +68,7 @@ export default function Dashboard() {
     url: '/api/hub/events',
     enabled: sseEnabled,
     onEvent: (event) => {
+      maybeDesktopNotify(event);
       // #84 (RFC-010 §3.4): node.renamed — revalidate the session list so the
       // new alias propagates instantly (TopoGraph + node grid re-render, the
       // avatar hue recomputes as a pure fn of alias) instead of waiting for
