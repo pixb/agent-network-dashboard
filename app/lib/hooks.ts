@@ -3,6 +3,7 @@ import { hydrateHubAvatars } from './avatars';
 import useSWR from 'swr';
 import { Session, Health, AnetConfig } from '../components/types';
 import { useNetworkId } from './network-context';
+import type { UserInboxRow } from './user-inbox';
 
 const fetcher = async (url: string) => {
   const res = await fetch(url);
@@ -139,4 +140,26 @@ export function useMessages(limit = 100) {
     { ...SWR_OPTIONS, keepPreviousData: true },
   );
   return { messages: data?.messages || [], error, isLoading, mutate };
+}
+
+/**
+ * 我的收件箱（hub 的 `user_inbox`）：`GET /api/messages?scope=user`。
+ *
+ * 这读的不是上面 useMessages 读的 `inbox` 表。hub 把「Agent 发给人的私信」
+ * （`send_desktop_message` → kind='agent_message'）和 hub 代发的通知
+ * （task_expired / task_orphan_suspected）只放进 user_inbox，它们既不在
+ * Messages 页的 inbox 里，也不算进聊天未读 ————私信在 Dashboard 上没有
+ * 任何显示面（2026-11-04 全仓 grep：app/ 下 `scope=user` 0 命中）。
+ * 读谁的收件箱由 hub 从 token 解出 userId，前端传不上去，也不需传。
+ */
+export function useUserInbox({ limit = 200, unackedOnly = false }: { limit?: number; unackedOnly?: boolean } = {}) {
+  const { networkId } = useNetworkId();
+  const query = new URLSearchParams({ limit: String(limit), scope: 'user' });
+  if (unackedOnly) query.set('unacked_only', '1');
+  const { data, error, isLoading, mutate } = useSWR<{ messages: UserInboxRow[] }>(
+    withNetwork(`/api/hub/messages?${query.toString()}`, networkId),
+    fetcher,
+    SWR_OPTIONS,
+  );
+  return { rows: data?.messages || [], error, isLoading, mutate };
 }

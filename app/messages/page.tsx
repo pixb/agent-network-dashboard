@@ -1,7 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { useMessages } from '../lib/hooks';
+import Link from 'next/link';
+import { useMessages, useUserInbox } from '../lib/hooks';
+import { countUnreadUserInbox } from '../lib/user-inbox';
 import { timeAgo, previewContent } from '../components/utils';
 import { formatWeChatTime } from '../lib/time';
 import { EmptyState } from '../components/EmptyState';
@@ -71,6 +73,9 @@ const HISTORY_PAGE = 30;
 export default function MessagesPage() {
   const [histLimit, setHistLimit] = useState(HISTORY_PAGE);
   const { messages, isLoading, error, mutate } = useMessages(histLimit);
+  // Only the unread count is read here; the list itself lives on /messages/inbox.
+  const { rows: inboxUnacked } = useUserInbox({ limit: 50, unackedOnly: true });
+  const inboxUnread = countUnreadUserInbox(inboxUnacked);
   // The hub returned a full page → assume more history exists beyond it.
   const hasOlder = messages.length >= histLimit;
   const loadingOlder = isLoading && messages.length > 0;
@@ -167,6 +172,18 @@ export default function MessagesPage() {
           >
             {filtered.length < messages.length ? `${filtered.length} / ${messages.length}` : messages.length}
           </span>
+          {/* 「我的收件箱」入口。刻意放在 `messages.length > 0` 的门之外：
+              节点私信走 hub 的 user_inbox，不进这一页读的 inbox 表，所以
+              「这一页一行消息都没有、收件箱里堆着 42 条私信」是真实生产形状
+              （net_b91c0d535346 实测）。把入口放进有消息才显示的 chrome 里，
+              等于最需要看到私信的那个人找不到入口。 */}
+          <Link
+            href="/messages/inbox"
+            className="text-xs text-[var(--fg-muted)] hover:text-[var(--fg)] border border-[var(--border)]/50 px-2.5 py-1 rounded-lg transition-colors shrink-0"
+            title="DMs nodes send you (user_inbox) are not part of this timeline"
+          >
+            {inboxUnread > 0 ? `Inbox · ${inboxUnread}` : 'Inbox'}
+          </Link>
           {filtered.length > 0 && (
             <button
               onClick={() => {

@@ -18,6 +18,16 @@ export async function GET(req: Request) {
   // 网络内换一个过滤条件，不是 #1636-P1 里被撤掉的「为空就放宽作用域」。
   const alias = (searchParams.get('alias') || '').trim();
   if (alias) qs.set('alias', alias);
+  // 收件箱（user_inbox）透传。hub 的 `scope=user` 分支就是「读我自己的收件箱」：
+  // Agent 发给人的私信（send_desktop_message → kind='agent_message'）与 hub
+  // 代发的通知（task_expired / task_orphan_suspected）全部落在这张表，而
+  // Messages 页读的 `inbox` 表没有它们 —— 所以此前 Dashboard 没有任何页面能
+  // 看到私信（2026-11-04 全仓 grep：app/ 下 `scope=user` 0 命中）。
+  const scope = (searchParams.get('scope') || '').trim();
+  if (scope) qs.set('scope', scope);
+  const kind = (searchParams.get('kind') || '').trim();
+  if (kind) qs.set('kind', kind);
+  if (searchParams.get('unacked_only') === '1') qs.set('unacked_only', '1');
   try {
     const res = await hubFetch(`/api/messages?${qs.toString()}`);
     // #1636 —— 401 原样上抛
