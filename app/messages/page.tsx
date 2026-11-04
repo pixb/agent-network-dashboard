@@ -4,6 +4,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import Link from 'next/link';
 import { useMessages, useUserInbox } from '../lib/hooks';
 import { countUnreadUserInbox } from '../lib/user-inbox';
+import { countInboxRowsInTimeline, inboxKindToType, inboxRowKey, mergeInboxIntoTimeline, userInboxRowToMessage } from '../lib/messages-merge';
+import { currentUserAlias } from '../lib/chat-unread-feed';
 import { timeAgo, previewContent } from '../components/utils';
 import { formatWeChatTime } from '../lib/time';
 import { EmptyState } from '../components/EmptyState';
@@ -22,6 +24,8 @@ interface MessageItem {
   content?: string;
   created_at?: string;
   task_id?: string;
+  /** 收件箱行带来的未读态（acked=0）。时间线原生行不用这个字段。 */
+  unread?: boolean;
   // #492 — attachments render below content. Both fields accepted so
   // this works whether the messages route is pre-parsed or forwards
   // the raw meta_json TEXT column.
@@ -34,6 +38,11 @@ const TYPE_COLORS: Record<string, string> = {
   message: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
   broadcast: 'bg-[var(--accent)]/10 text-[var(--accent-text)] border-[var(--accent)]/25',
   reply: 'bg-[var(--info)]/10 text-[var(--info)] border-[var(--info)]/25',
+  // 收件箱行合并进时间线后会出现的两种类型（user_inbox 的 kind 映过来的）。
+  // 不登记这两个色位，私信气泡会落到「unknown」的灰色默认样式上 ——
+  // 一眼看上去像一条不认识的系统行，而不是「节点在等你回答」。
+  dm: 'bg-[var(--accent)]/10 text-[var(--accent-text)] border-[var(--accent)]/25',
+  notice: 'bg-[var(--warning)]/10 text-[var(--warning)] border-[var(--warning)]/20',
 };
 
 function normalizeDate(value?: string) {
@@ -76,6 +85,17 @@ export default function MessagesPage() {
   // Only the unread count is read here; the list itself lives on /messages/inbox.
   const { rows: inboxUnacked } = useUserInbox({ limit: 50, unackedOnly: true });
   const inboxUnread = countUnreadUserInbox(inboxUnacked);
+  // 时间线里合并收件箱行。合并只在**前端**做：Hub 侧两张表各有自己的已读语义
+  // （inbox.acked 由节点消费、user_inbox.acked 由人 ack），让一条私信在 Hub 变成
+  // 两行就得到「一处已读一处未读」的红点口径分叉。
+  const { rows: inboxRows } = useUserInbox({ limit: histLimit });
+  const meRef = useRef<string | null>(null);
+  if (meRef.current === null && typeof window !== 'undefined') meRef.current = currentUserAlias() || '';
+  const timeline = useMemo(
+    () => mergeInboxIntoTimeline(messages, inboxRows, (row) => userInboxRowToMessage(row, meRef.current || '')),
+    [messages, inboxRows],
+  );
+  const inboxInTimeline = countInboxRowsInTimeline(timeline);
   // The hub returned a full page → assume more history exists beyond it.
   const hasOlder = messages.length >= histLimit;
   const loadingOlder = isLoading && messages.length > 0;
@@ -91,33 +111,33 @@ export default function MessagesPage() {
   const endRef = useRef<HTMLDivElement>(null);
   const didInitialScrollRef = useRef(false);
   useEffect(() => {
-    if (didInitialScrollRef.current || messages.length === 0) return;
+    if (didInitialScrollRef.current || timeline.length === 0) return;
     didInitialScrollRef.current = true;
     endRef.current?.scrollIntoView();
-  }, [messages.length]);
+  }, [timeline.length]);
   // #209 R33→R34: WeChat-style magnifier-toggle search hook (shared with /nodes).
   const searchCtl = useCollapsibleSearch({
     value: search,
     onChange: setSearch,
     placeholder: t('搜 别名(支持拼音)/内容，或 from:别名…', 'Search from/to (pinyin ok)/content, or from:alias…'),
     label: 'Search messages',
-    enabled: messages.length > 0,
+    enabled: timeline.length > 0,
   });
 
   const quickFromChips = useMemo(() => {
     const aliases = new Set<string>();
-    messages.forEach((message: MessageItem) => {
+    timeline.forEach((message: MessageItem) => {
       const alias = message.from_alias?.trim();
       if (alias && alias.toLowerCase() !== 'dashboard') aliases.add(alias);
     });
     return [...aliases].slice(0, 8);
-  }, [messages]);
+  }, [timeline]);
 
   const filtered = useMemo(() => {
     const query = search.trim().toLowerCase();
     const fromFilter = query.startsWith('from:') ? query.slice(5).trim() : '';
 
-    return [...messages]
+    return [...timeline]
       .filter((m: MessageItem) => {
         if (filterType && m.type !== filterType) return false;
         if (fromFilter) {
@@ -133,7 +153,7 @@ export default function MessagesPage() {
         return true;
       })
       .sort((a: MessageItem, b: MessageItem) => normalizeDate(a.created_at) - normalizeDate(b.created_at));
-  }, [filterType, messages, search, pinyinReady]);
+  }, [filterType, timeline, search, pinyinReady]);
 
   // Group messages by conversation pair
   const conversations = useMemo(() => {
@@ -168,10 +188,18 @@ export default function MessagesPage() {
               hiding. Same pattern as r88 /tasks chip. */}
           <span
             className="text-xs bg-blue-900/30 text-blue-400 px-2 py-0.5 rounded-full border border-blue-800/30 tabular-nums shrink-0"
-            title={filtered.length < messages.length ? `Showing ${filtered.length} of ${messages.length} messages` : undefined}
+            title={filtered.length < timeline.length ? `Showing ${filtered.length} of ${timeline.length} rows (network messages + your inbox)` : undefined}
           >
-            {filtered.length < messages.length ? `${filtered.length} / ${messages.length}` : messages.length}
+            {filtered.length < timeline.length ? `${filtered.length} / ${timeline.length}` : timeline.length}
           </span>
+          {inboxInTimeline > 0 && (
+            <span
+              className="text-xs bg-[var(--accent)]/10 text-[var(--accent-text)] px-2 py-0.5 rounded-full border border-[var(--accent)]/25 tabular-nums shrink-0"
+              title="Rows merged from your inbox (user_inbox): DMs from nodes and hub notices. The Messages list alone never shows them."
+            >
+              inbox {inboxInTimeline}{inboxUnread > 0 ? ` · ${inboxUnread} new` : ''}
+            </span>
+          )}
           {/* 「我的收件箱」入口。刻意放在 `messages.length > 0` 的门之外：
               节点私信走 hub 的 user_inbox，不进这一页读的 inbox 表，所以
               「这一页一行消息都没有、收件箱里堆着 42 条私信」是真实生产形状
@@ -213,7 +241,7 @@ export default function MessagesPage() {
           when there are no messages at all. Same r70-class fix carried
           across /nodes (r74) and /tasks (r75). When at least one message
           exists, the chrome reappears so users can still clear filters. */}
-      {messages.length > 0 && (
+      {timeline.length > 0 && (
       <div className="flex flex-wrap gap-3 mb-3">
         {/* R33: inline search input moved to the top-right magnifier
             toggle above. Type select + view-mode toggle + Debug stay. */}
@@ -227,6 +255,9 @@ export default function MessagesPage() {
           <option value="message">message</option>
           <option value="broadcast">broadcast</option>
           <option value="reply">reply</option>
+          {/* 合并进来的两类收件箱行。不给选项，就只能在全量里找它们。 */}
+          <option value="dm">dm (inbox)</option>
+          <option value="notice">notice (inbox)</option>
         </select>
         <div className="flex rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] p-0.5">
           {(['timeline', 'grouped'] as const).map(mode => (
@@ -296,8 +327,11 @@ export default function MessagesPage() {
       )}
 
       {/* 读失败不等于「没有消息」。旧实现忽略 error，把失败渲染成空态，
-          用户看到的是「这里很安静」而不是「没读到」。 */}
-      {error && messages.length > 0 && (
+          用户看到的是「这里很安静」而不是「没读到」。
+          门槛用合并后的列表：网络消息读失败、但收件箱行读到了时，时间线里只剩
+          上一次/部分数据 —— 这一幕必须明说「刷新失败」，不能默默把缺掉的网络
+          消息当成不存在。 */}
+      {error && timeline.length > 0 && (
         <div role="status" className="mb-3 flex items-center justify-between gap-3 rounded-xl bg-[var(--bg-secondary)] px-3 py-2 text-xs">
           <span className="text-[var(--fg-muted)]">刷新失败，下面是上一次读到的消息。</span>
           <button
@@ -310,11 +344,11 @@ export default function MessagesPage() {
         </div>
       )}
 
-      {isLoading && messages.length === 0 ? (
+      {isLoading && timeline.length === 0 ? (
         <div className="animate-pulse space-y-3">
           {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-20 rounded-2xl bg-[var(--bg-elevated)]/20" />)}
         </div>
-      ) : error && messages.length === 0 ? (
+      ) : error && timeline.length === 0 ? (
         <div role="alert" className="rounded-xl bg-[var(--bg-secondary)] p-6 text-center text-sm">
           <p className="font-medium text-[var(--danger)]">读不到消息</p>
           <p className="mt-1 text-xs text-[var(--fg-muted)]">
@@ -437,7 +471,13 @@ export default function MessagesPage() {
                             {fromAlias}
                           </span>
                           <span className="text-xs text-[var(--fg-muted)]">&rarr;</span>
-                          <span className="text-sm text-[#CBD5E1]">{message.to_alias || '--'}</span>
+                          <span className={`text-sm text-[#CBD5E1]`}>{message.to_alias || '--'}</span>
+                          {message.unread && (
+                            <span
+                              className="w-1.5 h-1.5 rounded-full bg-[var(--accent)] shrink-0"
+                              title="unread inbox row (acked=0 on the hub)"
+                            />
+                          )}
                           {message.priority === 'high' && <span className="text-xs text-[var(--danger)]">HIGH</span>}
                           <span className="ml-auto text-[11px] text-[var(--fg-muted)]">{message.created_at ? timeAgo(message.created_at) : '--'}</span>
                         </div>

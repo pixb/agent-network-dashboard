@@ -10,10 +10,36 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ### 节点发给人的私信，第一次在 Dashboard 上有了显示面
 
+- **收件箱行合并进 Messages 时间线，带已读操作**（`app/lib/messages-merge.ts` + `app/api/hub/messages-ack/`）。
+  下一条加了「我的收件箱」页，但两个日常动作仍然做不了：**没有已读能力**（hub 有
+  `POST /api/messages/ack`，dashboard 无代理、无按钮，存量未读永远是红的），以及**时间线里看不见私信**
+  （私信只进 user_inbox，而 Messages 页读的是 inbox：admin 实测 inbox 0 行 / user_inbox 42 行，
+  即这一页对管理员永远是空屏）。
+  - 合并只做在**前端**：hub 侧两张表各有已读语义（`inbox.acked` 由节点消费、`user_inbox.acked` 由人 ack）。
+    把私信在 hub 写成两行，就得到「一处已读一处未读」的红点口径分叉。
+  - 去重按带命名空间的 key（收件箱行加 `ui:` 前缀，常量 `INBOX_ROW_KEY_PREFIX`），**永不按内容去重**：
+    两表 id 都服务端生成、不可能相撞，按内容去重等于把两条无关消息当重复吞掉。
+  - 已读用 hub 的 `{agent}` 形式（按发信人整批标已读）：逐条 ack 清不完 522 条存量。
+  - 页面 chrome / 搜索 / 空态守卫一律改用合并后的列表（原来写死 `messages.length`，
+    「网络消息 0 行 + 收件箱 42 行」这个真实形状下搜索框会整块消失）。
+  - `hub-error-propagation.test.mjs` 的空态守卫同步放宽到合并后的列表：继续写死 `messages.length`
+    会在「读失败 + 收件箱有行」时渲染 EmptyState，正是该测试要拦的「把读失败伪装成很安静」。
+- **dashboard 的 compose 部署定义**：`deploy/compose/{Dockerfile,compose.yaml,dashboard.env.template,README.md}`。
+  背后可重建规则的缺口是：compose 定义只存在于运行机上，仓库里没有权威副本（pm2 那条有）。
+  钉住的约定：基础镜像 `node:24-slim`（#1272 lockfile 主版本一致）、版本由 `ARG VERSION` 传入且记录在
+  compose 的 build args、`--include=optional`、非 root、**只监听 127.0.0.1:3001**（`HOSTNAME` +
+  `network_mode: host`，不用 `ports:`）、就绪探针用 `/login` 不用 `/api/hub/health`（后者无会话时 401，
+  实测）、`init: true`（`bin/start.js` 不转发 SIGTERM）、CMD 跑 `bin/start.js`（本包无 standalone `server.js`）。
+  `DASHBOARD_PASSWORD` 在容器里是**必设项**：代码回落读 `~/.config/anet/cli.json`，容器里无该文件
+  → 口令为空串 → 谁都登不进去，而 `/login` 照常 200。env 模板只记录变量名与占位符，不含密钥值与真实地址。
 - 新增 `/messages/inbox`（「我的收件箱」）：读 Hub 的 `user_inbox`（`GET /api/messages?scope=user`），按发件节点分组，带未读（acked=0）提示与 kind 计数。
 - 之前节点用 `send_desktop_message` 发的私信（kind=`agent_message`）与 Hub 代发的任务过期 / 疑似孤儿通知（`task_expired` / `task_orphan_suspected`）只存在于 `user_inbox`，而 Messages 页读的是 `inbox` 表 —— 生产实测（net_b91c0d535346）admin 有 42 行、全部未确认，界面上却一行都没有。
 - Messages 页头部加入口（带未读数）；入口刻意不受「本页有消息才显示 chrome」的门控制：消息流为空时正好是私信最多的时候。
-- 端到端验收脚本 `tests/inbox-e2e/run.sh`：一次性 Hub + 一次性 Dashboard dev server，真登录、真会话 cookie，四条判据全过（代理带 `scope=user` 回 1 行 `kind=agent_message`、`unread=1`；别名读路径里没有那条私信；`/messages/inbox` 渲染；消息流页有入口）。
+- `tests/compose-contract.sh`（新增，`npm run test:compose`）：镜像/端口/探针/env 名字三组契约，含
+  **反向对齐**检查（代码里读的每个 env 名字都必须在模板里声明）、模板泄密扫描、以及
+  `docker compose config` 解析。首次运行就拦下三处：探针检查扫到注释里的「不要用 /api/hub/health」、
+  模板漏了 `ANET_DASHBOARD_PASSWORD` 别名、占位符规则把 `http://REPLACE_ME:9200` 当泄密。
+- 端到端验收脚本 `tests/inbox-e2e/run.sh`（`npm run test:inbox`）：一次性 Hub + 一次性 Dashboard dev server，真登录、真会话 cookie，四条判据全过（代理带 `scope=user` 回 1 行 `kind=agent_message`、`unread=1`；别名读路径里没有那条私信；`/messages/inbox` 渲染；消息流页有入口）。
 
 ## 0.6.4-preview.345 — 2026-11-04
 

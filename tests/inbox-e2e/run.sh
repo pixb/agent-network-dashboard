@@ -131,5 +131,35 @@ MSGS="$(curl -s -b "$WORK/cookies.txt" "$DASH/messages")"
 grep -q '/messages/inbox' <<<"$MSGS" || FAIL "the Messages page has no link to /messages/inbox"
 echo "   confirmed: entry link present"
 
+STEP "5) 标已读：按发件人整批 ack，未读数随之下降"
+# 这一步是「合并进时间线」的前置条件。hub 侧 ack 端点早就有（POST /api/messages/ack），
+# 缺的一直是 dashboard 侧的代理与按钮：没有它，收件箱的未读徽标是**清不掉的红点**，
+# 把这类行并进消息流就等于制造一个永远消不掉的提醒。
+BEFORE=$(curl -s -b "$WORK/cookies.txt" "$DASH/api/hub/messages?scope=user&network_id=$NET&limit=50")
+ACK=$(curl -s -b "$WORK/cookies.txt" -X POST "$DASH/api/hub/messages-ack" \
+  -H 'Content-Type: application/json' -d '{"agent":"e2e-node"}')
+grep -q '"ok":true' <<<"$ACK" || FAIL "ack proxy did not succeed: ${ACK:0:300}"
+AFTER=$(curl -s -b "$WORK/cookies.txt" "$DASH/api/hub/messages?scope=user&network_id=$NET&limit=50")
+python3 - "$BEFORE" "$AFTER" <<'PY'
+import json, sys
+before, after = (json.loads(x) for x in sys.argv[1:3])
+def unread(d):
+    v = d.get("unread")
+    if isinstance(v, int): return v
+    return sum(1 for r in (d.get("messages") or []) if not r.get("acked"))
+b, a = unread(before), unread(after)
+assert b > 0, f"nothing was unread before ack: {b}"
+assert a < b, f"unread did not drop after ack: {b} -> {a}"
+dm = [r for r in (after.get("messages") or []) if r.get("kind") == "agent_message"]
+assert dm and all(r.get("acked") for r in dm), f"DM rows still unacked after ack: {[r.get('acked') for r in dm]}"
+print(f"   unread {b} -> {a}; agent_message acked={sorted({bool(r.get('acked')) for r in dm})}")
+PY
+
+STEP "6) ack 代理不接受白名单之外的字段（不让前端拼出的任意字段直达 hub）"
+BAD=$(curl -s -o /dev/null -w '%{http_code}' -b "$WORK/cookies.txt" -X POST "$DASH/api/hub/messages-ack" \
+  -H 'Content-Type: application/json' -d '{"user_id":"u_anyone"}')
+[ "$BAD" = "400" ] || FAIL "unknown ack field returned $BAD, expected 400"
+echo "   confirmed: non-whitelisted ack field rejected"
+
 echo
-echo "inbox e2e: PASS (4 checks)"
+echo "inbox e2e: PASS (6 checks)"

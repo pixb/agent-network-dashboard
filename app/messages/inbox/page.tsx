@@ -3,6 +3,7 @@
 import { useMemo, useState } from 'react';
 import Link from 'next/link';
 import { useUserInbox } from '../../lib/hooks';
+import { useNetworkId } from '../../lib/network-context';
 import {
   countUnreadUserInbox,
   groupUserInboxBySender,
@@ -30,17 +31,42 @@ import { useT } from '../../lib/ui-lang';
  * 鉴权在 hub 侧），所以这一屏天然只显示登录者自己的行，不需要前端做过滤。
  */
 
-const TONE_CLASS: Record<string, string> = {
-  notice: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
-  mail: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
-  dm: 'bg-[var(--accent)]/10 text-[var(--accent-text)] border-[var(--accent)]/25',
-  neutral: 'bg-[var(--bg-secondary)] text-[var(--fg-muted)] border-[var(--border)]/40',
-};
-
 export default function InboxPage() {
   const t = useT();
+  const { networkId } = useNetworkId();
   const [unackedOnly, setUnackedOnly] = useState(false);
+  const [acking, setAcking] = useState<string | null>(null);
+  const [ackError, setAckError] = useState<string | null>(null);
   const { rows, isLoading, error, mutate } = useUserInbox({ unackedOnly });
+
+  /**
+   * 把一个发件人发来的行全部标已读 —— 走 Hub 的 `{agent}` 形态。
+   *
+   * 为什么不是逐条点：Hub 的未读分母是**全部**未 ack 的行，而这一屏只看得
+   * 到最近 N 条（生产 admin：user_inbox 522 行）—— 逐条点永远清不完。
+   * 为什么标完要 mutate：不刷新就看不到已读真的生效了，而「按钮点了、数不变」
+   * 就是这一屏要避免的事故形状。
+   */
+  const ackSender = async (sender: string) => {
+    setAcking(sender);
+    setAckError(null);
+    try {
+      const res = await fetch('/api/hub/messages-ack', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ agent: sender, ...(networkId ? { network_id: networkId } : {}) }),
+      });
+      const data = await res.json().catch(() => ({ ok: false, error: 'non_json_response' }));
+      if (!res.ok || data.ok === false) {
+        setAckError(`${data.error || `http_${res.status}`}`);
+      }
+      await mutate();
+    } catch (e) {
+      setAckError(String((e as Error)?.message || e));
+    } finally {
+      setAcking(null);
+    }
+  };
 
   const sorted = useMemo(() => groupUserInboxBySender(rows), [rows]);
   const unread = countUnreadUserInbox(rows);
@@ -51,7 +77,7 @@ export default function InboxPage() {
       <div className="flex items-center gap-3 mb-4 sm:mb-6 flex-wrap">
         <h1 className="text-2xl font-bold lg:ml-0 ml-10">{t('我的收件箱', 'My inbox')}</h1>
         <span
-          className="text-xs bg-blue-900/30 text-blue-400 px-2 py-0.5 rounded-full border border-blue-800/30 tabular-nums shrink-0"
+          className="text-xs bg-[var(--accent)]/10 text-[var(--accent-text)] px-2 py-0.5 rounded-full border border-[var(--accent)]/25 tabular-nums shrink-0"
           title={t('未读 = 还没被确认过的行（acked=0）', 'Unread = rows nobody acknowledged (acked=0)')}
         >
           {unread} {t('未读', 'unread')}
@@ -86,7 +112,7 @@ export default function InboxPage() {
         {summary.map((entry) => (
           <span
             key={entry.kind}
-            className={`text-xs px-2 py-1 rounded-full border tabular-nums ${TONE_CLASS[kindTone(entry.kind)]}`}
+            className={`text-xs px-2 py-1 rounded-full border tabular-nums ${kindTone(entry.kind)}`}
           >
             {kindLabel(entry.kind)} · {entry.count}
           </span>
@@ -94,11 +120,17 @@ export default function InboxPage() {
       </div>
 
       {error ? (
-        <div className="text-sm text-red-300 bg-red-500/10 border border-red-500/20 rounded-lg p-4">
+        <div className="text-sm text-[var(--danger)] bg-[var(--danger)]/10 border border-[var(--danger)]/20 rounded-lg p-4 mb-3">
           {t('收件箱读取失败：', 'Inbox read failed: ')}
           {String((error as { message?: string })?.message || error)}
         </div>
-      ) : isLoading && rows.length === 0 ? (
+      ) : null}
+      {ackError ? (
+        <div className="text-xs text-[var(--danger)] bg-[var(--danger)]/10 border border-[var(--danger)]/20 rounded-lg px-3 py-2 mb-3">
+          {t('标已读失败：', 'Mark-read failed: ')}{ackError}
+        </div>
+      ) : null}
+      {isLoading && rows.length === 0 ? (
         <div className="text-sm text-[var(--fg-muted)]">{t('加载中…', 'Loading…')}</div>
       ) : rows.length === 0 ? (
         <EmptyState
@@ -122,12 +154,23 @@ export default function InboxPage() {
                   </span>
                 )}
                 <span className="ml-auto text-xs text-[var(--fg-muted)] shrink-0">{formatWeChatTime(new Date(group.lastTime).toISOString())}</span>
+                {group.unread > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => ackSender(group.sender)}
+                    disabled={acking !== null}
+                    className="ml-2 text-[11px] px-2 py-1 rounded-lg border border-[var(--border)]/50 text-[var(--fg-muted)] hover:text-[var(--fg)] transition-colors shrink-0 disabled:opacity-50"
+                    title={t('把这个发件人发来的行全部标已读（Hub 侧 acked=1）', 'Mark everything from this sender as read (sets acked=1 on the hub)')}
+                  >
+                    {acking === group.sender ? t('标已读中…', 'Marking…') : t('标已读', 'Mark read')}
+                  </button>
+                )}
               </header>
               <ul className="divide-y divide-[var(--border)]/30">
                 {group.rows.map((row, index) => (
                   <li key={row.message_id || `${group.sender}-${index}`} className="px-3 py-2.5">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
-                      <span className={`text-[10px] px-2 py-0.5 rounded-full border shrink-0 ${TONE_CLASS[kindTone(row.kind)]}`}>
+                      <span className={`text-[11px] px-2 py-0.5 rounded-full border shrink-0 ${kindTone(row.kind)}`}>
                         {kindLabel(row.kind)}
                       </span>
                       {isUnreadRow(row) && (
