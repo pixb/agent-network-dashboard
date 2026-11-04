@@ -71,6 +71,19 @@ JS 堆：各页 7–9 MB；DOM 节点 `/nodes` 988、3D 页 379。
   直接「开第二个标签」测出来的数不能用于判断暂停是否生效
   （本项第一版就因此得到「修复无效」的假结论，后改写 getter + 派发 `visibilitychange` 才测得准）。
 
+## 5.5 SSE 重连已进冒烟门禁（45 条）
+
+`page-smoke` 新增 `sse:retriesAfterProbeFailure`：先让探测请求 **abort（真实网络错误）**，
+再放开；要求「失败期间 0 次连接、放开后 ≥1 次」。
+
+- 实测：**45/45**（`connectsWhileFailing: 0` → `connectsAfterRecovery: 2`）。
+- 门禁不是空跑：`.343`（修复前）同一路径实测「两次断网 0 次重连」，会直接红。
+- **踩坑**：第一版用 HTTP 500 模拟断网 → 页面判定「Hub 不支持 SSE」按设计停止重试，
+  断言红得莫名其妙。断网必须用 `route.abort()` 让 `fetch` reject。
+
+> 发布侧注意：`publish-<label>.py` 里 `pageSmoke` 期望是 **44**，下一版生成后须改成 **45**
+> （与 `legion` 267→269 同样处理）。
+
 ## 6. 网络抖动下的两个路径（实测）
 
 | 路径 | 实测结果 |
