@@ -2072,7 +2072,25 @@ export default function Legion3DPage() {
     };
 
     raf = requestAnimationFrame(draw);
-    return () => { stopped = true; cancelAnimationFrame(raf); };
+    // 页面不可见时暂停渲染。实测该页在后台标签里仍占满一个核（4 秒内 3.81s），
+    // 放进客户端后「军团页开着切到别处」会持续耗电发热。恢复时重置 lastFrame，
+    // 避免把隐藏时长算进第一帧的 dt（dt 本身也有 0.05s 上限兜底）。
+    const onVisibility = () => {
+      if (stopped) return;
+      if (document.visibilityState === 'hidden') {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      } else if (!raf) {
+        lastFrame = performance.now();
+        raf = requestAnimationFrame(draw);
+      }
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      stopped = true;
+      document.removeEventListener('visibilitychange', onVisibility);
+      cancelAnimationFrame(raf);
+    };
   }, [layout, ringRadii, size, statusByAlias, activeSet]);
 
   /* ── 交互 ───────────────────────────────────────────────────────── */
