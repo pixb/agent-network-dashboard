@@ -1223,7 +1223,14 @@ export default function LegionPage() {
                     );
                   })}
 
-                  {layout.nodes.map(node => {
+                  {/* 绘制顺序：Agent/成员先画，部门盘最后画。
+                      窄屏（390）下成员的命中区会压住部门盘中心，点击部门时选中的是成员
+                      （实测：点「平台」选中「有主成员」；1440 正常）。部门是容器与主入口，
+                      重叠时应优先命中，所以把它排到后面（后画 = 在上层）。 */}
+                  {[...layout.nodes].sort((a, b) => {
+                    const rank = (n: typeof a) => (n.kind === 'group' ? 1 : 0);
+                    return rank(a) - rank(b);
+                  }).map(node => {
                     const p = points.get(node.id);
                     if (!p) return null;
                     const dim = activeSet ? !activeSet.has(node.id) : false;
