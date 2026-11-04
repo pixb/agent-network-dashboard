@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.353 — 2026-11-04
+
+### 桌面通知：点一下能把窗口拉回来，也能先自己试一条
+
+- 点通知会回到 Agent Network 并关掉该通知（此前点击无反应）。
+- 设置页在开启后提供「发送测试通知」，不用等真实消息就知道是否生效。
+
 ## 0.6.4-preview.352 — 2026-11-04
 
 ### 桌面通知：同一条消息不会重复弹
