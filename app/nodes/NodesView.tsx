@@ -170,28 +170,18 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
     const el = rootRef.current;
     if (!el) return;
     const apply = () => {
-      // getBoundingClientRect().top is already viewport-relative, which is
-      // exactly the quantity we want: "how much screen is left below me".
-      // Adding scrollY turned it into a document coordinate and then
-      // subtracted it from innerHeight (a viewport quantity) — a unit
-      // mismatch that made the element short by however far the page
-      // happened to be scrolled when apply() ran. Since AppShell's root is
-      // min-h-[100dvh] and the HealthBanner sits in flow above us, the
-      // document IS taller than the viewport and does scroll, so any
-      // re-measure after a scroll shrank this container and exposed a band
-      // of page background at the bottom of the window.
-      const top = el.getBoundingClientRect().top;
+      // 用文档坐标（rect.top + scrollY）算高度，并且**不监听 scroll**。
+      //
+      // 曾经这里用 rect.top（视口坐标）+ scroll 重算，理由是「滚动后要够到窗口底部」；
+      // 但外壳的文档本来就比视口高 80px（移动端底部留白），滚动会让 rect.top 变小，
+      // 高度随之变大 → 文档再变高 → 下次滚动又更大。实测 390 宽每滚一次文档高
+      // +80px、布局高 +80px，无上限（924→1004→1084→1164）。
+      // 高度一旦与滚动无关，这个自激就断了；滚到页面底部看到的是外壳的留白。
+      const top = el.getBoundingClientRect().top + window.scrollY;
       el.style.height = `${Math.max(240, window.innerHeight - top)}px`;
     };
     apply();
     window.addEventListener('resize', apply);
-    // Our viewport top moves whenever the document scrolls (it does scroll:
-    // the shell root is min-h-[100dvh] and the banner sits above us in
-    // flow), so re-measure on scroll as well. Without this the container
-    // keeps its first-paint height and, once the page is scrolled, stops
-    // reaching the bottom of the window — the same visible symptom the
-    // coordinate fix above addresses, arrived at from the other direction.
-    window.addEventListener('scroll', apply, { passive: true });
     const ro = new ResizeObserver(apply);
     ro.observe(document.body);
     return () => {
