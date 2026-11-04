@@ -3614,20 +3614,20 @@ export default function Legion3DPage() {
 
       {/* 三态：只在真·空/真·错时覆盖画布，不用空态掩盖故障 */}
       {fatal === 'no-network' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
-          <NetworkRequiredNotice className="max-w-md" />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
+          <NetworkRequiredNotice className="pointer-events-auto max-w-md" />
         </div>
       )}
       {fatal === 'login' && (
-        <div role="alert" className="absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6 text-center">
-          <p className="text-sm text-[var(--warning)]">
+        <div role="alert" className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6 text-center">
+          <p className="pointer-events-auto text-sm text-[var(--warning)]">
             会话已过期，<Link href="/login" className="underline">重新登录</Link> 后再看军团。
           </p>
         </div>
       )}
       {fatal === 'error' && (
-        <div role="alert" className="absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
-          <div className="max-w-sm text-center">
+        <div role="alert" className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
+          <div className="pointer-events-auto max-w-sm text-center">
             <p className="text-sm text-[var(--danger)]">读取军团编制失败：{readError?.message ?? '未知错误'}</p>
             <button
               type="button"
@@ -3640,13 +3640,13 @@ export default function Legion3DPage() {
         </div>
       )}
       {isEmpty && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
-          <EmptyState
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
+          <div className="pointer-events-auto"><EmptyState
             variant="nodes"
             title="军团还没有成员"
             sub="成员加入网络并绑定 Agent 后，这里会自动长出三维编制。"
             cta={{ label: '去部门列表', href: '/org' }}
-          />
+          /></div>
         </div>
       )}
     </div>
