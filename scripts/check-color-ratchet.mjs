@@ -44,13 +44,27 @@ function* walk(dir) {
   }
 }
 
+// 统计前先去掉注释：R2 实测 TopoGraph 里 21 处「命中」有 3 处只是注释文本，
+// 注释里的类名既不会渲染、也无法「迁移」，计入分母会让门禁数字虚高。
+// 只去块注释与整行 // 注释——行内 // 可能是 URL（https://…），不能一概截断。
+function stripComments(text) {
+  const withoutBlocks = text.replace(/\/\*[\s\S]*?\*\//g, '');
+  return withoutBlocks
+    .split('\n')
+    .filter((line) => {
+      const s = line.trim();
+      return !(s.startsWith('//') || s.startsWith('*'));
+    })
+    .join('\n');
+}
+
 const counts = {};
 const paletteCounts = {};
 const scaleCounts = {};
 let scanned = 0, total = 0, paletteTotal = 0, scaleTotal = 0;
 for (const f of walk(join(ROOT, 'app'))) {
   scanned++;
-  const src = readFileSync(f, 'utf8');
+  const src = stripComments(readFileSync(f, 'utf8'));
   const n = (src.match(RE) || []).length;
   if (n > 0) { counts[relative(ROOT, f)] = n; total += n; }
   const pn = (src.match(PALETTE_RE) || []).length;
