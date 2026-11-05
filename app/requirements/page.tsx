@@ -1043,7 +1043,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
               aria-label="切换排序方向"
               disabled={!sortSpec.key}
               onClick={() => setParam({ sort: sortSpec.key, dir: sortSpec.dir === 'asc' ? 'desc' : 'asc' })}
-              className="rounded border border-[var(--border)] px-1.5 py-1 text-[11px] text-[var(--fg-muted)] disabled:opacity-40"
+              className="inline-flex min-w-[44px] items-center justify-center rounded border border-[var(--border)] px-1.5 py-1 text-[11px] text-[var(--fg-muted)] disabled:opacity-40"
             >
               {sortSpec.dir === 'asc' ? '↑' : '↓'}
             </button>
