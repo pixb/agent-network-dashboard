@@ -2024,13 +2024,13 @@ export default function Legion3DPage() {
                   : '';
             const lines = line2 ? [line1, line2] : [line1];
             ctx.font = '400 11px system-ui, -apple-system, "Noto Sans SC", sans-serif';
-            const padX = 7;
-            const lineH = 14;
-            const boxH = lines.length === 2 ? 34 : 20;
+            const padX = 9;
+            const lineH = 16;
+            const boxH = lines.length === 2 ? 40 : 22;
             const boxW = Math.max(...lines.map(l => ctx.measureText(l).width)) + padX * 2;
             const x = Math.max(6, Math.min(size.width - boxW - 6, hp.x + 14));
-            const y = Math.max(6, hp.y - boxH - 8);
-            ctx.globalAlpha = 0.94;
+            const y = Math.max(6, hp.y - boxH - 12);
+            ctx.globalAlpha = 0.97;
             ctx.fillStyle = tk.surface;
             ctx.beginPath();
             ctx.roundRect(x, y, boxW, boxH, 6);
@@ -2041,7 +2041,7 @@ export default function Legion3DPage() {
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
             lines.forEach((line, i) => {
-              const cy = lines.length === 2 ? y + 10 + i * lineH : y + boxH / 2;
+              const cy = lines.length === 2 ? y + 13 + i * lineH : y + boxH / 2;
               // 第二行降一级：名字是主信息，数量是补充。
               ctx.fillStyle = i === 0 ? tk.fg : tk.dim;
               ctx.globalAlpha = i === 0 ? 0.94 : 0.8;
