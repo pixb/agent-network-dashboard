@@ -6,6 +6,7 @@ import { TaskChatPanel } from './TaskChatPanel';
 import { useSessions, useHealth } from '../lib/hooks';
 import { relativeAgo } from '../lib/time';
 import { isOnline as presenceIsOnline } from '../lib/presence';
+import { useReturnFocus } from '../lib/useReturnFocus';
 
 interface ChatPopoverProps {
   /** Node alias to chat with. Changing it switches the conversation. */
@@ -51,6 +52,7 @@ const MOBILE_BP = 640;
  *  this round). */
 
 export function ChatPopover({ alias, onClose }: ChatPopoverProps) {
+  useReturnFocus();
   // Position + size are resolved on mount (SSR-safe defaults here).
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ w: MAX_W, h: MAX_H });

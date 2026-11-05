@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useReturnFocus } from '../lib/useReturnFocus';
 
 /**
  * Create/edit a model provider (RFC-028 P1 + #393 preset catalog). Single-step
@@ -81,6 +82,7 @@ export function ProviderFormModal({
   onClose: () => void;
   onSaved?: () => void;
 }) {
+  useReturnFocus();
   const editing = !!initial?.provider_id;
   const [presetId, setPresetId] = useState(() => detectPreset(initial?.base_url));
   const [name, setName] = useState(initial?.name ?? '');
