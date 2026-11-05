@@ -6,6 +6,14 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.381 — 2026-11-06
+
+### 军团 3D：悬停部门时能看到人数和 Agent 数
+
+- 鼠标停在某个部门上，卡片会显示「部门 · 负责人」和「N 人 · M Agent」；此前只显示部门名字，看不出这个部门到底有没有人。
+- 成员与 Agent 的悬停卡片同样改为两行：第一行名字，第二行 Agent 数或在线状态。
+- 卡片仍在画面内绘制，指针移开即消失，不影响帧率。
+
 ## 0.6.4-preview.380 — 2026-11-06
 
 ### 打开页面时不再谎称「在等 Agent」
