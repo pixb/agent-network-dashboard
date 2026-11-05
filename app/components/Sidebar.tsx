@@ -552,7 +552,10 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
   // Live online count — re-uses the same /api/hub/status endpoint the
   // Overview already polls, so SWR dedupes the request. Pulse is muted —
   // emerald dot at 4px with a 1.6s slow opacity pulse, no glow, no halo.
-  const { data } = useSWR<StatusData>('/api/hub/status', statusFetcher, {
+  // 三态必须分开：以前只看 total===0 就显示「waiting for agents」，
+  // 而加载中 total 也是 0 —— 首屏 0–6 秒里界面在宣称舰队是空的
+  // （生产实测：1.5s/4.0s 采样都是 waiting，约 8s 才出现 75/393）。
+  const { data, error, isLoading } = useSWR<StatusData>('/api/hub/status', statusFetcher, {
     refreshInterval: 10000,
     dedupingInterval: 4000,
   });
@@ -596,10 +599,16 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
         <div className="text-white text-[13px] font-semibold leading-tight">Agent Network</div>
         <div className="text-[11px] text-[var(--fg-muted)] flex items-center gap-1.5 mt-0.5">
           <span
-            className={`inline-block w-1.5 h-1.5 rounded-full ${online > 0 ? 'bg-emerald-400 anet-brand-pulse' : 'bg-gray-600'}`}
+            className={`inline-block w-1.5 h-1.5 rounded-full ${isLoading && total === 0 ? 'bg-gray-500/60' : error && total === 0 ? 'bg-[var(--danger)]' : online > 0 ? 'bg-emerald-400 anet-brand-pulse' : 'bg-gray-600'}`}
             aria-hidden
           />
-          {total === 0 ? (
+          {isLoading && total === 0 ? (
+            // 数据还没到：既不是「空」也不是「挂」，只是一个尚未知的状态。
+            <span aria-live="polite">loading…</span>
+          ) : error && total === 0 ? (
+            // 取失败：必须说清是「读不到」，不能伪装成空舰队。
+            <span className="text-[var(--danger)]" title={String(error?.message || error)}>status unavailable</span>
+          ) : total === 0 ? (
             <span>waiting for agents</span>
           ) : (
             <span><span className="text-[var(--fg)] font-medium tabular-nums">{onlineDisplay}</span><span className="text-[var(--fg-dim)]">/{total}</span> online</span>
