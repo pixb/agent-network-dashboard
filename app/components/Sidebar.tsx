@@ -549,36 +549,24 @@ const statusFetcher = async (url: string) => {
 };
 
 function SidebarBrand({ collapsed }: { collapsed: boolean }) {
-  // Live online count — re-uses the same /api/hub/status endpoint the
-  // Overview already polls, so SWR dedupes the request. Pulse is muted —
-  // emerald dot at 4px with a 1.6s slow opacity pulse, no glow, no halo.
-  // 三态必须分开：以前只看 total===0 就显示「waiting for agents」，
-  // 而加载中 total 也是 0 —— 首屏 0–6 秒里界面在宣称舰队是空的
-  // （生产实测：1.5s/4.0s 采样都是 waiting，约 8s 才出现 75/393）。
-  const { data, error, isLoading } = useSWR<StatusData>('/api/hub/status', statusFetcher, {
-    refreshInterval: 10000,
-    dedupingInterval: 4000,
-  });
-  // #515: sse_sessions map lives on hub's /health (Health.sse_sessions),
-  // not on /api/status. Re-use useHealth so SWR dedupes with page.tsx
-  // rather than fetching twice, and the count agrees with the stats card
-  // and the topology legend by construction (all three consume the same
-  // presence.ts + same health.sse_sessions source).
-  const { health } = useHealth();
-  const sessions = data?.sessions || [];
-  const sseSessions = health?.sse_sessions;
-  // #53: three-state presence — when the sseSessions map is missing but
-  // hub reports live connections, we're seeing an anonymized view.
-  // Render '?' instead of '0/N online' so the sidebar doesn't confidently
-  // claim the fleet died. HealthBanner surfaces the CTA.
-  const presenceState = presenceStatus(sseSessions, health || undefined);
-  // The old `status !== 'offline'` predicate was systematically inflated
-  // because hub `status` doesn't age out on heartbeat loss (see #520 /
-  // presence.ts). SSE-reachability is the "can I talk to it right now"
-  // ground truth.
-  const online = sessions.filter(s => s.alias ? presenceIsOnline({ alias: s.alias, network_id: s.network_id }, sseSessions) : false).length;
+  const { networkId, ready } = useNetworkId();
+  // 网络未解析完不发请求（否则先打一枪无作用域的，见 .383 的修复）。
+  const overviewKey = ready && networkId
+    ? `/api/hub/overview?network_id=${encodeURIComponent(networkId)}`
+    : null;
+  // 首屏只取「计数」：/api/hub/status 会回全部 session 对象（生产实测 709 KB），
+  // 公网约 240 KB/s，光这一份就要 3 秒。聚合端点让浏览器只收几百字节。
+  const { data, error, isLoading } = useSWR<{ ok: boolean; total: number; online: number; presence: 'ready' | 'blind' | 'loading' }>(
+    overviewKey as string | null,
+    statusFetcher as (url: string) => Promise<{ ok: boolean; total: number; online: number; presence: 'ready' | 'blind' | 'loading' }>,
+    { refreshInterval: 10000, dedupingInterval: 4000 },
+  );
+  // 三态（ready/blind/loading）由服务端用同一个 presence.ts 判定，
+  // 避免侧栏、统计卡、拓扑各算一套（#53 的老问题）。
+  const presenceState = data?.presence ?? 'loading';
+  const online = data?.online ?? 0;
   const onlineDisplay: number | string = presenceState === 'ready' ? online : '?';
-  const total = sessions.length;
+  const total = data?.total ?? 0;
 
   if (collapsed) {
     return (
