@@ -6,6 +6,14 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.366 — 2026-11-05
+
+### 从 ⋮ 菜单打开「会话设置」后，Esc 又能关了
+
+- 上一版修好菜单键盘操作后带出一个新问题：从菜单打开设置抽屉，焦点被菜单抢回去，
+  Esc 因此失效。
+- 现在抽屉拿到焦点、Esc 正常关闭，关闭后焦点回到 ⋮ 按钮。
+
 ## 0.6.4-preview.365 — 2026-11-05
 
 ### 节点列表的右键菜单也能用键盘了
