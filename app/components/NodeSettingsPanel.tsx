@@ -8,6 +8,7 @@ import { useNodeLifecycle } from '../lib/hooks';
 import { toggleMute, useMuted } from '../lib/chat-mute';
 import { togglePin, usePinned } from '../lib/chat-pin';
 import { useLifecycleCaps } from './NodeLifecycleMenu';
+import { useReturnFocus } from '../lib/useReturnFocus';
 
 /**
  * Per-node settings panel (issue #260 → v0.11 flagship #262, Vincent tg
@@ -374,6 +375,7 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
    *  the app stays interactive. */
   positioning?: 'fixed' | 'absolute';
 }) {
+  useReturnFocus();
   const runtime = s.runtime || '—';
   const initialModel = s.model || s.agent || '';
   // imageCapable: read-only, auto from model (MiniMax-M3 / Claude = yes).
