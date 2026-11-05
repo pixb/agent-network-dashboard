@@ -6,6 +6,12 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.375 — 2026-11-05
+
+### 需求页的排序箭头更好点了
+
+- 这个 22px 宽的小按钮低于触控最小尺寸，手机上容易点偏；现在 44px，和旁边控件一致。
+
 ## 0.6.4-preview.374 — 2026-11-05
 
 ### 浅色主题下，「新建节点」和需求页的数量标记更清楚了
