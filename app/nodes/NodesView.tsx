@@ -220,7 +220,7 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
       return tag === 'INPUT' || tag === 'TEXTAREA' || !!el?.isContentEditable;
     };
     const onKey = (e: KeyboardEvent) => {
-      // 焦点在菜单/弹层/列表里时不要接管方向键：这些控件自己要用 ↑/↓/Home/End
+      // 焦点在菜单/弹层/列表里时不要接管方向键：这些控件自己要用方向键与 Home/End
       //（实测：会话溢出菜单内按 ↓ 会被这里 stopImmediatePropagation 抢走，
       // 焦点直接跳到输入框，菜单等于不可键盘操作）。
       const target = e.target as HTMLElement | null;
