@@ -141,6 +141,21 @@ export function useStats() {
   return { stats: data?.ok ? data : null, error };
 }
 
+/**
+ * 任务状态计数（服务端统计，只回数字）。
+ * 用于 /api/stats 没有 tasks.by_status 的环境：避免为了 5 个数字下载 500 条任务
+ *（生产实测 665,867 B）。enabled=false 时不发请求。
+ */
+export function useTaskStats(enabled: boolean) {
+  const { networkId, ready } = useNetworkId();
+  const { data } = useSWR<{ ok: boolean; total: number; byStatus: Record<string, number> }>(
+    enabled ? scopedOrNull('/api/hub/task-stats', networkId, ready) : null,
+    fetcher,
+    SWR_OPTIONS,
+  );
+  return { taskStats: data?.byStatus ?? null, taskTotal: data?.total ?? null };
+}
+
 export function useMessages(limit = 100) {
   const { networkId, ready } = useNetworkId();
   // keepPreviousData: /messages grows `limit` when the user asks for older
