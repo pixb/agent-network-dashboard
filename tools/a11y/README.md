@@ -17,7 +17,7 @@
 ```bash
 # 1) 对比度（WCAG AA：正文 4.5:1、大字 3:1）
 node tools/a11y/contrast.mjs --base https://your.dashboard --config <node config.json> \
-     --routes /,/nodes,/requirements --themes light,cyber
+     --routes /,/nodes,/requirements --themes light,cyber --samples 3
 
 # 2) 触控目标（默认 24×24 最低线，可 --width 390 --min 24）
 node tools/a11y/tap-targets.mjs --base http://127.0.0.1:3000 --password '<dashboard password>' --routes /,/nodes
@@ -38,11 +38,20 @@ node tools/a11y/accessible-names.mjs --base http://127.0.0.1:3000 --config <node
 | tap-targets | 搜索框有效热区仅 160×20（外框 38px 但点空白不聚焦）→ 修成整框可点 |
 | accessible-names | 优先级下拉在无障碍树里名字为空（其余 3 个靠 placeholder 兜底，属误报） |
 
+## 为什么用 `--samples N`
+
+线上页面内容随时序变化（消息、状态、会话预览都会刷新），**单次采样会漏报也会误报**：
+同一条目在一次运行里是 4.09:1，下一次同页面可能已经不渲染。`--samples N` 会对每个路由重复采样 N 次并取**并集**，
+结果才可复现。本地夹具（数据固定）用默认 1 次即可。
+
+报告里会带出命中元素的 `className` 片段，便于直接定位到源码里的类名，不用再逐个探测。
+
 ## 已知限制
 
 - 只能测 DOM 渲染的文字；3D 画布内绘制的文字测不到（需要另做像素对比）；
 - 触控目标按"有效热区"估算伪元素扩展，只覆盖 `::before/::after` 且要求 `content` 非 `none`；
-- 对比度按页面当前主题计算，切换主题要分别跑（`--themes` 支持多值）。
+- 对比度按页面当前主题计算，切换主题要分别跑（`--themes` 支持多值）；
+- 线上真实数据必须 `--samples 3` 以上，否则结论不可复现（见上节）。
 
 ## 待复现（2026-11-05 记录）
 

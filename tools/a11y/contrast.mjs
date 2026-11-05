@@ -12,6 +12,7 @@ const base = args.base;
 if (!base) { console.error('need --base <url>'); process.exit(2); }
 const routes = String(args.routes || '/,/nodes,/requirements,/settings').split(',').map(s => s.trim()).filter(Boolean);
 const themes = String(args.themes || 'light,cyber').split(',').map(s => s.trim()).filter(Boolean);
+const samplesPerRoute = Math.max(1, Number(args.samples || 1));
 const cookieValue = args.config ? cookieFromNodeConfig(args.config)
   : args.password ? cookieFromPassword(String(args.password))
   : null;
@@ -30,7 +31,13 @@ for (const theme of themes) {
   for (const route of routes) {
     await page.goto(base + route, { waitUntil: 'domcontentloaded' });
     await page.waitForTimeout(Number(args.wait || 1800));
-    const found = await page.evaluate(helpers => {
+    const union = new Set();
+    for (let s = 0; s < samplesPerRoute; s++) {
+      if (s > 0) {
+        await page.reload({ waitUntil: 'domcontentloaded' });
+        await page.waitForTimeout(Number(args.wait || 1800));
+      }
+      const foundOnce = await page.evaluate(helpers => {
       new Function(helpers)(); // eslint-disable-line no-new-func
       const { px, over, contrast, bgOf } = globalThis.__a11y;
       const res = [];
@@ -59,11 +66,16 @@ for (const theme of themes) {
         const large = size >= 24 || (size >= 18.66 && Number(cs.fontWeight) >= 600);
         const ratio = contrast(fg, bg);
         const need = large ? 3 : 4.5;
-        if (ratio < need) res.push(`"${text.slice(0, 26)}" ${ratio.toFixed(2)}:1 (need ${need}, ${size}px)`);
+        if (ratio < need) {
+          const cls = (el.className || '').toString().replace(/\s+/g, ' ').slice(0, 70);
+          res.push(`"${text.slice(0, 26)}" ${ratio.toFixed(2)}:1 (need ${need}, ${size}px) [${cls}]`);
+        }
       }
       return res.slice(0, 10);
-    }, PAGE_COLOR_HELPERS);
-    rows.push({ target: `${theme} ${route}`, findings: found.length, details: found });
+      }, PAGE_COLOR_HELPERS);
+      for (const f of foundOnce) union.add(f);
+    }
+    rows.push({ target: `${theme} ${route}`, findings: union.size, details: [...union] });
   }
   await ctx.close();
 }
