@@ -12,6 +12,19 @@
 | Chrome 会用 `placeholder` 兜底生成可访问名 | 只看 `aria-label` 会把"其实能读"的控件报成缺陷（实测 4 个里只有 1 个真无名） | 读 CDP `Accessibility.getFullAXTree` |
 | SVG `<g role=button>` 的 `innerText` 为空 | 误报"按钮无名" | 同上，走无障碍树 |
 
+## 一键跑完三项（推荐）
+
+```bash
+node tools/a11y/run-all.mjs --base https://your.dashboard \
+     --config <node config.json> --routes /,/nodes,/requirements --samples 2 \
+     --out /tmp/a11y.json
+```
+
+- 依次跑对比度（明暗）、触控目标（390 宽）、可访问名；
+- `--samples` 会传给对比度（线上内容时序变化，需 ≥2）；
+- 末行给 `ALL PASS` / `FAIL: <项>`，退出码 0/1，可直接接 CI；
+- `--out` 写一份 JSON（含每项完整输出），便于归档与对比历史。
+
 ## 三个脚本
 
 ```bash
