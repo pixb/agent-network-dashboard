@@ -7,6 +7,7 @@ import { toggleMute, useMuted } from '../lib/chat-mute';
 import { markChatRead, useChatUnread } from '../lib/chat-unread';
 import { useNetworkId } from '../lib/network-context';
 import { t } from '../lib/ui-lang';
+import { useReturnFocus } from '../lib/useReturnFocus';
 
 // SPEC §10 (dashboard-ui-ref/SPEC.md): right-click context menu for
 // NodeList rail entries. Actions: 置顶 / 免打扰 / 标记已读.
@@ -39,6 +40,19 @@ const MENU_W = 200;   // SPEC §10: 200px fixed width
 const EDGE = 8;       // SPEC §10: ≥8px margin from viewport edge
 
 export function NodeListContextMenu({ alias, x, y, onClose }: NodeListContextMenuProps) {
+  // 键盘打开（Shift+F10 / 菜单键）后焦点必须进菜单，否则方向键到不了。
+  useReturnFocus();
+  const onMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(ref.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [])
+      .filter(el => !(el as HTMLButtonElement).disabled);
+    if (items.length === 0) return;
+    const i = items.indexOf(document.activeElement as HTMLElement);
+    if (e.key === 'ArrowDown') { e.preventDefault(); items[(i + 1) % items.length]?.focus(); }
+    else if (e.key === 'ArrowUp') { e.preventDefault(); items[(i - 1 + items.length) % items.length]?.focus(); }
+    else if (e.key === 'Home') { e.preventDefault(); items[0]?.focus(); }
+    else if (e.key === 'End') { e.preventDefault(); items[items.length - 1]?.focus(); }
+  };
+
   const pinned = usePinned(alias);
   const muted = useMuted(alias);
   const { networkId } = useNetworkId();
@@ -99,6 +113,10 @@ export function NodeListContextMenu({ alias, x, y, onClose }: NodeListContextMen
     };
   }, [onClose]);
 
+  useEffect(() => {
+    ref.current?.querySelector<HTMLElement>('[role="menuitem"]')?.focus({ preventScroll: true });
+  }, []);
+
   const runAndClose = (fn: () => void) => () => { fn(); onClose(); };
 
   // SPEC §10 三态色值 (Tailwind can't do arbitrary custom hex on
@@ -115,6 +133,7 @@ export function NodeListContextMenu({ alias, x, y, onClose }: NodeListContextMen
       ref={ref}
       role="menu"
       aria-label={t(`节点 ${alias} 操作菜单`, `Actions for node ${alias}`)}
+      onKeyDown={onMenuKeyDown}
       data-testid="node-context-menu"
       data-target-alias={alias}
       style={{ position: 'fixed', top: y, left: x, width: MENU_W, zIndex: 60 }}
