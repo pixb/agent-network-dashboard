@@ -334,11 +334,22 @@ export function CommandPalette() {
   }, [open]);
 
   // Reset state on open + auto-focus input
+  const lastFocusRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (open) {
+      // 记住打开前的焦点元素：关闭时归还。否则按 Esc 后焦点掉到 <body>，
+      // 键盘用户会丢失位置，只能从头 Tab（WCAG 2.4.3 焦点顺序）。
+      lastFocusRef.current = (document.activeElement as HTMLElement | null) ?? null;
       setQuery('');
       setSelected(0);
       setTimeout(() => inputRef.current?.focus(), 50);
+      return;
+    }
+    const back = lastFocusRef.current;
+    lastFocusRef.current = null;
+    if (back && document.contains(back)) {
+      // 等遮罩卸载后再还，preventScroll 避免页面被拽动
+      setTimeout(() => { try { back.focus({ preventScroll: true }); } catch { /* 元素已不可聚焦 */ } }, 0);
     }
   }, [open]);
 
