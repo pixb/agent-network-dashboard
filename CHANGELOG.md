@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.372 — 2026-11-05
+
+### 侧栏的主题名和 ⌘K 提示更清楚了
+
+- 这两个 10px 小标签原本带 70%/60% 透明度，浅色下对比度只有 2.87 / 2.41。
+- 去掉透明度后回到颜色本身的对比度（约 5:1），深浅两套都达标。
+
 ## 0.6.4-preview.371 — 2026-11-05
 
 ### 浅色主题下，回复气泡里的「replied」和引用行看得清了
