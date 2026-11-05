@@ -1846,6 +1846,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 onKeyDown={handleKeyDown}
                 onPaste={handlePaste}
                 placeholder={`Message ${alias}...`}
+                aria-label={`Message ${alias}`}
                 rows={1}
                 className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-3 py-2.5 pr-[6.75rem] text-base sm:px-4 sm:pr-24 sm:text-sm text-[var(--fg)] placeholder-[var(--fg-dim)] focus:border-[var(--accent)]/40 focus:outline-none resize-none transition-colors"
               />
@@ -1883,6 +1884,8 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 {/* 窄屏隐藏：44px 的附件与语音按钮之后，这个下拉会把输入区再压掉一截
                     （实测 320 下按钮块占 125px，输入框 212px，留给文本的只剩几十像素）。 */}
                 <select value={priority} onChange={e => setPriority(e.target.value)}
+                  aria-label="Priority"
+                  title="Priority"
                   className="hidden bg-transparent text-[9px] text-[var(--fg-dim)] focus:outline-none cursor-pointer sm:block">
                   <option value="normal">N</option>
                   <option value="high">H</option>
