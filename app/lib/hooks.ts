@@ -115,11 +115,14 @@ export function useAnetConfig() {
   return { config: data || null };
 }
 
-export function useTasks(params?: Record<string, string>) {
+export function useTasks(params?: Record<string, string>, enabled = true) {
   const { networkId, ready } = useNetworkId();
   const query = new URLSearchParams({ limit: '100', ...params }).toString();
+  // enabled=false → null key，SWR 不发请求。
+  // 用途：首页只在 /api/stats 没有 by_status 时才需要任务列表兜底，
+  // 而 tasks?limit=500 生产实测 665,867 B（约 666 KB）。
   const { data, error, isLoading } = useSWR(
-    scopedOrNull(`/api/hub/tasks?${query}`, networkId, ready),
+    enabled ? scopedOrNull(`/api/hub/tasks?${query}`, networkId, ready) : null,
     fetcher,
     SWR_OPTIONS,
   );
@@ -136,6 +139,21 @@ export function useStats() {
   const { networkId, ready } = useNetworkId();
   const { data, error } = useSWR(scopedOrNull('/api/hub/stats', networkId, ready), fetcher, SWR_OPTIONS);
   return { stats: data?.ok ? data : null, error };
+}
+
+/**
+ * 任务状态计数（服务端统计，只回数字）。
+ * 用于 /api/stats 没有 tasks.by_status 的环境：避免为了 5 个数字下载 500 条任务
+ *（生产实测 665,867 B）。enabled=false 时不发请求。
+ */
+export function useTaskStats(enabled: boolean) {
+  const { networkId, ready } = useNetworkId();
+  const { data } = useSWR<{ ok: boolean; total: number; byStatus: Record<string, number> }>(
+    enabled ? scopedOrNull('/api/hub/task-stats', networkId, ready) : null,
+    fetcher,
+    SWR_OPTIONS,
+  );
+  return { taskStats: data?.byStatus ?? null, taskTotal: data?.total ?? null };
 }
 
 export function useMessages(limit = 100) {

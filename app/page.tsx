@@ -40,7 +40,7 @@ import { AgentCard } from './components/AgentCard';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { NodesEmptyState as EmptyState } from './components/EmptyState';
 import { CommandCenter, useCommandCenter } from './components/CommandCenter';
-import { useSessions, useHealth, useTasks, useStats } from './lib/hooks';
+import { useSessions, useHealth, useTaskStats, useStats } from './lib/hooks';
 import { useChatUnread } from './lib/chat-unread';
 import { isPinned, usePinVersion } from './lib/chat-pin';
 import { useSSE } from './lib/useSSE';
@@ -60,8 +60,12 @@ export default function Dashboard() {
 
   const { sessions, hint: sessHint, error: sessError, isLoading } = useSessions();
   const { health } = useHealth();
-  const { tasks } = useTasks({ limit: '500' });
   const { stats } = useStats();
+  // 首页只在 /api/stats 没给 by_status 时才需要统计任务状态。
+  // 以前回退是拉 tasks?limit=500（生产实测 665,867 B）；现在改叫服务端计数端点
+  //（/api/hub/task-stats，回几百字节），浏览器不再为 5 个数字下载 666 KB。
+  const statsHasTaskStatus = Boolean(stats?.tasks?.by_status?.length);
+  const { taskStats: fallbackTaskStats } = useTaskStats(stats != null && !statsHasTaskStatus);
   const [showTopo, setShowTopo] = useState(typeof window !== 'undefined' && window.innerWidth >= 1024);
   const cmd = useCommandCenter();
   // R8: one page-level unread computation; counts flow to memo'd cards as props.
@@ -133,10 +137,8 @@ export default function Dashboard() {
     for (const s of stats.tasks.by_status) {
       taskStats[s.status] = s.count;
     }
-  } else {
-    for (const t of tasks) {
-      taskStats[t.status] = (taskStats[t.status] || 0) + 1;
-    }
+  } else if (fallbackTaskStats) {
+    Object.assign(taskStats, fallbackTaskStats);
   }
 
   // R29 (通信龙批准): 'working' demoted from sort key to visual badge —
