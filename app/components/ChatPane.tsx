@@ -1,6 +1,6 @@
 'use client';
 
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { AliasAvatar } from './AliasAvatar';
 import { TaskChatPanel } from './TaskChatPanel';
 import { NodeSettingsPanel } from './NodeSettingsPanel';
@@ -55,6 +55,16 @@ export function ChatPane({ alias, onClose, variant = 'column', onBack }: ChatPan
   // network cost.
   const { sessions } = useSessions();
   const session = sessions.find(s => s.alias === alias);
+
+  // 抽屉关闭后把焦点还给 ⋮：触屏上按钮不会被 focus，useReturnFocus 记不到来源
+  //（实测 390 下 Esc 关闭后 activeElement = BODY），这里显式归还一次。
+  const settingsWasOpen = useRef(false);
+  useEffect(() => {
+    if (settingsWasOpen.current && !settingsOpen) {
+      overflowAnchorRef.current?.focus({ preventScroll: true });
+    }
+    settingsWasOpen.current = settingsOpen;
+  }, [settingsOpen]);
 
   return (
     <aside
