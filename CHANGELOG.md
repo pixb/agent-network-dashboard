@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.368 — 2026-11-05
+
+### 手机上关掉设置抽屉后，焦点回到 ⋮ 按钮
+
+- 触屏关闭抽屉原本会把焦点丢到页面上，键盘（外接键盘）用户要重新找位置。
+- 现在关闭后回到 ⋮ 按钮，与桌面一致。
+
 ## 0.6.4-preview.367 — 2026-11-05
 
 ### 设置抽屉打开时，Tab 不会再跑到被遮住的页面上
