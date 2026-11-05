@@ -1116,7 +1116,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
         </div>
 
         {/* Status tabs */}
-        <div className="mb-4 flex flex-wrap items-center gap-1.5" aria-label="状态筛选，数量为当前已加载结果">
+        <div role="group" aria-label="状态筛选，数量为当前已加载结果" className="mb-4 flex flex-wrap items-center gap-1.5">
           {COLUMNS.map(col => {
             const count = col.key ? counts[col.key] || 0 : rows.length;
             const active = status === col.key;
@@ -1125,6 +1125,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                 key={col.key || 'all'}
                 type="button"
                 onClick={() => setParam({ status: col.key })}
+                aria-pressed={active}
                 className={`rounded-md px-3 py-1.5 text-xs transition-colors ${
                   active
                     ? 'bg-[var(--bg-elevated)] text-gray-100'
