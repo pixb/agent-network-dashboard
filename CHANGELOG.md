@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.379 — 2026-11-06
+
+### 小字统一到一个尺寸，读起来更整齐
+
+- 界面里的小字此前有 10px 和 11px 两种（同一层级混用），现在统一为 11px，与客户端同刻度。
+- 只改这一档，9px / 13px 的零散用法留到后续批次；改动后窄标签、筛选条没有出现截断。
+
 ## 0.6.4-preview.378 — 2026-11-06
 
 ### 小按钮、小筛选、小图标的圆角统一到 8
