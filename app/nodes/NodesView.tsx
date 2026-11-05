@@ -503,7 +503,7 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
       <div className="flex items-center gap-4 mb-4 sm:mb-6">
         <div className="flex items-center gap-3 min-w-0 flex-1">
           <h1 className="text-2xl font-bold text-white lg:ml-0 ml-10">Nodes</h1>
-          <span className="text-xs bg-[var(--success)]/10 text-[var(--success)] px-2 py-0.5 rounded-full border border-[var(--success)]/25 shrink-0">
+          <span className="text-xs bg-[var(--success)]/5 text-[var(--success)] px-2 py-0.5 rounded-full border border-[var(--success)]/25 shrink-0">
             {onlineCount} online
           </span>
           <span className="text-xs bg-[var(--bg-elevated)] text-[var(--fg-muted)] px-2 py-0.5 rounded-full border border-[var(--border)] shrink-0">
