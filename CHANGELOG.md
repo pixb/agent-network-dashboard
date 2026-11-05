@@ -6,6 +6,14 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.364 — 2026-11-05
+
+### 会话菜单可以用键盘操作了
+
+- 打开 ⋮ 菜单后按 Tab 原本要穿过整页才能到菜单项；现在打开即进入第一项，↑↓ 可在项间移动。
+- Esc 关闭后光标回到 ⋮ 按钮。
+- 同时修掉两处全局方向键抢焦点的问题（按 ↓ 会跳到输入框或换会话）。
+
 ## 0.6.4-preview.363 — 2026-11-05
 
 ### 节点设置抽屉：Esc 能关了，打开时光标也在里面
