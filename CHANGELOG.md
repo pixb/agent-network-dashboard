@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.376 — 2026-11-05
+
+### 卡片与面板的圆角放大一档，和客户端对齐
+
+- 设置、组织、供应商等页面的卡片，圆角从 12 调整到 16（客户端同一套刻度里卡片就是 16）。
+- 只改了「面」，按钮和输入框的圆角下一批单独调整。
+
 ## 0.6.4-preview.375 — 2026-11-05
 
 ### 需求页的排序箭头更好点了
