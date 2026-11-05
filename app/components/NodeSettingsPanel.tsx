@@ -734,7 +734,27 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
         tabIndex={-1}
         role="dialog"
         aria-label={`${s.alias} 节点设置`}
-        onKeyDown={e => { if (e.key === 'Escape') { e.stopPropagation(); onClose(); } }}
+        aria-modal="true"
+        onKeyDown={e => {
+          if (e.key === 'Escape') { e.stopPropagation(); onClose(); return; }
+          // 焦点陷阱：抽屉有遮罩，Tab 不能跑到被遮住的背景页去
+          //（实测未加之前，第 15 次 Tab 就落到 Expand servers panel / 背景链接）。
+          if (e.key !== 'Tab') return;
+          const focusables = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          ) ?? []).filter(el => el.offsetParent !== null);
+          if (focusables.length === 0) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          const active = document.activeElement as HTMLElement | null;
+          if (!e.shiftKey && (active === last || active === dialogRef.current)) {
+            e.preventDefault();
+            first.focus();
+          } else if (e.shiftKey && (active === first || active === dialogRef.current)) {
+            e.preventDefault();
+            last.focus();
+          }
+        }}
         className={`focus:outline-none ${scoped
           ? 'absolute top-0 right-0 h-full w-full sm:w-[360px] max-w-[360px] bg-[var(--bg)] border-l border-[var(--border)] z-50 flex flex-col animate-slide-in'
           : 'fixed top-0 right-0 h-[100dvh] w-full sm:w-[440px] bg-[var(--bg)] border-l border-[var(--border)] z-50 flex flex-col shadow-2xl shadow-black/60 animate-slide-in'}`}
