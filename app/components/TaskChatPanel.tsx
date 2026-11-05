@@ -1687,12 +1687,12 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                       <div className="flex items-center gap-1.5 min-w-0">
                         {m.to_name && <AliasAvatar alias={m.to_name} size={14} />}
                         <span className="text-[10px] text-[var(--fg)] font-medium truncate">{m.to_name}</span>
-                        <span className="text-[9px] text-green-300/70">replied</span>
+                        <span className="text-[9px] text-[var(--success)]">replied</span>
                       </div>
                       <CopyButton text={m.result || ''} label={t('复制回复', 'Copy reply')} />
                     </div>
-                    <div className="mb-2 rounded-lg border-l-2 border-cyan-400/40 bg-black/20 px-2.5 py-1.5">
-                      <div className="text-[9px] text-[var(--accent-text)]/80">
+                    <div className="mb-2 rounded-lg border-l-2 border-cyan-400/40 bg-[var(--bg)]/50 px-2.5 py-1.5">
+                      <div className="text-[9px] text-[var(--accent-text)]">
                         引用 {senderLabel} 的任务 · {formatTimestamp(m.created_at)}
                       </div>
                       <div className="mt-0.5 max-h-10 overflow-hidden text-[11px] leading-5 text-[var(--fg-muted)]">
