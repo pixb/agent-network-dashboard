@@ -247,6 +247,10 @@ export function NodeList({ sessions, selectedAlias, onSelect, search, onSearchCh
     if (typeof window === 'undefined') return;
     const onKey = (e: KeyboardEvent) => {
       if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown' && e.key !== 'Enter') return;
+      // 焦点在菜单/弹层里时不要接管：那些控件自己要用方向键。
+      // （实测：会话溢出菜单内按 ↓ 会被这里当成「切换侧栏会话」，直接换会话。）
+      const target = e.target as HTMLElement | null;
+      if (target?.closest?.('[role="menu"], [role="dialog"], [role="listbox"], [role="tablist"]')) return;
       const active = document.activeElement as HTMLElement | null;
       if (active) {
         const tag = active.tagName;
