@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.354 — 2026-11-05
+
+### 聊天空态图标改用描边 SVG
+
+- 节点页聊天空态原本用 emoji 当图标，缺 emoji 字体的环境（部分 Linux 桌面、无头/服务端预览）会显示成方框叉号。
+- 改为描边 SVG 气泡，与仓库既有的「emoji 换描边图标」约定一致。
+
 ## 0.6.4-preview.353 — 2026-11-04
 
 ### 桌面通知：点一下能把窗口拉回来，也能先自己试一条
