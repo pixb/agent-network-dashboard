@@ -57,10 +57,16 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (saved && THEMES.has(saved)) t = saved;
     } catch {}
     applyTheme(t);
-    // 选了「跟随系统」后，用户改 OS 明暗要立刻跟上（否则要刷新才生效）。
-    if (t !== 'system' || typeof window.matchMedia !== 'function') return;
+    // 「跟随系统」的监听必须常驻：用户可能在设置页中途才选 System，
+    // 只在挂载时判断 t === 'system' 会漏掉这种情况（实测：选完后改 OS 不跟随）。
+    // 回调里再读一次当前选择，只有仍是 system 才应用，避免覆盖用户手动选的主题。
+    if (typeof window.matchMedia !== 'function') return;
     const mq = window.matchMedia('(prefers-color-scheme: dark)');
-    const onChange = () => applyTheme('system');
+    const onChange = () => {
+      let saved = 'cyber';
+      try { saved = localStorage.getItem('anet-theme') || 'cyber'; } catch {}
+      if (saved === 'system') applyTheme('system');
+    };
     if (mq.addEventListener) mq.addEventListener('change', onChange);
     else mq.addListener(onChange);  // 老 Safari
     return () => {
