@@ -1448,7 +1448,10 @@ joining the R145
      「Vincent 2026-10-04『感觉这个绿色是真的丑』→ 换掉墨青」。
      此前这里是 #007a61 墨青绿，正是被否掉的那一版。对比度 4.98:1（对 --bg）/5.34:1（白底）。 */
   --accent:       #1b65db;
-  --accent-text:  var(--accent); /* 浅底上 accent 本身就够深 */
+  /* 浅色下 --accent(#1b65db) 作为文字放在「accent 15% 底」上只有 4.05:1（实测 /legion 的 3D 视图、
+     节点头部的 新建节点）。这里压深 0.9 到 #185bc5：同一色相，在 accent/15 上 4.76:1，
+     纯白底 ~5.3:1。填充与描边仍用 --accent，品牌色不变。 */
+  --accent-text:  #185bc5;
   --accent-fg:    #ffffff;
   --success:      #047857; /* was #059669 — 3.7:1 as text on white */
   --warning:      #a34708; /* was #d97706 — 3.19:1 as text on white */
