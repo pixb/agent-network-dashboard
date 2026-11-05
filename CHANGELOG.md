@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.362 — 2026-11-05
+
+### 关掉弹窗后，光标回到你刚才点的那个按钮
+
+- 新增供应商等弹窗按 Esc 或关闭后，焦点原本会掉到页面最开头。
+- 现在会回到打开它的按钮上，键盘操作不用重新找位置。
+
 ## 0.6.4-preview.361 — 2026-11-05
 
 ### 选了「跟随系统」后，改系统外观立刻就生效
