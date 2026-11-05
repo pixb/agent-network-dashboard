@@ -19,10 +19,11 @@ export async function GET(req: Request) {
 
   const { searchParams } = new URL(req.url);
   const networkId = searchParams.get('network_id') || '';
+  const status = searchParams.get('status') || '';
+  const sinceHours = Number(searchParams.get('sinceHours') || '0');
   const includeFilter = networkId && networkId !== 'all';
-  const qs = includeFilter
-    ? `?limit=500&network_id=${encodeURIComponent(networkId)}`
-    : '?limit=500';
+  const statusQs = status ? `&status=${encodeURIComponent(status)}` : '';
+  const qs = `?limit=500${includeFilter ? `&network_id=${encodeURIComponent(networkId)}` : ''}${statusQs}`;
 
   try {
     const res = await hubFetch(`/api/tasks${qs}`);
@@ -35,11 +36,18 @@ export async function GET(req: Request) {
     const data = await res.json();
     const tasks = Array.isArray(data.tasks) ? data.tasks : Array.isArray(data) ? data : [];
     const byStatus: Record<string, number> = {};
+    const since = sinceHours > 0 ? Date.now() - sinceHours * 3600_000 : 0;
+    let recent = 0;
     for (const t of tasks) {
-      const status = typeof t?.status === 'string' && t.status ? t.status : 'unknown';
-      byStatus[status] = (byStatus[status] || 0) + 1;
+      const st = typeof t?.status === 'string' && t.status ? t.status : 'unknown';
+      byStatus[st] = (byStatus[st] || 0) + 1;
+      if (since > 0) {
+        const when = t?.completed_at || t?.created_at;
+        const ts = when ? Date.parse(String(when)) : NaN;
+        if (Number.isFinite(ts) && ts >= since) recent += 1;
+      }
     }
-    return Response.json({ ok: true, total: tasks.length, byStatus }, { headers: { 'Cache-Control': 'no-store' } });
+    return Response.json({ ok: true, total: tasks.length, byStatus, recent }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err) {
     return Response.json(
       { ok: false, error: err instanceof Error ? err.message : 'hub request failed' },

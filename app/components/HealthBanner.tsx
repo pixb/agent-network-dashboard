@@ -55,8 +55,11 @@ export function HealthBanner() {
   // forever — a permanent warning is no warning. Only fetch the actual
   // failed tasks when stats reports any, and count just the last 24 h.
   const allTimeFailed = stats?.tasks?.by_status?.find(s => s.status === 'failed')?.count || 0;
-  const { data: failedTasks } = useSWR<{ tasks?: { created_at?: string | null; completed_at?: string | null }[] }>(
-    allTimeFailed > 0 ? '/api/hub/tasks?status=failed&limit=100' : null,
+  // 只需要「近 24h 失败数」，不需要失败任务本体。
+  // 旧实现拉 tasks?status=failed&limit=100（含 result 全文，生产实测约 400 KB），
+  // 再在前端按时间过滤计数；现在服务端数好只回一个数字。
+  const { data: failedStat } = useSWR<{ ok: boolean; recent?: number }>(
+    allTimeFailed > 0 ? '/api/hub/task-stats?status=failed&sinceHours=24' : null,
     fetcher,
     { refreshInterval: 60000, dedupingInterval: 30000, shouldRetryOnError: false },
   );
@@ -77,12 +80,7 @@ export function HealthBanner() {
   // #53 was opened for.
   const presenceBlind = !hubDown && health && presenceStatus(health.sse_sessions, health) === 'blind';
   // Coarse 24h window for the failed-task banner; poll-level freshness.
-  // eslint-disable-next-line react-hooks/purity
-  const dayAgo = Date.now() - 24 * 3600 * 1000;
-  const failed = (failedTasks?.tasks || []).filter(t => {
-    const at = parseHubTime(t.completed_at) ?? parseHubTime(t.created_at);
-    return at !== null && at >= dayAgo;
-  }).length;
+  const failed = failedStat?.recent ?? 0;
   const fleetEmpty = stats?.nodes?.total === 0;
 
   let kind: 'red' | 'amber' | 'green';
