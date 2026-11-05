@@ -60,8 +60,11 @@ export default function Dashboard() {
 
   const { sessions, hint: sessHint, error: sessError, isLoading } = useSessions();
   const { health } = useHealth();
-  const { tasks } = useTasks({ limit: '500' });
   const { stats } = useStats();
+  // 首页只在 /api/stats 没给 by_status 时才回退去数任务；生产实测
+  // tasks?limit=500 是 665,867 B，为了一份兜底统计下载 666 KB 不值得。
+  const statsHasTaskStatus = Boolean(stats?.tasks?.by_status?.length);
+  const { tasks } = useTasks({ limit: '500' }, stats != null && !statsHasTaskStatus);
   const [showTopo, setShowTopo] = useState(typeof window !== 'undefined' && window.innerWidth >= 1024);
   const cmd = useCommandCenter();
   // R8: one page-level unread computation; counts flow to memo'd cards as props.

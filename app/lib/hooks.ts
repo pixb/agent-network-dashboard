@@ -115,11 +115,14 @@ export function useAnetConfig() {
   return { config: data || null };
 }
 
-export function useTasks(params?: Record<string, string>) {
+export function useTasks(params?: Record<string, string>, enabled = true) {
   const { networkId, ready } = useNetworkId();
   const query = new URLSearchParams({ limit: '100', ...params }).toString();
+  // enabled=false → null key，SWR 不发请求。
+  // 用途：首页只在 /api/stats 没有 by_status 时才需要任务列表兜底，
+  // 而 tasks?limit=500 生产实测 665,867 B（约 666 KB）。
   const { data, error, isLoading } = useSWR(
-    scopedOrNull(`/api/hub/tasks?${query}`, networkId, ready),
+    enabled ? scopedOrNull(`/api/hub/tasks?${query}`, networkId, ready) : null,
     fetcher,
     SWR_OPTIONS,
   );
