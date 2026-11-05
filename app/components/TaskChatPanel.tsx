@@ -354,9 +354,9 @@ type StatusInfo = { label: string; hover: string; color: string; icon: React.Rea
 const STATUS_INFO: Record<string, StatusInfo> = {
   created:   { label: '发送中',   hover: '客户端已建消息，尚未收到 hub 回执。', color: 'text-[var(--fg-muted)]',   icon: <IconSending /> },
   queued:    { label: '排队中',   hover: '已入队，尚未推给节点。节点可能离线、或通道拥堵。', color: 'text-[var(--fg-muted)]',   icon: <IconClock /> },
-  delivered: { label: '已推送',   hover: 'hub 侧已标记推送。尚未确认节点是否收到（delivered_at 是入队时刻，不代表 SSE 已到达）。', color: 'text-sky-400',    icon: <IconCheck /> },
+  delivered: { label: '已推送',   hover: 'hub 侧已标记推送。尚未确认节点是否收到（delivered_at 是入队时刻，不代表 SSE 已到达）。', color: 'text-[var(--info)]', icon: <IconCheck /> },
   acked:     { label: '已接收',   hover: '节点进程已确认收到。未必已处理——对方 agent 可能尚未唤醒。', color: 'text-[var(--fg)]',   icon: <IconCheckDouble /> },
-  replied:   { label: '已回复',   hover: '对方已针对此消息回复。', color: 'text-emerald-400', icon: <IconCheckDouble filled /> },
+  replied:   { label: '已回复',   hover: '对方已针对此消息回复。', color: 'text-[var(--success)]', icon: <IconCheckDouble filled /> },
   failed:    { label: '失败',     hover: '发送失败——详细原因见消息下方文本。', color: 'text-[var(--danger)]',    icon: <IconWarn /> },
   closed:    { label: '已关闭',   hover: '会话已被关闭，不再期待回复。', color: 'text-[var(--fg-muted)]',   icon: <IconClose /> },
   expired:   { label: '已超时',   hover: '在期限内未收到回复，任务已超时。', color: 'text-[var(--fg-muted)]',   icon: <IconClock /> },
