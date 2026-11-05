@@ -109,7 +109,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       onClick={copy}
       aria-label={label}
       title={label}
-      className="shrink-0 rounded p-0.5 text-[10px] leading-none transition-opacity opacity-50 sm:opacity-0 sm:group-hover/bubble:opacity-70 hover:!opacity-100 text-[var(--fg-dim)] hover:text-[var(--accent-text)]"
+      className="shrink-0 rounded p-0.5 text-[11px] leading-none transition-opacity opacity-50 sm:opacity-0 sm:group-hover/bubble:opacity-70 hover:!opacity-100 text-[var(--fg-dim)] hover:text-[var(--accent-text)]"
     >
       {copied ? <span className="text-[var(--success)]">✓</span> : (
         <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -128,7 +128,7 @@ function ChatImage({ src, alt, thumbClass, onOpen }: { src: string; alt?: string
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   if (state === 'error') {
     return (
-      <span className={`${thumbClass} flex items-center justify-center bg-black/20 border border-[var(--border)] text-[10px] text-[var(--fg-dim)]`}>
+      <span className={`${thumbClass} flex items-center justify-center bg-black/20 border border-[var(--border)] text-[11px] text-[var(--fg-dim)]`}>
         {t('图片加载失败', 'Image failed to load')}
       </span>
     );
@@ -419,7 +419,7 @@ function StatusBar({ status, result }: { status: string; result?: string }) {
       {failedReason !== null && (
         <span
           data-status-reason={failedReason}
-          className="text-[10px] text-[var(--danger)]/80 max-w-[260px] truncate"
+          className="text-[11px] text-[var(--danger)]/80 max-w-[260px] truncate"
           title={result || undefined}
         >
           {failedReason}
@@ -540,7 +540,7 @@ function buildMdComponents(onImageClick?: (url: string) => void) {
             const lang = className?.replace(/^language-/, '') || '';
             return (
               <div className="my-2 rounded-lg overflow-hidden border border-[var(--border)]">
-                {lang && <div className="bg-[var(--code-bg)] px-3 py-1 text-[10px] text-[var(--fg-muted)] border-b border-[var(--border)]">{lang}</div>}
+                {lang && <div className="bg-[var(--code-bg)] px-3 py-1 text-[11px] text-[var(--fg-muted)] border-b border-[var(--border)]">{lang}</div>}
                 <pre className="bg-[var(--code-bg)] px-3 py-2 text-[11px] text-green-300 overflow-x-auto"><code>{children}</code></pre>
               </div>
             );
@@ -1582,7 +1582,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 placeholder={t('搜索会话…', 'Search conversation…')}
                 className="min-w-0 flex-1 bg-transparent text-xs text-[var(--fg)] placeholder-[var(--fg-dim)] focus:outline-none"
               />
-              <span className="shrink-0 text-[10px] tabular-nums text-[var(--fg-dim)]">
+              <span className="shrink-0 text-[11px] tabular-nums text-[var(--fg-dim)]">
                 {searchMatches.length ? `${Math.min(searchIdx, searchMatches.length - 1) + 1}/${searchMatches.length}` : searchQuery.trim() ? t('0 条', '0 found') : t(`${chatEvents.length} 条内`, `in ${chatEvents.length}`)}
               </span>
               <button type="button" onClick={() => stepMatch(-1)} aria-label={t('上一条（更早）', 'Previous (older)')} className="shrink-0 rounded px-1 text-[var(--fg-dim)] hover:text-[var(--accent-text)]">↑</button>
@@ -1626,7 +1626,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             </button>
           )}
           {historyLoaded && !hasOlder && messages.length > 0 && (
-            <div className="text-center text-[10px] text-[var(--fg-dim)] py-1">— beginning of history —</div>
+            <div className="text-center text-[11px] text-[var(--fg-dim)] py-1">— beginning of history —</div>
           )}
           {historyLoaded && !historyError && messages.length === 0 && (
             <div className="text-center py-12">
@@ -1665,7 +1665,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             const showSep = !prevAt || eventTime(event.at) - eventTime(prevAt) > TIME_GROUP_GAP_MS;
             const sepEl = showSep ? (
               <div className="flex justify-center py-1.5">
-                <span className="text-[10px] text-[var(--fg-dim)] bg-[var(--bg-elevated)] rounded px-2 py-0.5">{formatWeChatTime(event.at)}</span>
+                <span className="text-[11px] text-[var(--fg-dim)] bg-[var(--bg-elevated)] rounded px-2 py-0.5">{formatWeChatTime(event.at)}</span>
               </div>
             ) : null;
             // Distinguish task source so users can tell when a peer agent
@@ -1686,7 +1686,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <div className="flex items-center gap-1.5 min-w-0">
                         {m.to_name && <AliasAvatar alias={m.to_name} size={14} />}
-                        <span className="text-[10px] text-[var(--fg)] font-medium truncate">{m.to_name}</span>
+                        <span className="text-[11px] text-[var(--fg)] font-medium truncate">{m.to_name}</span>
                         <span className="text-[9px] text-[var(--success)]">replied</span>
                       </div>
                       <CopyButton text={m.result || ''} label={t('复制回复', 'Copy reply')} />
@@ -1738,7 +1738,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 )}
                 <div title={m.created_at} className={`group/bubble max-w-[92%] sm:max-w-[min(85%,56ch)] bg-[var(--accent)]/8 rounded-2xl rounded-br-md px-3 py-2.5 sm:px-4 ${currentMatchKey === `${m.task_id}:task` ? 'ring-2 ring-yellow-400/60' : ''}`}>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-[10px] font-medium ${fromUser ? 'text-[var(--accent-text)]' : 'text-purple-300'}`}>{senderLabel}</span>
+                    <span className={`text-[11px] font-medium ${fromUser ? 'text-[var(--accent-text)]' : 'text-purple-300'}`}>{senderLabel}</span>
                     {!fromUser && <span className="text-[9px] text-[var(--fg-dim)]">forwarded to {m.to_name}</span>}
                     <span className="flex-1" />
                     <CopyButton text={m.content || ''} label={t('复制内容', 'Copy message')} />
@@ -1767,7 +1767,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                         <button
                           type="button"
                           onClick={() => retrySend(m)}
-                          className="inline-flex items-center gap-1 rounded-md border border-red-500/40 bg-[var(--danger)]/10 px-1.5 py-0.5 text-[10px] font-medium text-red-300 hover:bg-[var(--danger)]/20"
+                          className="inline-flex items-center gap-1 rounded-md border border-red-500/40 bg-[var(--danger)]/10 px-1.5 py-0.5 text-[11px] font-medium text-red-300 hover:bg-[var(--danger)]/20"
                         >
                           <span aria-hidden>↻</span> {t('重发', 'Resend')}
                         </button>
@@ -1908,7 +1908,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             </button>
           </div>
           {(recording || recError) && (
-            <div className="mt-1 flex items-center gap-1.5 text-[10px]" role="status" data-testid="chat-voice-status">
+            <div className="mt-1 flex items-center gap-1.5 text-[11px]" role="status" data-testid="chat-voice-status">
               {recording ? (
                 <>
                   <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--danger)]" aria-hidden="true" />
@@ -1923,7 +1923,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             </div>
           )}
           {uploadProgress && (
-            <div className="mt-1 flex items-center gap-1.5 text-[10px] text-[var(--accent-text)]" role="status">
+            <div className="mt-1 flex items-center gap-1.5 text-[11px] text-[var(--accent-text)]" role="status">
               <span className="inline-block h-2.5 w-2.5 animate-spin rounded-full border-2 border-[var(--accent)]/30 border-t-cyan-400" />
               {t(`上传附件 ${uploadProgress.done}/${uploadProgress.total}…`, `Uploading ${uploadProgress.done}/${uploadProgress.total}…`)}
             </div>
@@ -1972,7 +1972,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                   </svg>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-[var(--fg-muted)]">
+              <div className="flex items-center gap-1.5 text-[11px] text-[var(--fg-muted)]">
                 {sseOnline !== null && (
                   <span aria-hidden className={`inline-block h-1.5 w-1.5 rounded-full ${sseOnline ? 'bg-green-400' : 'bg-gray-600'}`} />
                 )}

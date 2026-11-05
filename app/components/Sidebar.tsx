@@ -375,7 +375,7 @@ export function Sidebar() {
         {/* Network list */}
         {!collapsed && networks.length > 0 && (
           <div className="px-2 py-3 border-b border-[var(--border)]">
-            <div className="px-3 text-[10px] text-[var(--fg-dim)] uppercase mb-2">Network</div>
+            <div className="px-3 text-[11px] text-[var(--fg-dim)] uppercase mb-2">Network</div>
             <div className="relative" ref={netRef}>
               <button
                 type="button"
@@ -394,7 +394,7 @@ export function Sidebar() {
                     an admin can still tell at a glance whether the network
                     they are looking at is the one holding the fleet. */}
                 {activeNetwork?.agentCount ? (
-                  <span className="shrink-0 tabular-nums text-[10px] text-[var(--fg-dim)]">{activeNetwork.agentCount}</span>
+                  <span className="shrink-0 tabular-nums text-[11px] text-[var(--fg-dim)]">{activeNetwork.agentCount}</span>
                 ) : null}
                 <span className={`shrink-0 text-[9px] text-[var(--fg-dim)] transition-transform ${netOpen ? 'rotate-180' : ''}`}>▼</span>
               </button>
@@ -422,7 +422,7 @@ export function Sidebar() {
                       <span>{ROLE_ICON[n.role || 'member'] || '👤'}</span>
                       <span className="truncate flex-1">{n.displayName || n.network_name}</span>
                       {n.agentCount ? (
-                        <span className="shrink-0 tabular-nums text-[10px] text-[var(--fg-dim)]">{n.agentCount}</span>
+                        <span className="shrink-0 tabular-nums text-[11px] text-[var(--fg-dim)]">{n.agentCount}</span>
                       ) : null}
                     </button>
                   ))}
@@ -463,7 +463,7 @@ export function Sidebar() {
               </svg>
               {!collapsed && '主题'}
             </span>
-            {!collapsed && <span className="text-[10px] border border-current rounded px-1.5 py-0.5">{THEME_LABEL[theme]}</span>}
+            {!collapsed && <span className="text-[11px] border border-current rounded px-1.5 py-0.5">{THEME_LABEL[theme]}</span>}
           </button>
           <button
             onClick={() => {
@@ -481,7 +481,7 @@ export function Sidebar() {
               </svg>
               {!collapsed && 'Quick search'}
             </span>
-            {!collapsed && <kbd className="text-[10px] border border-current rounded px-1 py-0.5 font-mono">⌘K</kbd>}
+            {!collapsed && <kbd className="text-[11px] border border-current rounded px-1 py-0.5 font-mono">⌘K</kbd>}
           </button>
           <button
             onClick={async () => {
@@ -594,7 +594,7 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
       <BrandMark size={32} />
       <div className="min-w-0">
         <div className="text-white text-[13px] font-semibold leading-tight">Agent Network</div>
-        <div className="text-[10px] text-[var(--fg-muted)] flex items-center gap-1.5 mt-0.5">
+        <div className="text-[11px] text-[var(--fg-muted)] flex items-center gap-1.5 mt-0.5">
           <span
             className={`inline-block w-1.5 h-1.5 rounded-full ${online > 0 ? 'bg-emerald-400 anet-brand-pulse' : 'bg-gray-600'}`}
             aria-hidden

@@ -215,7 +215,7 @@ export default function ServerLogsPage() {
                 }`}
               >
                 <span>{lv}</span>
-                <span className={`text-[10px] tabular-nums ${isActive ? 'opacity-80' : 'text-gray-600'}`}>{count}</span>
+                <span className={`text-[11px] tabular-nums ${isActive ? 'opacity-80' : 'text-gray-600'}`}>{count}</span>
               </button>
             );
           })}
@@ -225,7 +225,7 @@ export default function ServerLogsPage() {
             actually narrowing the list. "500 / 500" duplicated the
             `all 500` chip 20px to its left. */}
         {filtered.length < logs.length && (
-          <span className="text-[10px] text-gray-600 ml-auto tabular-nums">
+          <span className="text-[11px] text-gray-600 ml-auto tabular-nums">
             {filtered.length} / {logs.length}
           </span>
         )}
@@ -287,7 +287,7 @@ export default function ServerLogsPage() {
                     at sm. The 2px left rail (LEVEL_STRIPE) already
                     encodes level visually for warn/error, so the LOG badge
                     is redundant on mobile — hide it below sm. */}
-                <span className="text-gray-600 shrink-0 w-[60px] sm:w-[100px] text-[9px] sm:text-[10px] tabular-nums">{shortTime(l.ts)}</span>
+                <span className="text-gray-600 shrink-0 w-[60px] sm:w-[100px] text-[9px] sm:text-[11px] tabular-nums">{shortTime(l.ts)}</span>
                 <span className={`hidden sm:inline shrink-0 px-1.5 rounded border text-[9px] uppercase ${LEVEL_BADGE[l.level]}`}>
                   {l.level}
                 </span>

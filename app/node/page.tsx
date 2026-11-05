@@ -160,7 +160,7 @@ function ExternalSchedulesCard({ snapshot, nodeId, onQueued }: {
     <div className="bg-[var(--bg-secondary)] rounded-2xl p-4" data-testid="external-schedules-card">
       <div className="flex items-center justify-between gap-3 mb-3">
         <h2 className="text-sm font-semibold text-gray-300">External schedules</h2>
-        <span className={`text-[10px] ${stale ? 'text-amber-400' : 'text-gray-600'}`} title={snapshot.observed_at}>
+        <span className={`text-[11px] ${stale ? 'text-amber-400' : 'text-gray-600'}`} title={snapshot.observed_at}>
           {stale ? 'stale report' : 'reported'} {reportedAgo}
         </span>
       </div>
@@ -177,29 +177,29 @@ function ExternalSchedulesCard({ snapshot, nodeId, onQueued }: {
             <div key={schedule.id} className="rounded-lg bg-[var(--col-inset)] px-3 py-2">
               <div className="flex items-center gap-2">
                 <span className="min-w-0 flex-1 truncate text-xs font-medium text-gray-300" title={schedule.name}>{schedule.name}</span>
-                <span className={`rounded px-1.5 py-0.5 text-[10px] ${
+                <span className={`rounded px-1.5 py-0.5 text-[11px] ${
                   schedule.last_status === 'failed' ? 'bg-red-950/50 text-red-300' :
                   schedule.last_status === 'running' ? 'bg-blue-950/50 text-blue-300' :
                   schedule.last_status === 'success' ? 'bg-emerald-950/50 text-emerald-300' :
                   'bg-gray-800 text-gray-400'
                 }`}>{schedule.last_status}</span>
-                {!schedule.enabled && <span className="text-[10px] text-gray-600">disabled</span>}
+                {!schedule.enabled && <span className="text-[11px] text-gray-600">disabled</span>}
                 {schedule.editable === true && Number.isSafeInteger(schedule.revision) && nodeId && (
                   <button
                     type="button"
                     disabled={stale}
                     onClick={() => openEdit(schedule)}
-                    className="rounded border border-[var(--accent)]/40 px-2 py-0.5 text-[10px] text-[var(--accent-text)] disabled:cursor-not-allowed disabled:opacity-40"
+                    className="rounded border border-[var(--accent)]/40 px-2 py-0.5 text-[11px] text-[var(--accent-text)] disabled:cursor-not-allowed disabled:opacity-40"
                     title={stale ? 'Wait for a fresh node report before editing' : 'Edit timing and enabled state'}
                   >Edit</button>
                 )}
               </div>
-              <div className="mt-1 text-[10px] text-gray-500">
+              <div className="mt-1 text-[11px] text-gray-500">
                 {schedule.kind} · {schedule.frequency}
                 {schedule.next_run_at ? ` · next ${timeAgo(schedule.next_run_at)}` : ''}
               </div>
-              {schedule.last_error && <div className="mt-1 text-[10px] text-red-300 break-words">{schedule.last_error}</div>}
-              {schedule.log_ref && <div className="mt-1 text-[10px] text-gray-600">log: {schedule.log_ref}</div>}
+              {schedule.last_error && <div className="mt-1 text-[11px] text-red-300 break-words">{schedule.last_error}</div>}
+              {schedule.log_ref && <div className="mt-1 text-[11px] text-gray-600">log: {schedule.log_ref}</div>}
             </div>
           ))}
         </div>
@@ -207,8 +207,8 @@ function ExternalSchedulesCard({ snapshot, nodeId, onQueued }: {
       {editing && (
         <div className="mt-3 rounded-lg border border-cyan-900/60 bg-cyan-950/10 p-3" data-testid="external-schedule-editor">
           <div className="text-xs font-medium text-gray-300">Edit {editing.name}</div>
-          <p className="mt-1 text-[10px] text-gray-500">Only five-field cron timing and enabled state can change. The command is immutable.</p>
-          <label className="mt-3 block text-[10px] text-gray-500">Five-field cron
+          <p className="mt-1 text-[11px] text-gray-500">Only five-field cron timing and enabled state can change. The command is immutable.</p>
+          <label className="mt-3 block text-[11px] text-gray-500">Five-field cron
             <input value={cron} onChange={(event) => setCron(event.target.value)} maxLength={120}
               className="mt-1 w-full rounded border border-[var(--border)] bg-[var(--col-inset)] px-2 py-1.5 font-mono text-xs text-gray-200" />
           </label>
@@ -224,7 +224,7 @@ function ExternalSchedulesCard({ snapshot, nodeId, onQueued }: {
       )}
       {editError && <p className="mt-2 text-xs text-red-300" role="alert">{editError}</p>}
       {editNotice && <p className="mt-2 text-xs text-emerald-300" role="status">{editNotice}</p>}
-      <p className="mt-3 text-[10px] text-gray-600">Reported by the node; Agent Network does not execute or verify these schedules.</p>
+      <p className="mt-3 text-[11px] text-gray-600">Reported by the node; Agent Network does not execute or verify these schedules.</p>
     </div>
   );
 }
@@ -380,7 +380,7 @@ function NodeFullPanel({ alias, session, sse, sendMsg, setSendMsg, sending, send
                 // 数字而不是光点：不切到 Chat 也知道积了几条。
                 <span
                   data-testid="node-chat-unread"
-                  className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[10px] font-semibold leading-[18px] text-white tabular-nums"
+                  className="inline-flex min-w-[18px] items-center justify-center rounded-full bg-red-500 px-1.5 text-[11px] font-semibold leading-[18px] text-white tabular-nums"
                   aria-label={`${unreadCount(alias)} 条未读消息`}
                 >
                   {badgeLabel(unreadCount(alias))}
@@ -519,7 +519,7 @@ function EventsTimeline({ events, loading }: { events: Array<{ id: number; event
     <div className="p-4 overflow-y-auto h-full space-y-4">
       {[...groups.entries()].map(([taskId, taskEvents]) => (
         <div key={taskId} className="bg-[var(--bg-secondary)] rounded-2xl p-4">
-          <div className="text-[10px] text-gray-600 mb-3 truncate">Task: {taskId.slice(0, 20)}...</div>
+          <div className="text-[11px] text-gray-600 mb-3 truncate">Task: {taskId.slice(0, 20)}...</div>
           <div className="relative pl-6">
             {/* Vertical line */}
             <div className="absolute left-[9px] top-2 bottom-2 w-0.5 bg-[var(--col-line)]" />
@@ -542,9 +542,9 @@ function EventsTimeline({ events, loading }: { events: Array<{ id: number; event
                         {e.event_type}
                       </span>
                       {e.from_status && (
-                        <span className="text-[10px] text-gray-600">{e.from_status} → {e.to_status}</span>
+                        <span className="text-[11px] text-gray-600">{e.from_status} → {e.to_status}</span>
                       )}
-                      <span className="text-[10px] text-gray-600 ml-auto">{timeAgo(e.created_at)}</span>
+                      <span className="text-[11px] text-gray-600 ml-auto">{timeAgo(e.created_at)}</span>
                     </div>
                     {e.detail && (
                       <div className="text-[11px] text-gray-500 mt-0.5 truncate">{e.detail.slice(0, 50)}{e.detail.length > 50 ? '...' : ''}</div>

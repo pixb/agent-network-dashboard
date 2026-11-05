@@ -535,7 +535,7 @@ export default function LegionPage() {
 
   /**
    * 导出当前视图为 PNG。两条坑：
-   *  1. Tailwind 的 `fill-[var(--fg)]` / `text-[10px]` 是类名，独立 SVG 里
+   *  1. Tailwind 的 `fill-[var(--fg)]` / `text-[11px]` 是类名，独立 SVG 里
    *     没有那条样式表，直接序列化会变成黑字 16px → 逐节点内联 computed style。
    *  2. SVG 背景是透明的，深色主题下导出的图上文字独自漂在透明底上 →
    *     先铺一层 --bg 实底，再 2x 光栅化（ retina 屏不糊）。
@@ -770,7 +770,7 @@ export default function LegionPage() {
                 <button
                   type="button"
                   onClick={() => setQuery('')}
-                  className="rounded px-1.5 py-0.5 text-[10px] text-[var(--accent-text)] hover:bg-[var(--hover-tint)]"
+                  className="rounded px-1.5 py-0.5 text-[11px] text-[var(--accent-text)] hover:bg-[var(--hover-tint)]"
                 >
                   清空搜索
                 </button>
@@ -822,7 +822,7 @@ export default function LegionPage() {
                 聚焦：{node?.label}
                 {facts && <span data-testid="legion-focus-facts" className="text-[var(--fg-muted)] tabular-nums">{facts}</span>}
                 {focusPath.includes(' / ') && (
-                  <span data-testid="legion-2d-focus-path" className="text-[10px] text-[var(--fg-dim)]">{focusPath}</span>
+                  <span data-testid="legion-2d-focus-path" className="text-[11px] text-[var(--fg-dim)]">{focusPath}</span>
                 )}
                 <span data-testid="legion-2d-focus" hidden>{node?.label}</span>
                 <button type="button" onClick={() => setFocusGroup(null)} aria-label="取消聚焦" className="text-[var(--fg-muted)] hover:text-[var(--fg)]">
@@ -1070,7 +1070,7 @@ export default function LegionPage() {
                   data-testid="legion-node-list"
                   className="absolute left-3 top-3 z-10 max-h-[70%] w-56 overflow-y-auto rounded-xl bg-[var(--bg)]/95 p-1.5 text-xs shadow-lg backdrop-blur sm:w-60"
                 >
-                  <label className="mb-1 flex items-center gap-1.5 rounded px-1.5 py-1 text-[10px] text-[var(--fg-muted)]">
+                  <label className="mb-1 flex items-center gap-1.5 rounded px-1.5 py-1 text-[11px] text-[var(--fg-muted)]">
                     <input
                       type="checkbox"
                       data-testid="legion-list-depts-only"
@@ -1088,7 +1088,7 @@ export default function LegionPage() {
                     const shownAll = qAll ? baseAll.filter(n => (n.label || '').toLowerCase().includes(qAll)) : baseAll;
                     if (shownAll.length > 0) return null;
                     return (
-                      <p data-testid="legion-list-empty-hint" className="px-2 py-2 text-[10px] leading-relaxed text-[var(--fg-muted)]">
+                      <p data-testid="legion-list-empty-hint" className="px-2 py-2 text-[11px] leading-relaxed text-[var(--fg-muted)]">
                         {listDeptsOnly
                           ? '当前只列部门，可能被这个筛选挡住了。'
                           : '没有匹配的节点。'}
@@ -1132,7 +1132,7 @@ export default function LegionPage() {
                             : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'
                         }`}
                       >
-                        <span className="w-8 shrink-0 text-[10px] text-[var(--fg-dim)]">{ringLabel(n)}</span>
+                        <span className="w-8 shrink-0 text-[11px] text-[var(--fg-dim)]">{ringLabel(n)}</span>
                         <span className="truncate">{n.label}</span>
                       </button>
                     ))}
@@ -1439,11 +1439,11 @@ export default function LegionPage() {
               <div className={`absolute bottom-3 left-3 flex items-center gap-1 rounded-lg bg-[var(--bg)]/80 p-1 backdrop-blur ${cleanView ? 'hidden' : ''}`}>
                 <button type="button" onClick={() => zoomBy(1.2)} aria-label="放大" className="rounded px-2 py-1 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]">＋</button>
                 <button type="button" onClick={() => zoomBy(1 / 1.2)} aria-label="缩小" className="rounded px-2 py-1 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]">－</button>
-                <button type="button" onClick={reset} aria-label="重置视图" className="rounded px-2 py-1 text-[10px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]">重置</button>
-                <span className="px-1 text-[10px] tabular-nums text-[var(--fg-muted)]">{Math.round(view.k * 100)}%</span>
+                <button type="button" onClick={reset} aria-label="重置视图" className="rounded px-2 py-1 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]">重置</button>
+                <span className="px-1 text-[11px] tabular-nums text-[var(--fg-muted)]">{Math.round(view.k * 100)}%</span>
               </div>
 
-              <div className="absolute right-3 top-3 flex flex-wrap items-center gap-2 rounded-lg bg-[var(--bg)]/80 px-2 py-1 text-[10px] text-[var(--fg-muted)] backdrop-blur">
+              <div className="absolute right-3 top-3 flex flex-wrap items-center gap-2 rounded-lg bg-[var(--bg)]/80 px-2 py-1 text-[11px] text-[var(--fg-muted)] backdrop-blur">
                 {/* 和 3D 页、导出图用同一套中文图例（之前这里是 working/idle/offline，
                     同一张图在页面上是英文、导出后是中文）。 */}
                 {([
@@ -1483,7 +1483,7 @@ export default function LegionPage() {
                       restoreFocusAfterUnmount(() => panelRef.current);
                       setSelected(null);
                     }}
-                    className="text-[10px] text-[var(--fg-muted)] hover:text-[var(--fg)]"
+                    className="text-[11px] text-[var(--fg-muted)] hover:text-[var(--fg)]"
                   >
                     返回全体
                   </button>
@@ -1506,7 +1506,7 @@ export default function LegionPage() {
                           setTimeout(() => setCopied(false), 1200);
                         }).catch(() => {});
                       }}
-                      className="shrink-0 rounded px-1.5 py-0.5 text-[10px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+                      className="shrink-0 rounded px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
                       aria-label={`复制 ${selectedNode.label} 的分享链接`}
                     >
                       {copied ? '已复制' : '复制链接'}
@@ -1561,7 +1561,7 @@ export default function LegionPage() {
                             className="flex w-full items-center justify-between rounded-md px-2 py-1 text-left text-xs text-[var(--fg)] hover:bg-[var(--hover-tint)]"
                           >
                             <span className="truncate">{child.label}</span>
-                            <span className="ml-2 shrink-0 text-[10px] text-[var(--fg-muted)]">
+                            <span className="ml-2 shrink-0 text-[11px] text-[var(--fg-muted)]">
                               {child.kind === 'agent' ? (statusByAlias.get(child.label) ?? '—') : `${child.agentCount}`}
                             </span>
                           </button>

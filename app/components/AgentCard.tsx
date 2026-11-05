@@ -137,7 +137,7 @@ function AgentCardInner({ session: s, hasSse, sseCount, onChat, unreadCount = 0 
           {s.agent || 'unknown'}
         </span>
         {hasSse && (
-          <span className="text-[10px] text-green-500">SSE:{sseCount}</span>
+          <span className="text-[11px] text-green-500">SSE:{sseCount}</span>
         )}
       </div>
 
@@ -160,7 +160,7 @@ function AgentCardInner({ session: s, hasSse, sseCount, onChat, unreadCount = 0 
           is no longer the constraint. */}
       {s.progress > 0 && (
         <div className="hidden sm:block mt-3">
-          <div className="flex justify-between text-[10px] mb-1">
+          <div className="flex justify-between text-[11px] mb-1">
             <span className="text-gray-600">Progress</span>
             <span className={cfg.text}>{s.progress}%</span>
           </div>
@@ -186,7 +186,7 @@ function AgentCardInner({ session: s, hasSse, sseCount, onChat, unreadCount = 0 
           brightens/nudges on hover, so it reads as a hint not a button.
           Presentational only — the onClick behaviour above is unchanged.
           #209 R40 density (mt-2 sm:mt-3) is preserved. */}
-      <div className="mt-2 sm:mt-3 flex justify-between items-center text-[10px] text-gray-600">
+      <div className="mt-2 sm:mt-3 flex justify-between items-center text-[11px] text-gray-600">
         {/* #217 D5 (Vincent: 乱七八糟的元素都可以删掉): the raw server
             hostname (cloud instance IDs like iZrj93…) is noise on a
             phone card — desktop keeps it, /node detail always has it. */}
@@ -198,11 +198,11 @@ function AgentCardInner({ session: s, hasSse, sseCount, onChat, unreadCount = 0 
               <svg className="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
               </svg>
-              <span className="hidden sm:inline text-[10px]">Chat</span>
+              <span className="hidden sm:inline text-[11px]">Chat</span>
             </span>
           ) : (
             <span className="inline-flex items-center gap-1 text-gray-600 group-hover:text-gray-400 transition-colors" aria-hidden>
-              <span className="hidden sm:inline text-[10px]">Details</span>
+              <span className="hidden sm:inline text-[11px]">Details</span>
               <svg className="w-3 h-3 transition-transform group-hover:translate-x-0.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                 <path d="M9 18l6-6-6-6" />
               </svg>

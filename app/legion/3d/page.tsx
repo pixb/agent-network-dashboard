@@ -2955,7 +2955,7 @@ export default function Legion3DPage() {
               {node.leader ? ` · 负责人 ${node.leader}` : ''}
             </p>
             {/* 讲解条也带上路径：演示时观众一直知道当前讲的是哪条链上的部门。 */}
-            <p data-testid="legion-3d-caption-path" className="mt-0.5 text-[10px] text-[var(--fg-dim)]">
+            <p data-testid="legion-3d-caption-path" className="mt-0.5 text-[11px] text-[var(--fg-dim)]">
               {(() => {
                 const byId = new Map(layout.nodes.map(n => [n.id, n]));
                 const chain: string[] = [];
@@ -3075,7 +3075,7 @@ export default function Legion3DPage() {
               return `${node.label} · ${node.memberCount} 人 · 下级 ${children}`;
             })()}</span>
             {/* 聚焦路径：深链/巡礼走到下一层部门时，观众需要知道它挂在哪条链上。 */}
-            <span data-testid="legion-3d-focus-path" className="text-[10px] text-[var(--fg-dim)]">
+            <span data-testid="legion-3d-focus-path" className="text-[11px] text-[var(--fg-dim)]">
               {(() => {
                 const node = layout.nodes.find(n => n.id === focus);
                 if (!node || node.kind !== 'group') return '';
@@ -3246,7 +3246,7 @@ export default function Legion3DPage() {
         </button>
         <label
           title="默认 720p（PPT 最稳）；1080p 仅用于其他场合"
-          className="flex items-center gap-1 rounded-lg px-1.5 py-1.5 text-[10px] text-[var(--fg-muted)]"
+          className="flex items-center gap-1 rounded-lg px-1.5 py-1.5 text-[11px] text-[var(--fg-muted)]"
         >
           <input
             type="checkbox"
@@ -3382,7 +3382,7 @@ export default function Legion3DPage() {
           style={{ maxHeight: 'min(52vh, calc(100% - var(--legion-list-top, 11rem) - 12px))' }}
           className={`absolute left-3 top-[var(--legion-list-top,11rem)] z-10 w-64 overflow-y-auto rounded-2xl bg-[var(--bg-secondary)]/96 p-1.5 text-xs shadow-lg backdrop-blur sm:block ${cleanView ? 'invisible' : 'visible'} ${listOpen ? 'block' : 'hidden'}`}
         >
-          <label className="mb-1 flex items-center gap-1.5 rounded px-1.5 py-1 text-[10px] text-[var(--fg-muted)]">
+          <label className="mb-1 flex items-center gap-1.5 rounded px-1.5 py-1 text-[11px] text-[var(--fg-muted)]">
             <input
               type="checkbox"
               data-testid="legion-3d-list-depts-only"
@@ -3402,7 +3402,7 @@ export default function Legion3DPage() {
             if (shownAll.length > 0) return null;
             // 与 2D 同口径：空列表要说清是搜索没命中，还是被「只列部门」挡住了。
             return (
-              <p data-testid="legion-3d-list-empty-hint" className="px-2 py-2 text-[10px] leading-relaxed text-[var(--fg-muted)]">
+              <p data-testid="legion-3d-list-empty-hint" className="px-2 py-2 text-[11px] leading-relaxed text-[var(--fg-muted)]">
                 {listDeptsOnly ? '当前只列部门，可能被这个筛选挡住了。' : '没有匹配的节点。'}
                 {listDeptsOnly && (
                   <button type="button" onClick={() => toggleDeptsOnly(false)} className="ml-1 underline hover:text-[var(--fg)]">
@@ -3448,7 +3448,7 @@ export default function Legion3DPage() {
                 <span className="w-8 shrink-0 text-[11px] text-[var(--fg-dim)]">{KIND_LABEL[n.kind]}</span>
                 <span className="truncate">{n.label}</span>
                 {/* 列表里直接给规模：挑部门时不必先点开看详情，也免得「平台」和「平台2组」看起来一样大。 */}
-                <span className="ml-auto shrink-0 tabular-nums text-[10px] text-[var(--fg-dim)]" data-testid={`legion-3d-list-facts-${n.id}`}>
+                <span className="ml-auto shrink-0 tabular-nums text-[11px] text-[var(--fg-dim)]" data-testid={`legion-3d-list-facts-${n.id}`}>
                   {n.kind === 'group'
                     ? `${n.memberCount} 人 · ${layout.nodes.filter(x => x.parentId === n.id && x.kind === 'group').length} 下级`
                     : n.kind === 'core'

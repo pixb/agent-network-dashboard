@@ -77,11 +77,11 @@ export function TaskList({
                       className="inline-block w-1.5 h-1.5 rounded-full shrink-0"
                       style={{ backgroundColor: STATUS_DOT_HEX[t.status] || '#6b7280' }}
                     />
-                    <span className="text-[10px] text-[var(--fg-muted)]">{t.status}</span>
+                    <span className="text-[11px] text-[var(--fg-muted)]">{t.status}</span>
                     {t.priority === 'high' && (
-                      <span className="text-[10px] text-red-400 shrink-0">HIGH</span>
+                      <span className="text-[11px] text-red-400 shrink-0">HIGH</span>
                     )}
-                    <span className="ml-auto shrink-0 text-[10px] tabular-nums text-[var(--fg-muted)]">
+                    <span className="ml-auto shrink-0 text-[11px] tabular-nums text-[var(--fg-muted)]">
                       {timeAgo(t.created_at)}
                     </span>
                   </div>

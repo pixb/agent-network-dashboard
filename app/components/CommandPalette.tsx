@@ -489,7 +489,7 @@ export function CommandPalette() {
             placeholder="Type a command or search…"
             className="flex-1 bg-transparent text-base sm:text-sm text-gray-200 placeholder-gray-600 focus:outline-none"
           />
-          <kbd className="text-[10px] text-gray-600 border border-[#26262b] rounded px-1.5 py-0.5 font-mono">esc</kbd>
+          <kbd className="text-[11px] text-gray-600 border border-[#26262b] rounded px-1.5 py-0.5 font-mono">esc</kbd>
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto py-2">
@@ -500,7 +500,7 @@ export function CommandPalette() {
           ) : (
             Object.entries(grouped).map(([groupName, items]) => (
               <div key={groupName} className="mb-2 last:mb-0">
-                <div className="text-[10px] uppercase tracking-[0.12em] text-gray-600 px-3 py-1">{groupName}</div>
+                <div className="text-[11px] uppercase tracking-[0.12em] text-gray-600 px-3 py-1">{groupName}</div>
                 {items.map(c => {
                   const idx = runningIdx++;
                   const isActive = idx === selected;
@@ -524,7 +524,7 @@ export function CommandPalette() {
                           </span>
                         )}
                       </span>
-                      {isActive && <span className="text-[10px] text-gray-500">↵</span>}
+                      {isActive && <span className="text-[11px] text-gray-500">↵</span>}
                     </button>
                   );
                 })}
@@ -533,7 +533,7 @@ export function CommandPalette() {
           )}
         </div>
 
-        <div className="border-t border-[#26262b] px-3 py-1.5 flex items-center justify-between text-[10px] text-gray-600">
+        <div className="border-t border-[#26262b] px-3 py-1.5 flex items-center justify-between text-[11px] text-gray-600">
           <span className="flex items-center gap-3">
             <span><kbd className="font-mono">↑↓</kbd> navigate</span>
             <span><kbd className="font-mono">↵</kbd> select</span>

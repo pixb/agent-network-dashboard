@@ -184,7 +184,7 @@ export default function AdminPage() {
                       SESSION_STATUS_CHIP_CLASS (was working-vs-other, which
                       rendered blocked/error identical to idle). */}
                   <span className={`text-xs px-2 py-0.5 rounded border ${SESSION_STATUS_CHIP_CLASS[s.status] || SESSION_STATUS_CHIP_CLASS.idle}`}>{s.status}</span>
-                  <span className="text-[10px] text-[var(--fg-dim)]">{timeAgo(s.updated_at)}</span>
+                  <span className="text-[11px] text-[var(--fg-dim)]">{timeAgo(s.updated_at)}</span>
                 </div>
               </div>
             ))}

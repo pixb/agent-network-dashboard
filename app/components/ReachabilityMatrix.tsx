@@ -168,8 +168,8 @@ export function ReachabilityMatrix({ providerId, models }: { providerId?: string
                         title={c.reason ? `${ui.label}: ${c.reason}` : ui.label} data-cell-status={c.status}>
                         <span aria-hidden>{ui.glyph}</span>
                         {c.status === 'ok'
-                          ? (c.latency_ms != null && <span className="tabular-nums text-[10px] opacity-80">{c.latency_ms}ms</span>)
-                          : <span className="text-[10px] opacity-80">{ui.tag}</span>}
+                          ? (c.latency_ms != null && <span className="tabular-nums text-[11px] opacity-80">{c.latency_ms}ms</span>)
+                          : <span className="text-[11px] opacity-80">{ui.tag}</span>}
                       </span>
                     </td>
                   );
@@ -179,7 +179,7 @@ export function ReachabilityMatrix({ providerId, models }: { providerId?: string
           </tbody>
         </table>
       </div>
-      <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-gray-500">
+      <div className="mt-2.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-gray-500">
         {LEGEND.map(s => {
           const ui = CELL_UI[s];
           return (

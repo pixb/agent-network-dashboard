@@ -369,7 +369,7 @@ function TasksViewInner({ initialSelectedId = null }: { initialSelectedId?: stri
                         )}
                         <span>{s || 'All'}</span>
                         <span
-                          className={`text-[10px] tabular-nums ${
+                          className={`text-[11px] tabular-nums ${
                             isActive ? 'text-[var(--fg-muted)]' : 'text-[var(--fg-dim)]'
                           }`}
                         >
@@ -428,7 +428,7 @@ function TasksViewInner({ initialSelectedId = null }: { initialSelectedId?: stri
                   <button
                     type="button"
                     onClick={clearAllFilters}
-                    className="rounded px-2 py-0.5 text-[10px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+                    className="rounded px-2 py-0.5 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
                   >
                     Clear
                   </button>
@@ -436,7 +436,7 @@ function TasksViewInner({ initialSelectedId = null }: { initialSelectedId?: stri
               </div>
 
               {filterDept && (
-                <p className="mb-2 text-[10px] leading-snug text-[var(--fg-dim)]" data-testid="tasks-dept-scope">
+                <p className="mb-2 text-[11px] leading-snug text-[var(--fg-dim)]" data-testid="tasks-dept-scope">
                   {filterDept === UNASSIGNED
                     ? `「未归属」= 参与者都不在通讯录或没有部门；命中数为当前这 ${tasks.length} 条任务里的投影结果。`
                     : `按「成员名下 Agent」归属部门筛选，命中数为当前这 ${tasks.length} 条任务里的投影结果，不是部门全量。`}

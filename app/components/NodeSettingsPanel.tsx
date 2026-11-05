@@ -273,9 +273,9 @@ function AvatarSection({ alias }: { alias: string }) {
               </button>
             )}
             {saveState === 'error' ? (
-              <span className="text-[10px] text-red-400" data-testid="avatar-save-error">{saveMsg}</span>
+              <span className="text-[11px] text-red-400" data-testid="avatar-save-error">{saveMsg}</span>
             ) : saveState === 'saved' ? (
-              <span className="text-[10px] text-emerald-400" data-testid="avatar-save-ok">已保存，全设备同步</span>
+              <span className="text-[11px] text-emerald-400" data-testid="avatar-save-ok">已保存，全设备同步</span>
             ) : (
               <span className="text-[11px] text-[var(--fg-dim)]">保存后跨设备同步（经 hub）</span>
             )}
@@ -953,7 +953,7 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
                     <label className={`flex items-center justify-between px-3 py-2 text-sm text-[var(--fg)] ${editable ? 'cursor-pointer hover:bg-[var(--bg-elevated)]' : 'cursor-not-allowed'}`}>
                       <span className="flex items-center gap-2">
                         {ch.label}
-                        {ch.roadmap && <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--control-off)] text-[var(--fg-muted)]">即将支持</span>}
+                        {ch.roadmap && <span className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--control-off)] text-[var(--fg-muted)]">即将支持</span>}
                       </span>
                       <input
                         type="checkbox"

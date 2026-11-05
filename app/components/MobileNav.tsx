@@ -97,7 +97,7 @@ export function MobileNav() {
               href={item.href}
               prefetch={false}
               aria-current={active ? 'page' : undefined}
-              className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[10px] transition-colors ${
+              className={`relative flex min-h-12 flex-col items-center justify-center gap-0.5 rounded-xl px-1 text-[11px] transition-colors ${
                 active
                   ? 'bg-cyan-500/12 text-cyan-300 before:absolute before:top-0 before:left-3 before:right-3 before:h-0.5 before:rounded-full before:bg-cyan-400'
                   : 'text-gray-500 active:bg-[#232327] active:text-gray-200'
