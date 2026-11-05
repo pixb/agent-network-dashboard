@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.356 — 2026-11-05
+
+### 手机上点搜索框的空白处也能输入了
+
+- 需求页与军团页的搜索框看着有 38px 高，但只有中间 20px 高的输入条能聚焦，点框内空白没反应。
+- 现在点框里任何位置都会聚焦到输入框（有效热区从 160×20 扩到整个框）。
+
 ## 0.6.4-preview.355 — 2026-11-05
 
 ### 暗色主题的次级文字看得清了
