@@ -6,6 +6,14 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.357 — 2026-11-05
+
+### 主题可以「跟随系统」了
+
+- 设置 → 外观新增 System：系统是深色就用深色，系统是浅色就用浅色。
+- 选了之后改系统外观，页面实时跟随，不用刷新。
+- 默认仍是深色不变，只有你主动选 System 才跟随。
+
 ## 0.6.4-preview.356 — 2026-11-05
 
 ### 手机上点搜索框的空白处也能输入了
