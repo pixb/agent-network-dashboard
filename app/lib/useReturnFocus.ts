@@ -45,6 +45,10 @@ export function useReturnFocus() {
 
     return () => {
       if (!opener || !document.contains(opener)) return;
+      // 若卸载的同时已经有别的弹层接管（菜单项打开设置抽屉就是这种），
+      // 不要再把焦点抢回原按钮——否则抽屉刚聚焦就被夺走，Esc 也随之失效
+      //（实测：会话设置抽屉打开后焦点停在 ⋮ 上，按 Esc 关不掉）。
+      if (document.querySelector('[role="dialog"]')) return;
       // 等一帧：遮罩先卸载，避免焦点被随后移除的元素吞掉
       setTimeout(() => {
         try {
