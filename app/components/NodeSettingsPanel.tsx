@@ -922,7 +922,7 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
                 它说的不是「这次写入成没成」，而是「它成不成得了，取决于这台机器上别的东西」。
                 只在写入已被接受的那几个 phase 显示（saving 还没结果，error 已被拒绝）。 */}
             {applyWarnings.length > 0 && (phase === 'applying' || phase === 'applied' || phase === 'timeout') && (
-              <ul role="status" aria-live="polite" className="mt-2 space-y-1 rounded-lg border border-amber-700/50 bg-[var(--warning)]/15/15 px-3 py-2 text-[12px] text-[var(--warning)]">
+              <ul role="status" aria-live="polite" className="mt-2 space-y-1 rounded-lg border border-[var(--warning)]/40 bg-[var(--warning)]/15/15 px-3 py-2 text-[12px] text-[var(--warning)]">
                 {applyWarnings.map(w => (
                   <li key={w} className="flex items-start gap-2">
                     <span className="shrink-0 leading-5" aria-hidden>⚠</span>
