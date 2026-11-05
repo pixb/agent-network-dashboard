@@ -1564,6 +1564,12 @@ joining the R145
   color: var(--fg-muted) !important;
 }
 
+/* 小控件圆角（item = 8）：由 app/lib/useRadiusTier.ts 在挂载后按**渲染高度**打标
+   （≤32 高 → data-radius-tier="item"）。CSS 看不到自身高度，故这里只认标签。 */
+[data-radius-tier="item"] {
+  border-radius: 8px !important;
+}
+
 /* 控件圆角对齐客户端 radius.control = 12（第二批）。
    依据客户端 theme.ts 语义刻度：控件（输入框/按钮/分段/搜索/菜单）= 12；
    ≤32 高的小控件属 item = 8，**本批不动**（保持原有 6px，避免新旧混排）。
