@@ -463,7 +463,7 @@ export function Sidebar() {
               </svg>
               {!collapsed && '主题'}
             </span>
-            {!collapsed && <span className="text-[10px] border border-current rounded px-1.5 py-0.5 opacity-70">{THEME_LABEL[theme]}</span>}
+            {!collapsed && <span className="text-[10px] border border-current rounded px-1.5 py-0.5">{THEME_LABEL[theme]}</span>}
           </button>
           <button
             onClick={() => {
@@ -481,7 +481,7 @@ export function Sidebar() {
               </svg>
               {!collapsed && 'Quick search'}
             </span>
-            {!collapsed && <kbd className="text-[10px] border border-current rounded px-1 py-0.5 opacity-60 font-mono">⌘K</kbd>}
+            {!collapsed && <kbd className="text-[10px] border border-current rounded px-1 py-0.5 font-mono">⌘K</kbd>}
           </button>
           <button
             onClick={async () => {
