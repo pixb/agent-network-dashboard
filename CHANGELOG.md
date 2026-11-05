@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.363 — 2026-11-05
+
+### 节点设置抽屉：Esc 能关了，打开时光标也在里面
+
+- 从会话菜单打开「会话设置」后，按 Esc 原本没有任何反应，只能用鼠标点关闭。
+- 现在 Esc 直接关闭，打开时焦点进入抽屉，关闭后回到菜单按钮。
+
 ## 0.6.4-preview.362 — 2026-11-05
 
 ### 关掉弹窗后，光标回到你刚才点的那个按钮
