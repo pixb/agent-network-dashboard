@@ -90,6 +90,15 @@ function NodeListRow({ session: s, selected, unread, onSelect, onContextMenu }: 
       data-node-muted={muted ? 'true' : 'false'}
       onClick={() => onSelect(s.alias)}
       onContextMenu={e => onContextMenu(s.alias, e)}
+      // 键盘等价于右键：Shift+F10（Windows 惯例）或菜单键。否则这三项
+      //（pin/mute/已读）只能鼠标右键——虽然别处有入口，标准行为仍应支持。
+      onKeyDown={e => {
+        if (e.key === 'ContextMenu' || (e.shiftKey && e.key === 'F10')) {
+          e.preventDefault();
+          const r = (e.currentTarget as HTMLElement).getBoundingClientRect();
+          onContextMenu(s.alias, { preventDefault() {}, clientX: r.left + 24, clientY: r.top + r.height / 2 } as React.MouseEvent);
+        }
+      }}
       // SPEC §11.1: pinned row = whole-row light background
       // rgba(125,211,252,0.04) (hover 0.08); no pin ICON (Feishu
       // pattern). Selected wins over both.
