@@ -1658,7 +1658,9 @@ joining the R145
 [data-theme="light"] .text-cyan-400,
 [data-theme="light"] .text-cyan-300,
 [data-theme="light"] .text-indigo-400 {
-  color: var(--accent) !important;
+  /* 用 accent-text 而不是 accent：这些类常出现在 accent 的浅色 tint 按钮上
+     （新建节点 bg-cyan-900/15），accent 原值在 tint 上只有 3.85:1。 */
+  color: var(--accent-text) !important;
 }
 
 /* Light theme: every "-300/400" accent text color needs a darker mid-tone

@@ -1133,7 +1133,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                 }`}
               >
                 {col.label}
-                <span className="ml-1.5 text-[10px] tabular-nums opacity-70">{count}</span>
+                <span className="ml-1.5 text-[10px] tabular-nums">{count}</span>
               </button>
             );
           })}
