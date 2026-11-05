@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.358 — 2026-11-05
+
+### 关掉快捷搜索后，光标回到你按之前的位置
+
+- 用 ⌘K / Ctrl+K 打开快捷搜索、再按 Esc 取消，焦点原本会掉到页面最开头。
+- 现在会回到你打开它之前待着的那个输入框或按钮，键盘操作不用重新找位置。
+
 ## 0.6.4-preview.357 — 2026-11-05
 
 ### 主题可以「跟随系统」了
