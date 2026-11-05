@@ -171,7 +171,7 @@ export default function LegionPage() {
   const hierarchy = useSWR<DepartmentsResponse | null>(
     networkReady && networkId ? scopedUrl('/api/hub/departments', networkId) : null, deptFetcher, { refreshInterval: 60000, shouldRetryOnError: false },
   );
-  const status = useSWR<StatusResponse>(networkReady && networkId ? scopedUrl('/api/hub/status', networkId) : null, fetcher, {
+  const status = useSWR<StatusResponse>(networkReady && networkId ? scopedUrl('/api/hub/session-status', networkId) : null, fetcher, {
     refreshInterval: 15000,
     shouldRetryOnError: false,
   });

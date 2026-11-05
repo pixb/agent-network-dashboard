@@ -159,8 +159,10 @@ export function Sidebar() {
   // The unfiltered /api/status response carries every visible session with
   // its network_id, so derive networks from there and merge them in — the
   // admin can then switch to any network that actually has agents.
+  // 只需 network_id 来推导网络列表；/api/hub/status 会回 710 KB 的全量对象
+  //（实测），这里换成投影后的紧凑端点（约 18 KB）。
   const { data: statusData } = useSWR<StatusData>(
-    '/api/hub/status', statusFetcher, { refreshInterval: 15000, dedupingInterval: 10000 },
+    '/api/hub/session-status', statusFetcher, { refreshInterval: 15000, dedupingInterval: 10000 },
   );
   const apiNetworks = netData?.networks || [];
   const networks: SidebarNetwork[] = (() => {
