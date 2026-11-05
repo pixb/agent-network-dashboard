@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.367 — 2026-11-05
+
+### 设置抽屉打开时，Tab 不会再跑到被遮住的页面上
+
+- 抽屉里 Tab 到最后一个控件后，焦点原本会跑到背景页（被遮罩挡住、看不见却能被键盘选中）。
+- 现在 Tab 在抽屉内首尾循环，且对话框被正确标记为模态。
+
 ## 0.6.4-preview.366 — 2026-11-05
 
 ### 从 ⋮ 菜单打开「会话设置」后，Esc 又能关了
