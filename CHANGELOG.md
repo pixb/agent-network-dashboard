@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.365 — 2026-11-05
+
+### 节点列表的右键菜单也能用键盘了
+
+- Shift+F10 或键盘上的菜单键可以打开节点操作菜单（固定/静音/标为已读）。
+- 打开后焦点在菜单里，↑↓ 选项，Esc 关闭并回到列表。
+
 ## 0.6.4-preview.364 — 2026-11-05
 
 ### 会话菜单可以用键盘操作了
