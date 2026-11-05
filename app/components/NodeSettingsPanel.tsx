@@ -425,6 +425,13 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
   const lifecycleCaps = useLifecycleCaps();
   const [renameVal, setRenameVal] = useState('');
   const [applyMode, setApplyMode] = useState<string | null>(null);
+  // RFC-024 `warnings[]`: hub 在**接受**这次写入的同时给出的旁注。
+  // 🔴 为什么单独一个 state、而不是塞进 phaseMsg：
+  //    它们是两个不同的事实 —— phase 说「这次写入有没有成」，
+  //    warnings 说「它成不成得了，取决于这台机器上别的东西」。
+  //    合并成一个字符串之后，超时那条会被读成「写入失败」，而实际是
+  //    「写入了，但可能永远不生效」。这两种结局对用户要做的事完全相反。
+  const [applyWarnings, setApplyWarnings] = useState<string[]>([]);
   // Outstanding lifecycle timers (real poll, auto-dismiss);
   // cleared on unmount and at the start of each new save so a stale timer can't
   // overwrite a fresh result.
@@ -569,6 +576,19 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
     }
   }
 
+  // RFC-024 `warnings[]` code → 一句能指导动作的话。
+  // 与 mapUpdateError 同一条纪律：**未知 code 原样露出**，不折叠成通用文案。
+  // 理由：折叠之后，「Hub 新增了一条提醒」这件事在界面上不可见 ——
+  // 而「没显示」与「没有」长得一模一样。
+  function warningText(code: string): string {
+    switch (code) {
+      case 'restart_supervision_unknown':
+        return '该节点没有声明「由守护进程托管重启」（restart_supervised 为 false 或未知）。写入已被接受，但重启级改动可能永远不会生效 —— 需要在目标机器上手动 `anet node` 重启。';
+      default:
+        return `未知旁注 ${code}：Hub 给了一条本界面还不认识的提醒，内容未翻译，请勿当作「没问题」。`;
+    }
+  }
+
   // Build a minimal diff patch vs the loaded snapshot (RFC-024 patch semantics:
   // only changed fields are sent — never force-writes untouched flags, and so
   // never trips invalid_patch on a field the user didn't touch).
@@ -601,6 +621,7 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
     const runId = ++applySeqRef.current;
     settledRef.current = false;
     setApplyMode(null);
+    setApplyWarnings([]);
 
     const patch = buildPatch();
     if (patch.model === undefined && !patch.flags && !patch.channels) {
@@ -678,6 +699,12 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
       // Accepted → optimistic "applying"; apply_mode flavours the progress copy.
       setDirty(false);
       setApplyMode(typeof d.apply_mode === 'string' ? (d.apply_mode as string) : null);
+      // Hub 接受这次写入时附带的旁注。**未知 code 原样保留**，不吞：
+      // 一个我们还不认识的 warning，正确显示是「未知旁注 xyz」，
+      // 而不是消失 —— 消失会让下一次新增的 warning 静默失效。
+      setApplyWarnings(
+        Array.isArray(d?.warnings) ? (d.warnings as unknown[]).filter((w): w is string => typeof w === 'string') : [],
+      );
       setPhase('applying');
       // Hard 30s ceiling regardless of poll/hub state (通信牛 review #11 blocker 2).
       after(APPLY_TIMEOUT_MS, () => markTimeout(runId));
@@ -891,6 +918,19 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
                 </div>
               );
             })()}
+            {/* RFC-024 warnings —— 与上面那条 phase 提示**分开渲染**：
+                它说的不是「这次写入成没成」，而是「它成不成得了，取决于这台机器上别的东西」。
+                只在写入已被接受的那几个 phase 显示（saving 还没结果，error 已被拒绝）。 */}
+            {applyWarnings.length > 0 && (phase === 'applying' || phase === 'applied' || phase === 'timeout') && (
+              <ul role="status" aria-live="polite" className="mt-2 space-y-1 rounded-lg border border-amber-700/50 bg-[var(--warning)]/15/15 px-3 py-2 text-[12px] text-[var(--warning)]">
+                {applyWarnings.map(w => (
+                  <li key={w} className="flex items-start gap-2">
+                    <span className="shrink-0 leading-5" aria-hidden>⚠</span>
+                    <span>{warningText(w)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
             {snapUnavailable && (
               <p className="mt-1 text-[11px] text-[var(--warning)]/80">无法读取该节点的配置快照（Hub 不可达或节点离线），暂不能保存。</p>
             )}
