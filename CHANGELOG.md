@@ -6,6 +6,14 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.380 — 2026-11-06
+
+### 打开页面时不再谎称「在等 Agent」
+
+- 侧栏的在线/总数状态此前只有「有数据」和「没数据」两种判断，于是**加载中**也会显示 `waiting for agents`，看起来像舰队空了；实测首屏约 6 秒都是这句话。
+- 现在区分四种状态：加载中显示 `loading…`，接口失败显示 `status unavailable`（附带可悬停查看的原因），确实一个 Agent 都没有时才是 `waiting for agents`。
+- 指示点同步：加载中为中性灰、失败为红点，不再用「离线灰」掩盖未知状态。
+
 ## 0.6.4-preview.379 — 2026-11-06
 
 ### 小字统一到一个尺寸，读起来更整齐
