@@ -2005,32 +2005,52 @@ export default function Legion3DPage() {
         // 选中时不画（右侧详情卡已经有完整信息）。
         const hv = hoverRef.current;
         const hp = hoverPos.current;
+        // 没有悬停时清掉钩子，避免探针读到上一次的残留文本。
+        if ((!hv || !hp) && canvasRef.current?.dataset.hoverCard) delete canvasRef.current.dataset.hoverCard;
         if (hv && hp && !selectedRef.current && !interacting) {
           const hitNode = nodes.find(n => n.item.id === hv);
           if (hitNode) {
             const nd = hitNode.item;
-            const status = nd.kind === 'agent' ? (statusByAlias.get(nd.label) ?? '未上报') : nd.kind === 'person' ? `${nd.agentCount} 个 Agent` : '';
-            const text = status ? `${nd.label} · ${status}` : nd.label;
+            // 两行：第一行「是什么」，第二行「有多少」。
+            // 部门节点此前只显示名字，看不出这个部门到底有没有人 —— 军团图最该回答的
+            // 恰恰是「这个部门多少人、多少 Agent」。
+            const line1 = nd.kind === 'group' && nd.leader ? `${nd.label} · ${nd.leader}` : nd.label;
+            const line2 = nd.kind === 'group'
+              ? `${nd.memberCount} 人 · ${nd.agentCount} Agent`
+              : nd.kind === 'person'
+                ? `${nd.agentCount} 个 Agent`
+                : nd.kind === 'agent'
+                  ? `${statusByAlias.get(nd.label) ?? '未上报'}`
+                  : '';
+            const lines = line2 ? [line1, line2] : [line1];
             ctx.font = '400 11px system-ui, -apple-system, "Noto Sans SC", sans-serif';
-            const w = ctx.measureText(text).width;
-            const padX = 6;
-            const boxW = w + padX * 2;
-            const boxH = 20;
+            const padX = 7;
+            const lineH = 14;
+            const boxH = lines.length === 2 ? 34 : 20;
+            const boxW = Math.max(...lines.map(l => ctx.measureText(l).width)) + padX * 2;
             const x = Math.max(6, Math.min(size.width - boxW - 6, hp.x + 14));
             const y = Math.max(6, hp.y - boxH - 8);
             ctx.globalAlpha = 0.94;
             ctx.fillStyle = tk.surface;
             ctx.beginPath();
-            ctx.roundRect(x, y, boxW, boxH, 5);
+            ctx.roundRect(x, y, boxW, boxH, 6);
             ctx.fill();
             ctx.strokeStyle = tk.border;
             ctx.lineWidth = 1;
             ctx.stroke();
-            ctx.fillStyle = tk.fg;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
-            ctx.fillText(text, x + padX, y + boxH / 2);
+            lines.forEach((line, i) => {
+              const cy = lines.length === 2 ? y + 10 + i * lineH : y + boxH / 2;
+              // 第二行降一级：名字是主信息，数量是补充。
+              ctx.fillStyle = i === 0 ? tk.fg : tk.dim;
+              ctx.globalAlpha = i === 0 ? 0.94 : 0.8;
+              ctx.fillText(line, x + padX, cy);
+            });
             ctx.globalAlpha = 1;
+            // 可断言钩子：画布上的文字 DOM 探针读不到，这里按帧暴露一份，
+            // 让「悬停卡片到底显示了什么」有据可查（沿用 dataset.nodeTextAlpha 的做法）。
+            if (canvasRef.current) canvasRef.current.dataset.hoverCard = lines.join(' | ');
           }
         }
       }
