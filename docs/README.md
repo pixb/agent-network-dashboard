@@ -23,3 +23,4 @@
 
 - [oss-security-gates.md](oss-security-gates.md) —— 仓库的 OSS 安全门：凭据、不可移植路径、依赖、lint、生产构建与历史扫描各查什么。
 - [军团 3D 可调参数与当前取值](legion-3d-tunables-20261105.md) — 「再震撼一点」的可执行拆解：每个常量当前值、往大往小的影响、改后必测项
+- [2026-11-05 交接](handoff-2026-11-05.md) — 19 个版本、判据修复（waitForPainted）、9 类交叉路径审计、4 项待决策
