@@ -39,6 +39,15 @@ jobs:
           bun-version: '1.3.14'
 
       # npm ci:同一个 commit 在不同时间必须装出同一份依赖图。
-      - run: npm ci
+      #
+      # Skip electron's postinstall binary download (~100MB from GitHub releases):
+      # 2026-11-05 the unit-tests job failed on `npm ci` with
+      # `HTTPError: Response code 504 (Gateway Time-out)` from electron/install.js
+      # on a docs-only PR — a network flake that has nothing to do with the diff.
+      # Nothing this job runs needs the binary (same rationale as oss-gates.yml).
+      - name: Install exact dependencies
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: npm ci
 
       - run: npm test

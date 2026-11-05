@@ -38,7 +38,11 @@ jobs:
           node-version: '22'
           cache: npm
 
-      - run: npm ci
+      # 同 unit-tests / oss-gates：这套用例只用 Chromium，不碰 electron 二进制。
+      - name: Install exact dependencies
+        env:
+          ELECTRON_SKIP_BINARY_DOWNLOAD: '1'
+        run: npm ci
 
       - name: Install Chromium
         run: npx playwright install --with-deps chromium
