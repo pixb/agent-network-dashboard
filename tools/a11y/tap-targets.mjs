@@ -37,8 +37,11 @@ for (const route of routes) {
         const cs = getComputedStyle(el, pe);
         if (cs.content === 'none' || cs.position !== 'absolute') continue;
         const num = v => (v && v.endsWith('px') ? parseFloat(v) : 0);
-        const ex = -(num(cs.left) + num(cs.right)); // inset-x:[-8px] → +16 宽
-        const ey = -(num(cs.top) + num(cs.bottom));
+        // 只有「负 inset」才是扩大热区（inset-x:[-8px] → +16 宽）。
+        // 正的 inset 表示伪元素比本体更小，不能当成缩小本体——否则会把 60×48
+        // 的底部标签算成 36×2（线上实测过的误报）。
+        const ex = Math.max(0, -(num(cs.left) + num(cs.right)));
+        const ey = Math.max(0, -(num(cs.top) + num(cs.bottom)));
         w += ex; h += ey; left -= ex / 2; top -= ey / 2;
       }
       return { w, h, left, top };
@@ -49,6 +52,14 @@ for (const route of routes) {
       if (r.top > innerHeight || r.bottom < 0) continue;
       const cs = getComputedStyle(el);
       if (cs.visibility === 'hidden' || cs.pointerEvents === 'none') continue;
+      // 1×1 的多半是「跳到主内容」这类 skip link，聚焦后才展开，不是指针目标。
+      if (r.width <= 2 && r.height <= 2) continue;
+      // 输入框本体小但外层可点时（本项目给它加了 cursor-text + 点击聚焦），
+      // 不该按本体的 160×20 报缺陷。
+      if (/^(INPUT|TEXTAREA)$/.test(el.tagName)) {
+        const host = el.parentElement;
+        if (host && getComputedStyle(host).cursor === 'text') continue;
+      }
       const eff = expand(el);
       if (eff.w < min || eff.h < min) {
         const label = (el.getAttribute('aria-label') || el.innerText || el.getAttribute('placeholder') || el.tagName).replace(/\s+/g, ' ').trim().slice(0, 24);
