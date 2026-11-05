@@ -263,7 +263,7 @@ export default function SettingsPage() {
                     <span
                       aria-hidden
                       className="inline-block h-5 w-5 shrink-0 rounded-full border border-black/20"
-                      style={{ backgroundColor: t.swatch }}
+                      style={{ background: t.swatch }}
                     />
                     {t.label}
                     {theme === t.id && (
