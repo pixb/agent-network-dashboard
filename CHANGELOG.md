@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.359 — 2026-11-05
+
+### 读屏器能念出聊天框、优先级和密码框了
+
+- 聊天输入框、优先级下拉、设置页两个密码框以前只有占位提示，读屏器念不出它们是什么。
+- 现在各自有了名称（如「Message 有主Agent」「Priority」「New password」）。
+
 ## 0.6.4-preview.358 — 2026-11-05
 
 ### 关掉快捷搜索后，光标回到你按之前的位置
