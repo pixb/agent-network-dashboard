@@ -400,6 +400,11 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
   // node can take config updates, whether a readable snapshot exists at all,
   // and the loaded baselines used to build a minimal diff patch.
   const revisionRef = useRef<number | null>(null);
+  // 抽屉打开时把焦点移进来：否则焦点留在触发按钮上，Esc 也到不了这里。
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    dialogRef.current?.focus({ preventScroll: true });
+  }, []);
   const loadedModelRef = useRef(initialModel);
   const loadedFlagsRef = useRef<FlagsForm>(DEFAULT_FLAGS);
   // Channels baseline for the diff patch (#31 + RFC-024): seeded from the
@@ -725,11 +730,14 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
       />
 
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-label={`${s.alias} 节点设置`}
-        className={scoped
+        onKeyDown={e => { if (e.key === 'Escape') { e.stopPropagation(); onClose(); } }}
+        className={`focus:outline-none ${scoped
           ? 'absolute top-0 right-0 h-full w-full sm:w-[360px] max-w-[360px] bg-[var(--bg)] border-l border-[var(--border)] z-50 flex flex-col animate-slide-in'
-          : 'fixed top-0 right-0 h-[100dvh] w-full sm:w-[440px] bg-[var(--bg)] border-l border-[var(--border)] z-50 flex flex-col shadow-2xl shadow-black/60 animate-slide-in'}
+          : 'fixed top-0 right-0 h-[100dvh] w-full sm:w-[440px] bg-[var(--bg)] border-l border-[var(--border)] z-50 flex flex-col shadow-2xl shadow-black/60 animate-slide-in'}`}
       >
         {/* Header */}
         <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[var(--border)]">
