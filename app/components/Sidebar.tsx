@@ -136,8 +136,8 @@ export function Sidebar() {
   // Theme switcher (Vincent 07-20 "主题还不能切换吗" — the Settings entry was
   // too buried; a sidebar control is findable from every page). Cycle order
   // matches Settings: 深色(默认) → 浅色 → Slack.
-  const THEME_CYCLE = ['cyber', 'light', 'slack'] as const;
-  const THEME_LABEL: Record<string, string> = { cyber: '深色', light: '浅色', slack: 'Slack' };
+  const THEME_CYCLE = ['cyber', 'light', 'slack', 'system'] as const;
+  const THEME_LABEL: Record<string, string> = { cyber: '深色', light: '浅色', slack: 'Slack', system: '跟随系统' };
   const [theme, setTheme] = useState('cyber');
   useEffect(() => {
     try { const t = localStorage.getItem('anet-theme'); if (t && THEME_LABEL[t]) setTheme(t); } catch {}

@@ -83,6 +83,10 @@ const themeBootScript = `
 try {
   var t = localStorage.getItem('anet-theme') || 'cyber';
   var el = document.documentElement;
+  // 「跟随系统」要在首帧前就解析掉，否则会先按默认深色画一帧再跳成浅色。
+  if (t === 'system') {
+    t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'cyber' : 'light';
+  }
   // slack 是 light 主题上的皮肤：两头都要在首帧前设好，否则会先闪一下
   // 普通浅色再切到 Slack 配色（applyTheme 的同一套约定）。
   if (t === 'slack') {

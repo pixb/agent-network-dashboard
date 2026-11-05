@@ -46,6 +46,8 @@ export const SETTINGS_THEMES = [
   { id: 'cyber', label: 'Dark', swatch: '#0b0b0d' },
   { id: 'light', label: 'Light', swatch: '#f6f7f9' },
   { id: 'slack', label: 'Slack', swatch: '#3f0e40' },
+  // 与客户端对齐：跟随操作系统的明暗偏好（web 走 prefers-color-scheme）。
+  { id: 'system', label: 'System', swatch: 'linear-gradient(135deg,#0b0b0d 0 50%,#f6f7f9 50% 100%)' },
 ] as const;
 
 /** Client-aligned group order. Kept as a literal so a reorder is a test failure. */
