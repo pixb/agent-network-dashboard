@@ -1561,6 +1561,18 @@ joining the R145
   color: var(--fg-muted) !important;
 }
 
+/* 暗色（cyber）：light/mint 早就把 gray 类映射到了 token，cyber 漏了。
+   实测深底上 gray-500 = 3.66:1、gray-600 = 2.19:1（「离线」几乎看不见）。
+   只映射 500/600：gray-400(#9ca3af) 在深底已是 7:1，不动。 */
+[data-theme="cyber"] .text-gray-500,
+[data-theme="cyber"] .placeholder-gray-600::placeholder {
+  color: var(--fg-muted) !important;
+}
+
+[data-theme="cyber"] .text-gray-600 {
+  color: var(--fg-dim) !important;
+}
+
 [data-theme="light"] .text-white,
 [data-theme="mint"] .text-white {
   color: var(--fg) !important;
