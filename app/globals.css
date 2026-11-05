@@ -1564,6 +1564,21 @@ joining the R145
   color: var(--fg-muted) !important;
 }
 
+/* 控件圆角对齐客户端 radius.control = 12（第二批）。
+   依据客户端 theme.ts 语义刻度：控件（输入框/按钮/分段/搜索/菜单）= 12；
+   ≤32 高的小控件属 item = 8，**本批不动**（保持原有 6px，避免新旧混排）。
+
+   两条实测教训（都来自圆角普查探针，不靠截图）：
+   1) 按类名猜语义会误伤 chip/告警条 → 改成按元素类型选（button/a/input/select/textarea）；
+   2) CSS 无法按高度选，「小尺寸」只能靠 class 线索排除。实测两次选错线索：
+      先用 `text-xs` → 把设置页 44px 高的分区标签（也是 text-xs）误排除，留 6 个 6px；
+      改用 `py-1`（小控件都用 py-1/py-1.5，大控件没有）后归零。
+      排除必须写在**同一条规则**里，否则会被 :not(.h-*) 抬高的特异性压过。
+   排除后：普通控件 12px，小控件维持原状（item 档另批处理）。 */
+:where(button, a, input, select, textarea):is([class*="rounded-lg"], [class*="rounded-md"]):not(.h-6):not(.h-7):not(.h-8):not(.size-6):not(.size-7):not(.size-8):not([class*="py-1"]) {
+  border-radius: 12px;
+}
+
 /* 暗色（cyber）：light/mint 早就把 gray 类映射到了 token，cyber 漏了。
    实测深底上 gray-500 = 3.66:1、gray-600 = 2.19:1（「离线」几乎看不见）。
    只映射 500/600：gray-400(#9ca3af) 在深底已是 7:1，不动。 */
