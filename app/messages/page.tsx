@@ -325,7 +325,7 @@ export default function MessagesPage() {
                   <AliasAvatar alias={conv.participants[1]} size={16} />
                   <span className="text-sm text-[var(--fg)] font-medium">{conv.participants[1]}</span>
                 </div>
-                <span className="text-[10px] text-[var(--fg-dim)]">{conv.messages.length} messages</span>
+                <span className="text-[11px] text-[var(--fg-dim)]">{conv.messages.length} messages</span>
               </div>
               <div className="px-4 py-2 space-y-2 max-h-64 overflow-y-auto">
                 {conv.messages.map(m => (

@@ -260,7 +260,7 @@ function HostCard({
         <span className="truncate font-semibold">{host.hostname}</span>
         <AlertChip level={alert} />
       </div>
-      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[10px] text-gray-500">
+      <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-gray-500">
         <span>{host.status === 'online' ? 'online' : host.status === 'offline' ? 'offline' : 'status unknown'}</span>
       </div>
       {daemon ? (
@@ -305,12 +305,12 @@ function HostCard({
 
 function RuntimeList({ runtimes, className = '' }: { runtimes?: string[]; className?: string }) {
   if (!runtimes || runtimes.length === 0) {
-    return <div className={`text-[10px] text-gray-600 ${className}`}>runtimes_supported: —</div>;
+    return <div className={`text-[11px] text-gray-600 ${className}`}>runtimes_supported: —</div>;
   }
   return (
     <div className={`flex flex-wrap gap-1 ${className}`}>
       {runtimes.map(r => (
-        <span key={r} className="rounded bg-[#1c1c1f] px-1.5 py-0.5 text-[10px] text-gray-400">{r}</span>
+        <span key={r} className="rounded bg-[#1c1c1f] px-1.5 py-0.5 text-[11px] text-gray-400">{r}</span>
       ))}
     </div>
   );
@@ -325,6 +325,6 @@ function AlertChip({ level }: { level: 'green' | 'yellow' | 'red' | 'gray' }) {
   }[level];
   const label = { green: '正常', yellow: '注意', red: '警报', gray: '离线' }[level];
   return (
-    <span className={`rounded border px-1.5 py-0.5 text-[10px] ${cls}`}>{label}</span>
+    <span className={`rounded border px-1.5 py-0.5 text-[11px] ${cls}`}>{label}</span>
   );
 }

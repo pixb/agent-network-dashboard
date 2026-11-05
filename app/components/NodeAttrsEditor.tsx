@@ -328,7 +328,7 @@ export function NodeAttrsEditor({ alias, nodeId, snapshot, onClose, onSaved }: N
               placeholder="留空以清除"
               className="mt-1 w-full rounded-md border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-sm text-white placeholder-gray-600 focus:border-cyan-500/40 focus:outline-none"
             />
-            <span className="mt-1 block text-[10px] text-[var(--fg-muted)]">
+            <span className="mt-1 block text-[11px] text-[var(--fg-muted)]">
               仅用于显示，不影响别人 @ 你的路由名（alias 保持 <code className="text-[var(--fg-muted)]">{alias}</code>）
             </span>
           </label>
@@ -391,7 +391,7 @@ export function NodeAttrsEditor({ alias, nodeId, snapshot, onClose, onSaved }: N
               // Advisory, not decisive — see the design comment at the
               // top of this file. Amber (not red) because the user may
               // still want to save; server will make the final call.
-              <div className="mt-1 text-[10px] text-amber-300/80" role="status">
+              <div className="mt-1 text-[11px] text-amber-300/80" role="status">
                 {addAdvisory}
               </div>
             )}
@@ -404,7 +404,7 @@ export function NodeAttrsEditor({ alias, nodeId, snapshot, onClose, onSaved }: N
             <ul className="list-disc space-y-0.5 pl-4">
               {notice.map((n, i) => <li key={i}>{n}</li>)}
             </ul>
-            <div className="mt-1 text-[10px] text-amber-200/60">
+            <div className="mt-1 text-[11px] text-amber-200/60">
               以上是服务端的实存结果，已同步到此表单
             </div>
           </div>

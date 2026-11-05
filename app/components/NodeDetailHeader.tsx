@@ -30,7 +30,7 @@ export function NodeDetailHeader({ alias, session, sse }: {
     <span aria-hidden="true" className={`inline-block h-1.5 w-1.5 shrink-0 rounded-full ${
       sse > 0 ? (session?.status === 'working' ? 'animate-pulse bg-green-500' : 'bg-emerald-400') : 'bg-gray-500'
     }`} />
-    <span className={`shrink-0 text-[10px] font-semibold uppercase tracking-wide ${statusColor}`}>{session?.status || 'unknown'}</span>
+    <span className={`shrink-0 text-[11px] font-semibold uppercase tracking-wide ${statusColor}`}>{session?.status || 'unknown'}</span>
   </>;
 
   const copyAlias = async () => {

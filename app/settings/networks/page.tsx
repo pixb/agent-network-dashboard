@@ -141,7 +141,7 @@ export default function NetworksPage() {
             {/* #217 D9: "N TOTAL" counter dropped below 4 rows — counting
                 a visibly one-item list is noise (D6 conditional rule). */}
             {networks.length > 3 && (
-              <span className="text-[10px] text-[var(--fg-dim)] uppercase tracking-wide">{networks.length} total</span>
+              <span className="text-[11px] text-[var(--fg-dim)] uppercase tracking-wide">{networks.length} total</span>
             )}
           </div>
           {loadFailed ? (
@@ -179,7 +179,7 @@ export default function NetworksPage() {
                       <AliasAvatar alias={n.network_name} size={28} />
                       <div className="min-w-0">
                         <div className="text-sm text-[var(--fg)] font-medium truncate">{n.network_name}</div>
-                        <div className="text-[10px] text-[var(--fg-muted)] font-mono truncate" title={n.network_id}>{n.network_id} · {timeAgo(n.created_at)}</div>
+                        <div className="text-[11px] text-[var(--fg-muted)] font-mono truncate" title={n.network_id}>{n.network_id} · {timeAgo(n.created_at)}</div>
                         {n.description && <div className="text-xs text-[var(--fg-muted)] mt-1">{n.description}</div>}
                       </div>
                     </div>
@@ -208,7 +208,7 @@ export default function NetworksPage() {
                     <div className="mt-3 pt-3 border-t border-[var(--border)]">
                       <div className="text-xs text-[var(--fg-muted)] mb-2">Members ({(members[n.network_id] || []).length})</div>
                       {(members[n.network_id] || []).length === 0 ? (
-                        <div className="text-[10px] text-[var(--fg-dim)]">No members or V3 auth required</div>
+                        <div className="text-[11px] text-[var(--fg-dim)]">No members or V3 auth required</div>
                       ) : (
                         (members[n.network_id] || []).map(m => {
                           const name = m.username || m.display_name || '?';
@@ -218,7 +218,7 @@ export default function NetworksPage() {
                               <AliasAvatar alias={name} size={16} />
                               <span className="text-[var(--fg)] truncate">{name}</span>
                             </div>
-                            <span className={`px-1.5 py-0.5 rounded border text-[10px] shrink-0 ${
+                            <span className={`px-1.5 py-0.5 rounded border text-[11px] shrink-0 ${
                               m.role === 'owner' ? 'text-yellow-300 border-yellow-500/20' : 'text-[var(--fg-muted)] border-gray-600/20'
                             }`}>{m.role}</span>
                           </div>
@@ -244,11 +244,11 @@ export default function NetworksPage() {
                         {inviteCode && (
                           <div className="mt-2 bg-green-500/5 border border-green-500/20 rounded px-3 py-2">
                             <div className="flex items-center justify-between mb-1">
-                              <div className="text-[10px] text-[var(--success)] uppercase tracking-wide">Invite code</div>
+                              <div className="text-[11px] text-[var(--success)] uppercase tracking-wide">Invite code</div>
                               <button
                                 type="button"
                                 onClick={() => { navigator.clipboard?.writeText(inviteCode).catch(() => {}); }}
-                                className="text-[10px] text-green-300 hover:text-green-200 px-1.5 py-0.5 rounded border border-green-500/20 hover:bg-green-500/10"
+                                className="text-[11px] text-green-300 hover:text-green-200 px-1.5 py-0.5 rounded border border-green-500/20 hover:bg-green-500/10"
                               >
                                 Copy
                               </button>

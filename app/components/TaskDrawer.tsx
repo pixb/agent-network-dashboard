@@ -86,7 +86,7 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
         <div className="flex items-center justify-between px-5 py-4 border-b border-[var(--border)] bg-[#111113] sticky top-0">
           <div>
             <div className="text-sm font-semibold text-[var(--fg)]">Task Detail</div>
-            <div className="text-[10px] text-[var(--fg-muted)] mt-0.5">{taskId.slice(0, 16)}...</div>
+            <div className="text-[11px] text-[var(--fg-muted)] mt-0.5">{taskId.slice(0, 16)}...</div>
           </div>
           {/* R16 of #190: same chat-panel close pattern — was ~32 px
               tap target; lift to a uniform 44 x 44 hit zone. */}
@@ -133,7 +133,7 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
               <div className="flex items-center justify-between mb-3">
                 <div className="text-xs text-[var(--fg-muted)] uppercase tracking-wide">Timeline</div>
                 {duration !== null && (
-                  <div className="text-[10px] text-[var(--fg-dim)]">
+                  <div className="text-[11px] text-[var(--fg-dim)]">
                     {duration < 60 ? `${duration}s` : `${Math.floor(duration/60)}m ${duration%60}s`} runtime
                   </div>
                 )}
@@ -171,7 +171,7 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
                           <span>{step.label}</span>
                           {isCurrent && <span className="text-[9px] uppercase tracking-wide text-[var(--accent-text)]">in&nbsp;progress</span>}
                         </div>
-                        <div className="text-[10px] text-[var(--fg-muted)]" title={step.time || undefined}>
+                        <div className="text-[11px] text-[var(--fg-muted)]" title={step.time || undefined}>
                           {step.time ? timeAgo(step.time) : isCurrent ? '—' : 'Pending'}
                         </div>
                       </div>
@@ -215,7 +215,7 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
             )}
 
             {/* Metadata */}
-            <div className="text-[10px] text-[var(--fg-dim)] space-y-1">
+            <div className="text-[11px] text-[var(--fg-dim)] space-y-1">
               <div>Task ID: {task.task_id}</div>
               {task.expires_at && <div>Expires: {task.expires_at}</div>}
             </div>

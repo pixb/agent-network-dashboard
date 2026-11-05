@@ -194,7 +194,7 @@ export function CreateNodeWizard({
           {STEPS.map((label, i) => (
             <div key={label} className="flex flex-1 flex-col items-center gap-1">
               <div className={`h-1 w-full rounded-full ${i <= step ? 'bg-[var(--accent)]' : 'bg-[var(--bg-elevated)]'}`} />
-              <span className={`text-[10px] ${i === step ? 'text-[var(--accent-text)]' : 'text-[var(--fg-dim)]'}`}>{label}</span>
+              <span className={`text-[11px] ${i === step ? 'text-[var(--accent-text)]' : 'text-[var(--fg-dim)]'}`}>{label}</span>
             </div>
           ))}
         </div>
@@ -295,7 +295,7 @@ export function CreateNodeWizard({
                       >
                         <span>
                           {r.label}
-                          {disabled && <span className="ml-2 text-[10px] text-gray-700">该 daemon 不支持</span>}
+                          {disabled && <span className="ml-2 text-[11px] text-gray-700">该 daemon 不支持</span>}
                         </span>
                         {selected && !disabled && (
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

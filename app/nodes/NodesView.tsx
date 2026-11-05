@@ -648,7 +648,7 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
           })}
           {filterTags.length >= 2 && (
             <span
-              className="text-[10px] text-cyan-300/80 ml-1 tabular-nums"
+              className="text-[11px] text-cyan-300/80 ml-1 tabular-nums"
               data-testid="filter-tags-and-hint"
             >
               {t(`= 同时具有 ${filterTags.length} 个标签`, `= AND of ${filterTags.length} tags`)}
@@ -785,14 +785,14 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
                       <DraftMark alias={s.alias} />
                       {/* 数字已经说了「几条」，同一个事实不再加一个 New 胶囊；
                           静音会话不显示数字，才用这个词提示。 */}
-                      {unread && isMuted(s.alias) && <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-red-300">New</span>}
+                      {unread && isMuted(s.alias) && <span className="shrink-0 rounded-full bg-red-500/15 px-2 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-red-300">New</span>}
                       <StatusLabel statusKey={statusKey} />
                     </div>
                     <div className="mt-0.5 truncate text-xs text-gray-500">
                       {(s.agent || '—')}<span className="text-gray-700 mx-1.5">·</span><span title={s.server || ''}>{shortServer(s.server)}</span>
                     </div>
                   </div>
-                  <span className="hidden shrink-0 rounded-lg border border-cyan-500/15 bg-cyan-500/5 px-2 py-1 text-[10px] text-cyan-300/70 sm:inline">Tap to chat</span>
+                  <span className="hidden shrink-0 rounded-lg border border-cyan-500/15 bg-cyan-500/5 px-2 py-1 text-[11px] text-cyan-300/70 sm:inline">Tap to chat</span>
                   {/* RFC-027 PR2 — per-node ⋮ lifecycle menu. The button stopsPropagation
                       internally so it doesn't open chat. lifecycleByAlias absent → 'active'
                       default, menu renders normal stop/delete options. */}
@@ -808,8 +808,8 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
 
                 <div className="mt-3 rounded-lg bg-[var(--bg)] px-3 py-2 text-xs">
                   <div className="flex items-center justify-between gap-3">
-                    <span className="text-[10px] uppercase tracking-wide text-gray-600">Current task</span>
-                    <span className="text-[10px] text-gray-600">{timeAgo(s.last_seen_at || s.updated_at)}</span>
+                    <span className="text-[11px] uppercase tracking-wide text-gray-600">Current task</span>
+                    <span className="text-[11px] text-gray-600">{timeAgo(s.last_seen_at || s.updated_at)}</span>
                   </div>
                   <div className={`mt-1 line-clamp-2 ${s.task ? 'text-gray-300' : 'text-gray-600 italic'}`}>
                     {s.task || 'No current task'}
@@ -922,7 +922,7 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
                         <div className="truncate text-sm font-medium text-white">{s.alias}</div>
                         {unread && isMuted(s.alias) && <span className="shrink-0 rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-red-300">New</span>}
                       </div>
-                      <div className="truncate text-[10px] text-gray-500">{s.agent || '—'} · {timeAgo(s.last_seen_at || s.updated_at)}</div>
+                      <div className="truncate text-[11px] text-gray-500">{s.agent || '—'} · {timeAgo(s.last_seen_at || s.updated_at)}</div>
                     </div>
                     <StatusLabel statusKey={statusKey} />
                     {/* RFC-027 PR2 ⋮ lifecycle menu — mobile list. */}

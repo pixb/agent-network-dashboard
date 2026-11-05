@@ -82,7 +82,7 @@ function Bar({ pct, label }: { pct: number; label: string }) {
   const clamped = Math.max(0, Math.min(100, pct));
   return (
     <div className="space-y-0.5">
-      <div className="flex justify-between text-[10px] text-[var(--fg-muted)] font-mono">
+      <div className="flex justify-between text-[11px] text-[var(--fg-muted)] font-mono">
         <span>{label}</span>
         <span className="tabular-nums">{Math.round(clamped)}%</span>
       </div>
@@ -175,7 +175,7 @@ function AgentList({ agents }: { agents?: ServerAgent[] }) {
         return (
           <li
             key={a.alias}
-            className="flex items-center gap-1.5 text-[10px] font-mono"
+            className="flex items-center gap-1.5 text-[11px] font-mono"
             data-server-agent={a.alias}
           >
             <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: statusColor }} />
@@ -231,24 +231,24 @@ export function ServersPanel({ enabled = true, className = '' }: { enabled?: boo
   return (
     <div className={`min-h-0 overflow-y-auto px-2 py-2 space-y-2 ${className}`} data-servers-body>
       {loading && (
-        <div className="text-[10px] text-[var(--fg-muted)] font-mono text-center py-4">
+        <div className="text-[11px] text-[var(--fg-muted)] font-mono text-center py-4">
           loading servers…
         </div>
       )}
       {error && !data && (
-        <div className="rounded-md border px-2.5 py-2 text-[10px] font-mono"
+        <div className="rounded-md border px-2.5 py-2 text-[11px] font-mono"
           style={{ background: 'rgb(239 68 68 / 0.06)', borderColor: 'rgb(239 68 68 / 0.25)', color: '#ef4444' }}>
           hub unreachable · retrying every 5s
         </div>
       )}
       {unavailable && (
-        <div className="text-[10px] text-[var(--fg-muted)] font-mono text-center py-3 leading-relaxed">
+        <div className="text-[11px] text-[var(--fg-muted)] font-mono text-center py-3 leading-relaxed">
           host telemetry not available<br/>
           <span className="text-[var(--fg-dim)]">upgrade commhub-server ≥ 0.8.1-preview.2</span>
         </div>
       )}
       {!loading && !error && !unavailable && servers.length === 0 && (
-        <div className="text-[10px] text-[var(--fg-muted)] font-mono text-center py-4">
+        <div className="text-[11px] text-[var(--fg-muted)] font-mono text-center py-4">
           no servers reporting yet
         </div>
       )}
@@ -286,7 +286,7 @@ export function ServersPanel({ enabled = true, className = '' }: { enabled?: boo
                 {s.note && <span className="text-[9px] text-[var(--fg-muted)]">({s.note})</span>}
               </div>
               <span className="flex items-center gap-1 shrink-0">
-                <span className="text-[10px] text-[var(--fg-muted)] font-mono tabular-nums">
+                <span className="text-[11px] text-[var(--fg-muted)] font-mono tabular-nums">
                   {s.agent_count}&nbsp;agent{s.agent_count === 1 ? '' : 's'}
                 </span>
                 {/* Chevron — rotates 90° on expanded */}
@@ -306,7 +306,7 @@ export function ServersPanel({ enabled = true, className = '' }: { enabled?: boo
               <Bar pct={memPct} label={`RAM ${s.mem_used_gb!.toFixed(1)}/${s.mem_total_gb!.toFixed(1)}G`} />
             )}
             {offline && (
-              <div className="text-[10px] text-[var(--fg-dim)] font-mono italic">CPU n/a · RAM n/a · offline</div>
+              <div className="text-[11px] text-[var(--fg-dim)] font-mono italic">CPU n/a · RAM n/a · offline</div>
             )}
             {/* v0.10.0 Hero 1+2: expanded detail — disk bar +
                 5-min sparklines + agent rollup. Visible only when
@@ -416,7 +416,7 @@ export function ServersDrawer() {
         {open && (
           <>
             <span className="flex-1 text-left">Servers</span>
-            <span className="text-[10px] text-[var(--fg-muted)] font-mono">{onlineCount}/{servers.length}</span>
+            <span className="text-[11px] text-[var(--fg-muted)] font-mono">{onlineCount}/{servers.length}</span>
           </>
         )}
       </button>

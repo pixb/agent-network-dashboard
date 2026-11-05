@@ -209,7 +209,7 @@ export function TagManager({ catalog, networkId, treeSupported, onClose, onAppli
 
               {(action.kind === 'create' || action.kind === 'move') && (
                 <label className="mt-2 block">
-                  <span className="text-[10px] text-[var(--fg-muted)]">父标签（顶级 = 根）</span>
+                  <span className="text-[11px] text-[var(--fg-muted)]">父标签（顶级 = 根）</span>
                   <select
                     aria-label="父标签"
                     value={parentDraft ?? ''}
@@ -262,7 +262,7 @@ export function TagManager({ catalog, networkId, treeSupported, onClose, onAppli
                         />
                         <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: tag.color || 'transparent', boxShadow: tag.color ? 'none' : 'inset 0 0 0 1px var(--border)' }} />
                         {tag.name}
-                        <span className="tabular-nums text-[10px] text-[var(--fg-dim)]">{tag.count}</span>
+                        <span className="tabular-nums text-[11px] text-[var(--fg-dim)]">{tag.count}</span>
                       </label>
                     </li>
                   ))}
@@ -289,15 +289,15 @@ export function TagManager({ catalog, networkId, treeSupported, onClose, onAppli
               <li key={tag.name} className="flex items-center gap-2 px-2.5 py-1.5" data-testid={`tag-row-${tag.name}`} data-depth={tag.depth} style={{ paddingLeft: 10 + (tag.depth - 1) * 14 }}>
                 <span aria-hidden className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: tag.color || 'transparent', boxShadow: tag.color ? 'none' : 'inset 0 0 0 1px var(--border)' }} />
                 <span className="min-w-0 flex-1 truncate text-xs text-[var(--fg)]">{tag.name}</span>
-                <span className="shrink-0 tabular-nums text-[10px] text-[var(--fg-dim)]">{tag.count}</span>
+                <span className="shrink-0 tabular-nums text-[11px] text-[var(--fg-dim)]">{tag.count}</span>
                 <span className="flex shrink-0 gap-1">
-                  <button type="button" aria-label={`改名 ${tag.name}`} onClick={() => openAction({ kind: 'rename', tag: tag.name })} className="rounded px-1.5 py-0.5 text-[10px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]">改名</button>
-                  <button type="button" aria-label={`合并 ${tag.name}`} onClick={() => openAction({ kind: 'merge', tag: tag.name })} className="rounded px-1.5 py-0.5 text-[10px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]">合并</button>
+                  <button type="button" aria-label={`改名 ${tag.name}`} onClick={() => openAction({ kind: 'rename', tag: tag.name })} className="rounded px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]">改名</button>
+                  <button type="button" aria-label={`合并 ${tag.name}`} onClick={() => openAction({ kind: 'merge', tag: tag.name })} className="rounded px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]">合并</button>
                   {treeSupported && (
-                    <button type="button" aria-label={`移动 ${tag.name}`} onClick={() => openAction({ kind: 'move', tag: tag.name })} className="rounded px-1.5 py-0.5 text-[10px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]">移动</button>
+                    <button type="button" aria-label={`移动 ${tag.name}`} onClick={() => openAction({ kind: 'move', tag: tag.name })} className="rounded px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]">移动</button>
                   )}
-                  <button type="button" aria-label={`颜色 ${tag.name}`} onClick={() => openAction({ kind: 'color', tag: tag.name })} className="rounded px-1.5 py-0.5 text-[10px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]">颜色</button>
-                  <button type="button" aria-label={`删除 ${tag.name}`} onClick={() => openAction({ kind: 'delete', tag: tag.name })} className="rounded px-1.5 py-0.5 text-[10px] text-[var(--danger)] hover:bg-[var(--hover-tint)]">删除</button>
+                  <button type="button" aria-label={`颜色 ${tag.name}`} onClick={() => openAction({ kind: 'color', tag: tag.name })} className="rounded px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]">颜色</button>
+                  <button type="button" aria-label={`删除 ${tag.name}`} onClick={() => openAction({ kind: 'delete', tag: tag.name })} className="rounded px-1.5 py-0.5 text-[11px] text-[var(--danger)] hover:bg-[var(--hover-tint)]">删除</button>
                 </span>
               </li>
             ))}

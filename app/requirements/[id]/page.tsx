@@ -683,7 +683,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
                   disabled={busy}
                   title="重命名（Hub 校验 1–80 字）"
                   onClick={() => { setNameDraft(req.name); setNameError(''); setRenaming(true); }}
-                  className="shrink-0 rounded border border-[var(--border)] px-1.5 py-0.5 text-[10px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] disabled:opacity-60"
+                  className="shrink-0 rounded border border-[var(--border)] px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)] disabled:opacity-60"
                 >
                   重命名
                 </button>
@@ -779,7 +779,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
         {/* #1634 — write surface. Hub keeps the rules (owner must be human,
             node tokens may not delete); this bar only sends whitelisted fields. */}
         <section className="mb-6 flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
-          <span className="text-[10px] uppercase tracking-wide text-gray-600">Status</span>
+          <span className="text-[11px] uppercase tracking-wide text-gray-600">Status</span>
           {COLUMN_OPTIONS.map(opt => (
             <button
               key={opt.key}
@@ -796,7 +796,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
             </button>
           ))}
           <span className="mx-1 h-4 w-px bg-[var(--border)]" />
-          <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-gray-600">
+          <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-gray-600">
             Priority
             <select
               value={req.priority}
@@ -807,7 +807,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
               {PRIORITY_OPTIONS.map(p => <option key={p} value={p}>{priorityLabel(p)} · {p}</option>)}
             </select>
           </label>
-          <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-gray-600">
+          <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-gray-600">
             项目
             <select
               aria-label="项目"
@@ -824,7 +824,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
               ))}
             </select>
           </label>
-          <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-gray-600">
+          <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-gray-600">
             Start
             <input
               type="date"
@@ -836,7 +836,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
               className="rounded border border-[var(--border)] bg-[var(--bg-secondary)] px-1.5 py-1 text-xs normal-case text-gray-200"
             />
           </label>
-          <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-gray-600">
+          <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-gray-600">
             Due
             <input
               type="date"
@@ -848,7 +848,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
               className="rounded border border-[var(--border)] bg-[var(--bg-secondary)] px-1.5 py-1 text-xs normal-case text-gray-200"
             />
           </label>
-          <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-gray-600">
+          <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-gray-600">
             负责人
             <select
               aria-label="负责人（人）"
@@ -871,7 +871,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
               )}
             </select>
           </label>
-          <label className="flex items-center gap-1.5 text-[10px] uppercase tracking-wide text-gray-600">
+          <label className="flex items-center gap-1.5 text-[11px] uppercase tracking-wide text-gray-600">
             负责 Agent
             <select
               aria-label="负责 Agent"
@@ -910,8 +910,8 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
                 placeholder="逗号分隔"
                 className="w-44 rounded border border-[var(--border)] bg-[var(--bg-secondary)] px-1.5 py-1 text-xs text-gray-200"
               />
-              <button type="button" data-testid="requirement-save-tags" disabled={busy} onClick={() => void saveTags()} className="rounded bg-[var(--hl)] px-2 py-0.5 text-[10px] text-[var(--bg)] disabled:opacity-60">保存</button>
-              <button type="button" onClick={() => { setEditingTags(false); setEditError(''); }} className="text-[10px] text-gray-500 underline">取消</button>
+              <button type="button" data-testid="requirement-save-tags" disabled={busy} onClick={() => void saveTags()} className="rounded bg-[var(--hl)] px-2 py-0.5 text-[11px] text-[var(--bg)] disabled:opacity-60">保存</button>
+              <button type="button" onClick={() => { setEditingTags(false); setEditError(''); }} className="text-[11px] text-gray-500 underline">取消</button>
               {editorTagSuggestions(tagCatalog, tagsDraft).length > 0 && (
                 <span className="ml-1 flex flex-wrap items-center gap-1" data-testid="requirement-tag-suggestions">
                   {editorTagSuggestions(tagCatalog, tagsDraft).map(suggestion => (
@@ -919,7 +919,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
                       key={suggestion.name}
                       type="button"
                       onClick={() => setTagsDraft(prev => (prev.trim() ? `${prev.trim().replace(/[,，]$/, '')}, ${suggestion.name}` : suggestion.name))}
-                      className="inline-flex items-center gap-1 rounded border border-[var(--border)] px-1.5 py-0.5 text-[10px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
+                      className="inline-flex items-center gap-1 rounded border border-[var(--border)] px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
                       data-testid={`requirement-tag-suggestion-${suggestion.name}`}
                     >
                       {suggestion.color && <span aria-hidden className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: suggestion.color }} />}
@@ -1010,7 +1010,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
                 rows={8}
                 className="w-full resize-y rounded-lg border border-[var(--border)] bg-[var(--bg)] px-2.5 py-2 font-mono text-xs text-gray-200 focus:border-[var(--border-hover)] focus:outline-none"
               />
-              <p className="mt-1 text-[10px] text-[var(--fg-dim)]">{descriptionDraft.length}/20000 · 支持 Markdown</p>
+              <p className="mt-1 text-[11px] text-[var(--fg-dim)]">{descriptionDraft.length}/20000 · 支持 Markdown</p>
               {editError && <p role="alert" className="mt-1 text-[11px] text-[var(--danger)]">{editError}</p>}
             </div>
           ) : req.description ? (
@@ -1058,8 +1058,8 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
               </div>
               {checklistError && <p role="alert" data-testid="checklist-error" className="mt-1 text-[11px] text-[var(--danger)]">{checklistError}</p>}
               <div className="mt-2 flex items-center gap-2">
-                <button type="button" data-testid="requirement-save-checklist" disabled={busy} onClick={() => void saveChecklist()} className="rounded bg-[var(--hl)] px-2 py-0.5 text-[10px] text-[var(--bg)] disabled:opacity-60">保存</button>
-                <button type="button" onClick={() => { setEditingChecklist(false); setChecklistError(''); }} className="text-[10px] text-gray-500 underline">取消</button>
+                <button type="button" data-testid="requirement-save-checklist" disabled={busy} onClick={() => void saveChecklist()} className="rounded bg-[var(--hl)] px-2 py-0.5 text-[11px] text-[var(--bg)] disabled:opacity-60">保存</button>
+                <button type="button" onClick={() => { setEditingChecklist(false); setChecklistError(''); }} className="text-[11px] text-gray-500 underline">取消</button>
               </div>
             </div>
           ) : checklist.length === 0 ? (
@@ -1107,7 +1107,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
                         data-testid={`requirement-issue-remove-${issueLabel(issue)}`}
                         disabled={busy}
                         onClick={() => removeIssueRow(issueLabel(issue))}
-                        className="ml-auto shrink-0 rounded border border-[var(--border)] px-1.5 py-0.5 text-[10px] text-gray-400 hover:text-gray-200 disabled:opacity-60"
+                        className="ml-auto shrink-0 rounded border border-[var(--border)] px-1.5 py-0.5 text-[11px] text-gray-400 hover:text-gray-200 disabled:opacity-60"
                       >
                         移除
                       </button>
@@ -1178,8 +1178,8 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
                         disabled={parentBusy}
                         className="flex w-full items-center gap-2 px-2 py-1 text-left text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]"
                       >
-                        <span className="tabular-nums text-[10px] text-gray-500">#{row.seq}</span>
-                        <span className="rounded bg-[var(--bg-elevated)] px-1 text-[10px]">{row.column}</span>
+                        <span className="tabular-nums text-[11px] text-gray-500">#{row.seq}</span>
+                        <span className="rounded bg-[var(--bg-elevated)] px-1 text-[11px]">{row.column}</span>
                         <span className="min-w-0 flex-1 truncate">{row.name}</span>
                       </button>
                     </li>
@@ -1198,7 +1198,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
                 <li key={row.id}>
                   <Link href={`/requirements/${row.id}`} className="flex flex-wrap items-center gap-2 rounded-lg border border-[var(--border)] px-2 py-1.5 text-sm hover:bg-[var(--hover-tint)]">
                     <span className="tabular-nums text-[11px] text-gray-500">#{row.seq}</span>
-                    <span className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] text-gray-400">{row.column}</span>
+                    <span className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[11px] text-gray-400">{row.column}</span>
                     <span className="text-[11px] text-gray-400" title={priorityTitle(row.priority)}>{priorityLabel(row.priority)}</span>
                     <span className="min-w-0 flex-1 truncate text-gray-200">{row.name}</span>
                   </Link>

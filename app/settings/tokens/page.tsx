@@ -133,11 +133,11 @@ export default function TokensPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-[var(--fg)] font-medium">{t.name}</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded border ${
+                      <span className={`text-[11px] px-1.5 py-0.5 rounded border ${
                         t.scope === 'full' ? 'text-[var(--accent-text)] border-[var(--accent)]/20 bg-[var(--accent)]/5' : 'text-[var(--fg-muted)] border-gray-600/20'
                       }`}>{t.scope}</span>
                     </div>
-                    <div className="text-[10px] text-[var(--fg-muted)]">{t.token_id} · network: {t.network_id?.slice(0, 12) || '--'} · used {timeAgo(t.last_used_at)}</div>
+                    <div className="text-[11px] text-[var(--fg-muted)]">{t.token_id} · network: {t.network_id?.slice(0, 12) || '--'} · used {timeAgo(t.last_used_at)}</div>
                   </div>
                   <button onClick={() => revokeToken(t.token_id)}
                     className="text-xs text-[var(--danger)] hover:text-red-300 px-2 py-1 rounded border border-red-800/30 hover:bg-[var(--danger)]/10 transition-colors">
