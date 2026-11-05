@@ -129,7 +129,7 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
 
             {/* Timeline — round 36 polish: relative timestamps, current-step
                 pulse if task is still in flight, full ISO in title=. */}
-            <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4">
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-4">
               <div className="flex items-center justify-between mb-3">
                 <div className="text-xs text-[var(--fg-muted)] uppercase tracking-wide">Timeline</div>
                 {duration !== null && (
@@ -182,14 +182,14 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
             </div>
 
             {/* Content */}
-            <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4">
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-4">
               <div className="text-xs text-[var(--fg-muted)] uppercase mb-2">Input</div>
               <div className="text-sm text-[var(--fg)] whitespace-pre-wrap">{task.content || '--'}</div>
             </div>
 
             {/* Result */}
             {task.result && (
-              <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-4">
                 <div className="text-xs text-[var(--fg-muted)] uppercase mb-2">Output</div>
                 <div className="text-sm text-[var(--fg)] whitespace-pre-wrap max-h-64 overflow-y-auto">{task.result}</div>
               </div>
@@ -197,7 +197,7 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
 
             {/* Events */}
             {events.length > 0 && (
-              <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4">
+              <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-4">
                 <div className="text-xs text-[var(--fg-muted)] uppercase mb-2">Events ({events.length})</div>
                 <div className="space-y-1.5 max-h-40 overflow-y-auto">
                   {events.map(e => (

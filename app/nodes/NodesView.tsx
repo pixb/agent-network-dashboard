@@ -756,7 +756,7 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
                 data-node-alias={s.alias}
                 onClick={() => selectNode(s.alias)}
                 onKeyDown={e => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); selectNode(s.alias); } }}
-                className={`relative min-w-0 max-w-full overflow-hidden rounded-xl bg-[var(--bg-secondary)] p-4 transition-colors hover:bg-[var(--hover-tint)] cursor-pointer ${!s.online ? 'opacity-60' : ''}`}
+                className={`relative min-w-0 max-w-full overflow-hidden rounded-2xl bg-[var(--bg-secondary)] p-4 transition-colors hover:bg-[var(--hover-tint)] cursor-pointer ${!s.online ? 'opacity-60' : ''}`}
               >
                 {!s.online && (
                   <div className="pointer-events-none absolute inset-0 flex items-center justify-center">

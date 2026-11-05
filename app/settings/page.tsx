@@ -76,7 +76,7 @@ export default function SettingsPage() {
   const [pwdResult, setPwdResult] = useState('');
   const rowClass = 'flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between';
   const valueClass = 'break-all sm:max-w-[320px] sm:text-right';
-  const cardClass = 'rounded-xl bg-[var(--bg-secondary)] p-5';
+  const cardClass = 'rounded-2xl bg-[var(--bg-secondary)] p-5';
 
   return (
     <div className="min-h-screen bg-[var(--bg)] p-4 text-[var(--fg)] sm:p-6">
@@ -230,7 +230,7 @@ export default function SettingsPage() {
             <GroupHeading id="team" label="Team" />
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {SETTINGS_LINKS.filter(l => l.group === 'team').map(l => (
-                <Link key={l.href} href={l.href} className="rounded-xl bg-[var(--bg-secondary)] p-5 transition-colors hover:bg-[var(--bg-elevated)]">
+                <Link key={l.href} href={l.href} className="rounded-2xl bg-[var(--bg-secondary)] p-5 transition-colors hover:bg-[var(--bg-elevated)]">
                   <h3 className="text-sm font-semibold">{l.title}</h3>
                   <p className="mt-2 text-xs text-[var(--fg-muted)]">{l.desc}</p>
                   <span className="mt-3 inline-block text-xs text-[var(--hl)]">{l.action} &rarr;</span>
@@ -335,7 +335,7 @@ export default function SettingsPage() {
                 need a discovery surface that isn't the primary nav. */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {SETTINGS_LINKS.filter(l => l.group === 'resource').map(l => (
-                <Link key={l.href} href={l.href} className="rounded-xl bg-[var(--bg-secondary)] p-5 transition-colors hover:bg-[var(--bg-elevated)]">
+                <Link key={l.href} href={l.href} className="rounded-2xl bg-[var(--bg-secondary)] p-5 transition-colors hover:bg-[var(--bg-elevated)]">
                   <h3 className="text-sm font-semibold">{l.title}</h3>
                   <p className="mt-2 text-xs text-[var(--fg-muted)]">{l.desc}</p>
                   <span className="mt-3 inline-block text-xs text-[var(--hl)]">{l.action} &rarr;</span>

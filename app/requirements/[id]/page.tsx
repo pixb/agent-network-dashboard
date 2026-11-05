@@ -778,7 +778,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
 
         {/* #1634 — write surface. Hub keeps the rules (owner must be human,
             node tokens may not delete); this bar only sends whitelisted fields. */}
-        <section className="mb-6 flex flex-wrap items-center gap-2 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
+        <section className="mb-6 flex flex-wrap items-center gap-2 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5">
           <span className="text-[10px] uppercase tracking-wide text-gray-600">Status</span>
           {COLUMN_OPTIONS.map(opt => (
             <button
@@ -937,7 +937,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
           {actionError && <span className="text-[11px] text-red-400">{actionError}</span>}
         </section>
 
-        <section className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
+        <section className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
           <h2 className="mb-2 text-xs uppercase tracking-wide text-gray-500">参与者 {req.participants && req.participants.length > 0 && <span className="ml-1 text-gray-600">{req.participants.length}</span>}</h2>
           <div className="flex flex-wrap items-center gap-2" data-testid="requirement-participants">
             {(req.participants || []).length === 0 ? (
@@ -989,7 +989,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
           </div>
         </section>
 
-        <section className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
+        <section className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
           <div className="mb-2 flex items-center justify-between gap-2">
             <h2 className="text-xs uppercase tracking-wide text-gray-500">Description</h2>
             {!editingDescription ? (
@@ -1022,7 +1022,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
           )}
         </section>
 
-        <section className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
+        <section className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
           <h2 className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
             Checklist {checklist.length > 0 && <span className="ml-1 text-gray-600">{checklist.filter(c => c.done).length}/{checklist.length}</span>}
             {!editingChecklist && (
@@ -1083,7 +1083,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
           )}
         </section>
 
-        <section className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4" data-testid="requirement-issues">
+        <section className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4" data-testid="requirement-issues">
           <h2 className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
             关联 Issue
             {issues && issues.length > 0 && <span className="text-gray-600">{issues.length}/{MAX_REQUIREMENT_ISSUES}</span>}
@@ -1140,7 +1140,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
           )}
         </section>
 
-        <section className="mb-6 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4" data-testid="requirement-children">
+        <section className="mb-6 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4" data-testid="requirement-children">
           <h2 className="mb-2 flex items-center gap-2 text-xs uppercase tracking-wide text-gray-500">
             子需求{childRows.length > 0 && <span className="ml-1 text-gray-600">{childRows.length}</span>}
             <button
@@ -1230,7 +1230,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
           <p className="mt-1 text-[11px] text-gray-600">同一网络、最多 5 层、不能成环（由 Hub 校验）。</p>
         </section>
 
-        <section className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
+        <section className="rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
           <h2 className="mb-2 text-xs uppercase tracking-wide text-gray-500">Activity</h2>
           {events.length === 0 ? (
             <EmptyState variant="generic" compact title="还没有动态" sub="状态变更和评论会出现在这里。" />

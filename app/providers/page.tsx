@@ -125,7 +125,7 @@ export default function ProvidersPage() {
           </div>
         )}
 
-        <section className="rounded-xl bg-[var(--bg-secondary)] p-5">
+        <section className="rounded-2xl bg-[var(--bg-secondary)] p-5">
           {loading ? (
             <div className="animate-pulse space-y-2">{[1, 2, 3].map(i => <div key={i} className="h-14 rounded bg-[var(--bg-elevated)]" />)}</div>
           ) : providers.length === 0 ? (

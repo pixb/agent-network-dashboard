@@ -177,7 +177,7 @@ export function CreateNodeWizard({
         aria-label="新建节点"
         // RFC-026 §9.4 responsive: mobile single-screen (full width minus
         // gutter, taller); desktop ~3-col-friendly width when picker is shown.
-        className="fixed left-1/2 top-1/2 z-50 w-[min(94vw,440px)] md:w-[min(92vw,720px)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] shadow-2xl"
+        className="fixed left-1/2 top-1/2 z-50 w-[min(94vw,440px)] md:w-[min(92vw,720px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] shadow-2xl"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">

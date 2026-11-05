@@ -123,7 +123,7 @@ function TimelineView({ rows }: { rows: Requirement[] }) {
     return { left: (i / 3) * 100, label: new Date(ms).toISOString().slice(5, 10) };
   });
   return (
-    <div data-testid="requirements-timeline" className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]/40 p-3">
+    <div data-testid="requirements-timeline" className="rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]/40 p-3">
       {dated.length === 0 ? (
         <p className="px-1 py-6 text-center text-xs text-[var(--fg-muted)]" data-testid="timeline-empty">
           已加载的需求里都没有截止日期，先给需求补一个 due 再看时间线。
@@ -256,7 +256,7 @@ function SummaryPanel({ rows, labelFor, projects, onPickOwner, onPickProject }: 
   const projectRows = [...byProject.entries()].sort((a, b) => b[1].total - a[1].total).slice(0, 5);
   const projectWidest = Math.max(1, ...projectRows.map(([, entry]) => entry.total));
   return (
-    <section data-testid="requirements-summary" className="mb-3 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]/40 p-3">
+    <section data-testid="requirements-summary" className="mb-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]/40 p-3">
       <div className="flex flex-wrap items-center gap-4">
         {counts.map(item => (
           <div key={item.key} data-testid={`summary-status-${item.key}`} data-count={item.value} className="flex items-center gap-1.5 text-[11px] text-[var(--fg-muted)]">
@@ -1675,7 +1675,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                     key={col.key}
                     aria-label={`${col.label}列`}
                     data-testid={`requirements-column-${col.key}`}
-                    className={`snap-start shrink-0 rounded-xl border bg-[var(--bg-secondary)]/60 transition-colors ${isCollapsed ? 'w-12' : 'w-72 sm:w-[19rem] lg:w-[calc((100%-1.5rem)/3)] lg:max-w-[19rem]'} ${dragOverColumn === col.key ? 'border-[var(--hl)] bg-[var(--hover-tint)]' : 'border-[var(--border)]'}`}
+                    className={`snap-start shrink-0 rounded-2xl border bg-[var(--bg-secondary)]/60 transition-colors ${isCollapsed ? 'w-12' : 'w-72 sm:w-[19rem] lg:w-[calc((100%-1.5rem)/3)] lg:max-w-[19rem]'} ${dragOverColumn === col.key ? 'border-[var(--hl)] bg-[var(--hover-tint)]' : 'border-[var(--border)]'}`}
                     onDragOver={event => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setDragOverColumn(col.key); }}
                     onDragLeave={event => { if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) setDragOverColumn(null); }}
                     onDrop={event => {
@@ -1840,7 +1840,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
           </div>
           </>
         ) : (
-          <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-xl bg-[var(--bg-secondary)]">
+          <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
             {(treeRows ?? viewRows.map(row => ({ row, depth: 0, hasChildren: false }))).map(({ row, depth, hasChildren }) => {
               const chk = row.checklist_count;
               const kids = row.children;

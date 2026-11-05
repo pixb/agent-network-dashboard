@@ -988,7 +988,7 @@ export default function LegionPage() {
         {helpOpen && (
           <div role="dialog" aria-modal="true" aria-label="键盘快捷键" data-testid="legion-help"
             className="fixed inset-0 z-50 flex items-center justify-center bg-[var(--bg)]/70 p-4" onClick={() => setHelpOpen(false)}>
-            <div className="w-full max-w-sm rounded-xl bg-[var(--bg-secondary)] p-4 text-sm text-[var(--fg)]" onClick={e => e.stopPropagation()}>
+            <div className="w-full max-w-sm rounded-2xl bg-[var(--bg-secondary)] p-4 text-sm text-[var(--fg)]" onClick={e => e.stopPropagation()}>
               <div className="flex items-center justify-between">
                 <h2 className="text-sm font-semibold">键盘快捷键</h2>
                 <button type="button" onClick={() => setHelpOpen(false)} aria-label="关闭" className="rounded px-1.5 py-0.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]">✕</button>
@@ -1027,7 +1027,7 @@ export default function LegionPage() {
         ) : null}
 
         {loading ? (
-          <div className="flex h-[62vh] min-h-[420px] items-center justify-center rounded-xl bg-[var(--bg-secondary)]">
+          <div className="flex h-[62vh] min-h-[420px] items-center justify-center rounded-2xl bg-[var(--bg-secondary)]">
             <div className="h-40 w-40 animate-pulse rounded-full border border-[var(--border)]" />
           </div>
         ) : networkReady && !networkId ? (
@@ -1044,7 +1044,7 @@ export default function LegionPage() {
               ref={stageCallbackRef}
               // 净屏（?present=1）与 3D 演示同标准：铺满视口、盖住仍是淡色侧栏的
               // 应用外壳（.293 在 3D 上修过同一问题；2D 只隐藏了自己的头部）。
-              className={`overflow-hidden rounded-xl bg-[var(--bg-secondary)] ${cleanView ? 'fixed inset-0 z-40' : `relative ${isFullscreen ? 'h-[calc(100dvh-10rem)] min-h-[420px]' : 'h-[62vh] min-h-[420px] sm:h-[calc(100dvh-9.5rem)]'}`}`}
+              className={`overflow-hidden rounded-2xl bg-[var(--bg-secondary)] ${cleanView ? 'fixed inset-0 z-40' : `relative ${isFullscreen ? 'h-[calc(100dvh-10rem)] min-h-[420px]' : 'h-[62vh] min-h-[420px] sm:h-[calc(100dvh-9.5rem)]'}`}`}
               onWheel={onWheel}
               onPointerDown={onPointerDown}
               onPointerMove={onPointerMove}
@@ -1470,7 +1470,7 @@ export default function LegionPage() {
               </div>
             </div>
 
-            <aside ref={panelRef} tabIndex={-1} data-testid="legion-panel" data-clean={cleanView ? '1' : '0'} role="status" aria-live="polite" className={`rounded-xl bg-[var(--bg-secondary)] p-4 ${cleanView ? 'hidden' : ''} focus:outline-none`}>
+            <aside ref={panelRef} tabIndex={-1} data-testid="legion-panel" data-clean={cleanView ? '1' : '0'} role="status" aria-live="polite" className={`rounded-2xl bg-[var(--bg-secondary)] p-4 ${cleanView ? 'hidden' : ''} focus:outline-none`}>
               <div className="flex items-baseline justify-between">
                 <h2 className="text-xs uppercase tracking-wide text-[var(--fg-muted)]">
                   {selectedNode ? ringLabel(selectedNode) : '编制'}

@@ -119,7 +119,7 @@ export default function NetworksPage() {
 
       <div className="max-w-2xl space-y-6">
         {/* Create */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-[var(--fg)] mb-3">Create Network</h2>
           <div className="space-y-3">
             <input type="text" value={newName} onChange={e => setNewName(e.target.value)} placeholder="Network name"
@@ -135,7 +135,7 @@ export default function NetworksPage() {
         </section>
 
         {/* List */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-5">
           <div className="flex items-center justify-between mb-3">
             <h2 className="text-sm font-semibold text-[var(--fg)]">My Networks</h2>
             {/* #217 D9: "N TOTAL" counter dropped below 4 rows — counting
