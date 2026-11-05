@@ -105,9 +105,9 @@ export default function SettingsPage() {
             <div className={cardClass}>
               <h3 className="mb-4 text-sm font-semibold">Change password</h3>
               <div className="space-y-3">
-                <input type="password" value={oldPwd} onChange={e => setOldPwd(e.target.value)} placeholder="Current password"
+                <input type="password" value={oldPwd} onChange={e => setOldPwd(e.target.value)} placeholder="Current password" aria-label="Current password"
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-base text-[var(--fg)] placeholder:text-[var(--fg-dim)] focus:border-[var(--hl)] focus:outline-none sm:text-sm" />
-                <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="New password"
+                <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="New password" aria-label="New password"
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-base text-[var(--fg)] placeholder:text-[var(--fg-dim)] focus:border-[var(--hl)] focus:outline-none sm:text-sm" />
                 <button onClick={async () => {
                   if (!oldPwd || !newPwd) return;
