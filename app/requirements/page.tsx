@@ -1299,7 +1299,12 @@ function RequirementsContent({ networkId }: { networkId: string }) {
 
         {/* Text filters */}
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-2.5 py-1.5 focus-within:border-[var(--border-hover)]">
+          {/* 窄屏实测：输入框本体只有 160×20，点外框内边距不聚焦（低于 24px 最低点击线）。
+              整框可点后再聚焦输入，别让用户对准那一条。 */}
+          <div
+            className="cursor-text rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-2.5 py-1.5 focus-within:border-[var(--border-hover)]"
+            onClick={() => searchInputRef.current?.focus()}
+          >
             <input
               ref={searchInputRef}
               title="按 / 聚焦搜索"

@@ -833,7 +833,11 @@ export default function LegionPage() {
             })()}
           </div>
           <div className="flex flex-wrap items-center gap-2">
-            <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-2.5 py-1.5">
+            {/* 同 /requirements：外框 38px 高但只有输入框本体可点，窄屏要瞄准 20px 高的一条。 */}
+            <div
+              className="cursor-text rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-2.5 py-1.5"
+              onClick={() => searchRef.current?.focus()}
+            >
               <input
                 ref={searchRef}
                 value={query}
