@@ -360,6 +360,10 @@ export default function Legion3DPage() {
   const introRef = useRef<{ t0: number; from: number; to: number } | null>(null);
   const yawAnimRef = useRef<{ t0: number; from: number; to: number } | null>(null);
   const introDone = useRef(false);
+  // 入场第二段：部门环依次点亮。跟 intro 同时启动，但比镜头缓动（480ms）活得久，
+  // 所以单独一个时间基准；结束后置 null，稳态每帧零开销。
+  const revealT0 = useRef<number | null>(null);
+  const revealOrderRef = useRef<{ nodes: unknown; order: Map<string, number> }>({ nodes: null, order: new Map() });
   const dragRef = useRef<{ x: number; y: number; yaw: number; pitch: number; moved: number } | null>(null);
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef = useRef<{ span: number; dist: number } | null>(null);
@@ -1248,6 +1252,8 @@ export default function Legion3DPage() {
               // 动画期间也别让「尺寸漂移」触发重算。
               userAdjusted.current = true;
               introRef.current = { t0: now, from: want * 0.62, to: want };
+              // 镜头推进之外，部门环再按顺序亮起（第二段入场）。
+              revealT0.current = now;
               try { sessionStorage.setItem('legion3d-intro', '1'); } catch {}
             }
           }
@@ -1721,7 +1727,25 @@ export default function Legion3DPage() {
         const breathe = breatheTarget && breathePhaseRef.current >= 0
           ? 1 - Math.abs(0.5 - breathePhaseRef.current) * 0.12
           : 1;
-        let alpha = (1 - depthT * depthFade) * (dim ? (selectedRef.current ? 0.14 : 0.22) : 1) * (offline ? 0.42 : 1)
+        // —— 入场第二段：部门环依次点亮 ——
+        // 目标：开场镜头推进（480ms）之后，部门按顺序逐个亮起，而不是整片同时出现。
+        // 约束：只在首访的那一秒多里生效；稳态 reveal 恒为 1，不影响任何交互与帧率。
+        let reveal = 1;
+        if (revealT0.current !== null && node.kind === 'group') {
+          const elapsed = now - revealT0.current;
+          if (revealOrderRef.current.nodes !== nodes) {
+            const groups = nodes.filter(n => n.item.kind === 'group')
+              .slice()
+              .sort((a, b) => (a.item.order ?? 0) - (b.item.order ?? 0));
+            revealOrderRef.current = { nodes, order: new Map(groups.map((n, i) => [n.item.id, i])) };
+          }
+          const idx = revealOrderRef.current.order.get(node.id) ?? 0;
+          const REVEAL_STEP = 120;   // 每个部门之间的间隔
+          const REVEAL_DUR = 260;    // 单个部门淡入时长
+          reveal = Math.min(1, Math.max(0, (elapsed - idx * REVEAL_STEP) / REVEAL_DUR));
+          reveal = reveal * reveal * (3 - 2 * reveal); // smoothstep，避免线性淡入的突兀
+        }
+        let alpha = (1 - depthT * depthFade) * (dim ? (selectedRef.current ? 0.14 : 0.22) : 1) * (offline ? 0.42 : 1) * reveal
           * (emptyDept ? 0.3 : deepDept ? 0.12 : 1)
           * (offLayer ? 0.34 : 1) * breathe;
         if (node.kind === 'core') alpha = Math.min(1, alpha + 0.15);
@@ -2000,6 +2024,27 @@ export default function Legion3DPage() {
         ctx.globalAlpha = 1;
         // 整帧画完再记：此时 nodeTextAlphaMin 已经覆盖本帧所有节点文字。
         if (canvasRef.current) canvasRef.current.dataset.nodeTextAlpha = nodeTextAlphaMin.toFixed(2);
+        // 入场揭示进度：既是「结束后停掉」的开关，也是验收断言的数据源
+        //（画布亮度肉眼看不准，进度是确定的）。
+        if (revealT0.current !== null) {
+          const groups = nodes.filter(n => n.item.kind === 'group').length;
+          const total = groups * 120 + 260 + 200;
+          const elapsed = now - revealT0.current;
+          if (elapsed > total) {
+            revealT0.current = null;
+            if (canvasRef.current?.dataset.deptReveal) delete canvasRef.current.dataset.deptReveal;
+          } else if (canvasRef.current) {
+            const order = revealOrderRef.current.order;
+            const vals = nodes.filter(n => n.item.kind === 'group')
+              .slice(0, 12)
+              .map(n => {
+                const idx = order.get(n.item.id) ?? 0;
+                const v = Math.min(1, Math.max(0, (elapsed - idx * 120) / 260));
+                return `${n.item.id}:${v.toFixed(2)}`;
+              });
+            canvasRef.current.dataset.deptReveal = vals.join(',');
+          }
+        }
 
         // 悬停提示：不点也能知道「这是谁、什么状态」。
         // 选中时不画（右侧详情卡已经有完整信息）。
