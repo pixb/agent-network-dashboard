@@ -123,7 +123,7 @@ export function CreateRequirement({ networkId, onCreated }: {
             aria-label="新建需求"
             data-testid="requirements-create-dialog"
             onClick={event => event.stopPropagation()}
-            className="w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--fg)] shadow-xl"
+            className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--fg)] shadow-xl"
           >
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold">新建需求</h2>

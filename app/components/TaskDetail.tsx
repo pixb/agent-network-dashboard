@@ -219,7 +219,7 @@ export function TaskDetail({
             <section
               data-testid="task-detail-timeline"
               data-block="timeline"
-              className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4"
+              className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-4"
             >
               <h2 className="text-sm font-semibold text-[var(--fg)] mb-4">Timeline</h2>
               <div className="relative">
@@ -271,7 +271,7 @@ export function TaskDetail({
             <section
               data-testid="task-detail-info"
               data-block="info"
-              className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4"
+              className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-4"
             >
               <h2 className="text-sm font-semibold text-[var(--fg)] mb-3">Info</h2>
               <div className="space-y-2 text-xs">
@@ -319,7 +319,7 @@ export function TaskDetail({
             <section
               data-testid="task-detail-content"
               data-block="content"
-              className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4"
+              className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-4"
             >
               <h2 className="text-sm font-semibold text-[var(--fg)] mb-2">Content</h2>
               <pre
@@ -335,7 +335,7 @@ export function TaskDetail({
               <section
                 data-testid="task-detail-result"
                 data-block="result"
-                className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4"
+                className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-4"
               >
                 <h2 className="text-sm font-semibold text-[var(--fg)] mb-2">Result</h2>
                 <pre
@@ -355,7 +355,7 @@ export function TaskDetail({
               data-testid="task-detail-events"
               data-block="events"
               data-events-count={events.length}
-              className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4"
+              className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-4"
             >
               <h2 className="text-sm font-semibold text-[var(--fg)] mb-3">
                 Events {events.length > 0 && <span className="text-[var(--fg-muted)]">({events.length})</span>}

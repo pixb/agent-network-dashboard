@@ -281,7 +281,7 @@ export default function MessagesPage() {
       {/* 读失败不等于「没有消息」。旧实现忽略 error，把失败渲染成空态，
           用户看到的是「这里很安静」而不是「没读到」。 */}
       {error && messages.length > 0 && (
-        <div role="status" className="mb-3 flex items-center justify-between gap-3 rounded-xl bg-[var(--bg-secondary)] px-3 py-2 text-xs">
+        <div role="status" className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-[var(--bg-secondary)] px-3 py-2 text-xs">
           <span className="text-[var(--fg-muted)]">刷新失败，下面是上一次读到的消息。</span>
           <button
             type="button"
@@ -298,7 +298,7 @@ export default function MessagesPage() {
           {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-20 rounded-2xl bg-[var(--bg-elevated)]/20" />)}
         </div>
       ) : error && messages.length === 0 ? (
-        <div role="alert" className="rounded-xl bg-[var(--bg-secondary)] p-6 text-center text-sm">
+        <div role="alert" className="rounded-2xl bg-[var(--bg-secondary)] p-6 text-center text-sm">
           <p className="font-medium text-[var(--danger)]">读不到消息</p>
           <p className="mt-1 text-xs text-[var(--fg-muted)]">
             {error instanceof Error ? error.message : String(error)}
@@ -316,7 +316,7 @@ export default function MessagesPage() {
       ) : viewMode === 'grouped' ? (
         <div className="space-y-4">
           {conversations.map((conv, ci) => (
-            <div key={ci} className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl overflow-hidden">
+            <div key={ci} className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl overflow-hidden">
               <div className="px-4 py-2.5 border-b border-[var(--border)] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <AliasAvatar alias={conv.participants[0]} size={16} />

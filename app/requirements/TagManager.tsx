@@ -161,7 +161,7 @@ export function TagManager({ catalog, networkId, treeSupported, onClose, onAppli
         aria-modal="true"
         aria-labelledby="tag-manager-title"
         data-testid="tag-manager"
-        className="mt-6 w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] shadow-2xl"
+        className="mt-6 w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] shadow-2xl"
       >
         <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
           <div>

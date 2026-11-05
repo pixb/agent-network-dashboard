@@ -402,7 +402,7 @@ function OrgContent() {
           />
         ) : (
           <>
-            <ul className="overflow-hidden rounded-xl bg-[var(--bg-secondary)]">
+            <ul className="overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
               {tree.groups.map(group => (
                 <GroupSection key={group.id} group={group} depth={0} counts={deptTaskCounts} focusName={focusName} expandAll={!!q} overrides={expandOverrides} onToggle={toggleGroup} />
               ))}
@@ -420,7 +420,7 @@ function OrgContent() {
             )}
 
             {offset === 0 && withoutOwner.length > 0 && (
-              <div className="mt-6 rounded-xl bg-[var(--bg-secondary)] p-4">
+              <div className="mt-6 rounded-2xl bg-[var(--bg-secondary)] p-4">
                 <h2 className="mb-2 text-xs text-[var(--fg-muted)]">无 owner 的 Agent</h2>
                 <div className="flex flex-wrap gap-1.5">
                   {withoutOwner.map(agent => (

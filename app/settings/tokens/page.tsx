@@ -83,7 +83,7 @@ export default function TokensPage() {
 
       <div className="max-w-2xl space-y-6">
         {/* Create token */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-[var(--fg)] mb-3">Create Token</h2>
           <div className="flex gap-2">
             <input type="text" value={newName} onChange={e => setNewName(e.target.value)}
@@ -104,7 +104,7 @@ export default function TokensPage() {
         </section>
 
         {/* Token list */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-[var(--fg)] mb-3">Active Tokens ({tokens.length})</h2>
           {loading ? (
             <div className="animate-pulse space-y-2">{[1,2].map(i => <div key={i} className="h-12 bg-[var(--bg-elevated)]/20 rounded" />)}</div>

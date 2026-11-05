@@ -85,7 +85,7 @@ export default function ChangelogView({ markdown }: { markdown: string }) {
     <article
       data-testid="changelog-body"
       data-sections={sections.length}
-      className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]/60 px-4 py-3"
+      className="rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]/60 px-4 py-3"
     >
       {preamble.trim() ? <div className="mb-2">{renderMarkdown(preamble)}</div> : null}
       {/* 版本索引：243 条折叠后仍有 8.5k px，给最近 12 个版本一个直达入口。 */}

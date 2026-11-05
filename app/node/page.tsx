@@ -82,7 +82,7 @@ function TmuxViewer({ tmuxName }: { tmuxName: string }) {
   };
 
   return (
-    <div className="bg-[var(--bg-secondary)] rounded-xl p-4">
+    <div className="bg-[var(--bg-secondary)] rounded-2xl p-4">
       <div className="flex items-center justify-between mb-2">
         <h2 className="text-sm font-semibold text-gray-300">Terminal ({tmuxName})</h2>
         <div className="flex gap-2">
@@ -157,7 +157,7 @@ function ExternalSchedulesCard({ snapshot, nodeId, onQueued }: {
     }
   };
   return (
-    <div className="bg-[var(--bg-secondary)] rounded-xl p-4" data-testid="external-schedules-card">
+    <div className="bg-[var(--bg-secondary)] rounded-2xl p-4" data-testid="external-schedules-card">
       <div className="flex items-center justify-between gap-3 mb-3">
         <h2 className="text-sm font-semibold text-gray-300">External schedules</h2>
         <span className={`text-[10px] ${stale ? 'text-amber-400' : 'text-gray-600'}`} title={snapshot.observed_at}>
@@ -358,7 +358,7 @@ function NodeFullPanel({ alias, session, sse, sendMsg, setSendMsg, sending, send
   }, [tab, eventsLoaded]);
 
   return (
-    <div ref={panelRef} data-testid="node-chat-panel" className="bg-[var(--bg-secondary)] rounded-xl overflow-hidden h-[calc(100dvh-9rem)] flex flex-col">
+    <div ref={panelRef} data-testid="node-chat-panel" className="bg-[var(--bg-secondary)] rounded-2xl overflow-hidden h-[calc(100dvh-9rem)] flex flex-col">
       {/* Tab bar — round 40: emoji icons (💬 📋 📊) replaced with stroke
           SVG to drop the "AI generated" tell. */}
       <div className="flex border-b border-[var(--col-line)] bg-[var(--bg)] shrink-0">
@@ -403,7 +403,7 @@ function NodeFullPanel({ alias, session, sse, sendMsg, setSendMsg, sending, send
 
         {tab === 'info' && (
           <div className="p-4 overflow-y-auto h-full space-y-4 max-w-2xl">
-            <div className="bg-[var(--bg-secondary)] rounded-xl p-4">
+            <div className="bg-[var(--bg-secondary)] rounded-2xl p-4">
               <h2 className="text-sm font-semibold text-gray-300 mb-3">Node Info</h2>
             <div className="space-y-2 text-xs">
               {[
@@ -440,7 +440,7 @@ function NodeFullPanel({ alias, session, sse, sendMsg, setSendMsg, sending, send
 
           {/* Current Task */}
           {session?.task && (
-            <div className="bg-[var(--bg-secondary)] rounded-xl p-4">
+            <div className="bg-[var(--bg-secondary)] rounded-2xl p-4">
               <h2 className="text-sm font-semibold text-gray-300 mb-2">Current Task</h2>
               <p className="text-xs text-gray-400 whitespace-pre-wrap">{session.task}</p>
             </div>
@@ -448,7 +448,7 @@ function NodeFullPanel({ alias, session, sse, sendMsg, setSendMsg, sending, send
 
           {/* Output */}
           {session?.output && (
-            <div className="bg-[var(--bg-secondary)] rounded-xl p-4">
+            <div className="bg-[var(--bg-secondary)] rounded-2xl p-4">
               <h2 className="text-sm font-semibold text-gray-300 mb-2">Last Output</h2>
               <p className="text-xs text-gray-400 whitespace-pre-wrap max-h-48 overflow-y-auto">{session.output}</p>
             </div>
@@ -457,7 +457,7 @@ function NodeFullPanel({ alias, session, sse, sendMsg, setSendMsg, sending, send
           <ExternalSchedulesCard snapshot={session?.external_schedules} nodeId={session?.node_id} />
 
           {/* Send Task */}
-          <div className="bg-[var(--bg-secondary)] rounded-xl p-4">
+          <div className="bg-[var(--bg-secondary)] rounded-2xl p-4">
             <h2 className="text-sm font-semibold text-gray-300 mb-2">Send Task</h2>
             <div className="flex gap-2">
               <input
@@ -518,7 +518,7 @@ function EventsTimeline({ events, loading }: { events: Array<{ id: number; event
   return (
     <div className="p-4 overflow-y-auto h-full space-y-4">
       {[...groups.entries()].map(([taskId, taskEvents]) => (
-        <div key={taskId} className="bg-[var(--bg-secondary)] rounded-xl p-4">
+        <div key={taskId} className="bg-[var(--bg-secondary)] rounded-2xl p-4">
           <div className="text-[10px] text-gray-600 mb-3 truncate">Task: {taskId.slice(0, 20)}...</div>
           <div className="relative pl-6">
             {/* Vertical line */}
