@@ -599,7 +599,7 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
         <div className="text-white text-[13px] font-semibold leading-tight">Agent Network</div>
         <div className="text-[11px] text-[var(--fg-muted)] flex items-center gap-1.5 mt-0.5">
           <span
-            className={`inline-block w-1.5 h-1.5 rounded-full ${isLoading && total === 0 ? 'bg-gray-500/60' : error && total === 0 ? 'bg-[var(--danger)]' : online > 0 ? 'bg-emerald-400 anet-brand-pulse' : 'bg-gray-600'}`}
+            className={`inline-block w-1.5 h-1.5 rounded-full ${isLoading && total === 0 ? 'bg-[var(--fg-dim)]/60' : error && total === 0 ? 'bg-[var(--danger)]' : online > 0 ? 'bg-emerald-400 anet-brand-pulse' : 'bg-gray-600'}`}
             aria-hidden
           />
           {isLoading && total === 0 ? (
