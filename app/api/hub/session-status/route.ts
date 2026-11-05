@@ -37,7 +37,11 @@ export async function GET(req: Request) {
       ok: true,
       sessions: sessions
         .filter((s: { alias?: string }) => typeof s?.alias === 'string')
-        .map((s: { alias: string; status?: string }) => ({ alias: s.alias, status: s.status ?? '' })),
+        .map((s: { alias: string; status?: string; network_id?: string }) => ({
+          alias: s.alias,
+          status: s.status ?? '',
+          network_id: s.network_id,
+        })),
     }, { headers: { 'Cache-Control': 'no-store' } });
   } catch (err) {
     return Response.json(
