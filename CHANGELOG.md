@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.371 — 2026-11-05
+
+### 浅色主题下，回复气泡里的「replied」和引用行看得清了
+
+- 这两行 9px 小字原本几乎不可见（对比度 1.22 / 2.51）。
+- 现在：浅色 5.11 / 4.97，深色 7.85 / 7.44；引用块底色改为跟随主题。
+
 ## 0.6.4-preview.370 — 2026-11-05
 
 ### 浅色主题下，节点头部的「在线 / 总数」标签更清楚了
