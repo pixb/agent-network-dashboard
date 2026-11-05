@@ -44,6 +44,15 @@ for (const theme of themes) {
         if (cs.visibility === 'hidden' || Number(cs.opacity) < 0.5) continue;
         const fgRaw = px(cs.color);
         if (fgRaw[3] < 0.05) continue;
+        // 元素自身的 opacity 会等比削弱文字：只读 color 会高估对比度
+        //（实测：10px 文本报 4.09，实际因祖先 opacity 更低）。逐级相乘后再合成。
+        let chain = 1;
+        for (let n = el; n && n !== document.documentElement; n = n.parentElement) {
+          const o = Number(getComputedStyle(n).opacity);
+          if (Number.isFinite(o)) chain *= o;
+          if (chain < 0.02) break;
+        }
+        fgRaw[3] = fgRaw[3] * chain;
         const bg = bgOf(el);
         const fg = over(fgRaw, bg);
         const size = parseFloat(cs.fontSize);
