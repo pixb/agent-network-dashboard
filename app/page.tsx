@@ -58,7 +58,8 @@ export default function Dashboard() {
   // pre-V3 cookie now surfaces as API 401s with the error banner
   // instead of silent session destruction.
 
-  const { sessions, hint: sessHint, error: sessError, isLoading } = useSessions();
+  // lite：首页只用 alias/status/network_id 等字段；不拉 host / process_telemetry（约 65% 体积）。
+  const { sessions, hint: sessHint, error: sessError, isLoading } = useSessions({ lite: true });
   const { health } = useHealth();
   const { stats } = useStats();
   // 首页只在 /api/stats 没给 by_status 时才需要统计任务状态。

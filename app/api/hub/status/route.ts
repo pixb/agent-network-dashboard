@@ -24,6 +24,20 @@ export async function GET(req: Request) {
     const data = await res.json();
     if (Array.isArray(data.sessions)) data.sessions = normalizeSessions(data.sessions);
 
+    // lite=1：按 Session 接口投影，丢掉页面从不读取的字段并截断超长文本。
+    // 生产实测 393 条会话共 709,690 B，单条约 2.1 KB，其中
+    //   task 319B / host 233B / process_telemetry 101B 占约 65%（host 与 telemetry 页面不用）。
+    if (searchParams.get('lite') === '1' && Array.isArray(data.sessions)) {
+      const KEEP = ['alias','status','agent','server','task','progress','updated_at','node_id','session_id',
+        'channels','last_seen_at','config_path','network_id','project_dir','model','runtime','version','lifecycle_state'] as const;
+      data.sessions = data.sessions.map((s: Record<string, unknown>) => {
+        const out: Record<string, unknown> = {};
+        for (const k of KEEP) if (k in s) out[k] = s[k];
+        if (typeof out.task === 'string' && out.task.length > 120) out.task = `${out.task.slice(0, 120)}…`;
+        return out;
+      });
+    }
+
     // If filtered result is empty, fetch global count for empty-state hint
     if (includeFilter && Array.isArray(data.sessions) && data.sessions.length === 0) {
       try {

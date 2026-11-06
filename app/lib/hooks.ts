@@ -41,10 +41,10 @@ function withNetwork(url: string, networkId: string): string {
   return `${url}${sep}network_id=${encodeURIComponent(networkId)}`;
 }
 
-export function useSessions() {
+export function useSessions(options?: { lite?: boolean }) {
   const { networkId, ready } = useNetworkId();
   const { data, error, isLoading, mutate } = useSWR<{ sessions: Session[]; _hint?: { global_count?: number; filtered_network?: string } }>(
-    scopedOrNull('/api/hub/status', networkId, ready),
+    scopedOrNull(options?.lite ? '/api/hub/status?lite=1' : '/api/hub/status', networkId, ready),
     fetcher,
     SWR_OPTIONS,
   );
