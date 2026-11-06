@@ -20,14 +20,47 @@ const BASE = process.env.TEST_URL || 'http://localhost:3100';
 //     scrollable ancestor — the 15 s history poll therefore dragged the
 //     document (and the thread) to the bottom. It is container-relative now.
 
+// Plan B (one network per project): every hub read is network-scoped —
+// `useNetworkId()` resolves a network id (sessionStorage, else GET
+// /api/hub/networks and auto-pick) and `useSessions`/`useNodes` send the
+// request only once `ready` is true and a network id exists. Mocking
+// /api/hub/status alone therefore yields a *silent* page: no request is made,
+// sessions stay empty, /nodes renders the `npx … init` quickstart and the chat
+// column never mounts. Serve a network, or the test asserts on a page that
+// was never asked to render the thing under test.
+const HUB_NETWORKS = { networks: [{ network_id: 'net_fit', network_name: 'default' }] };
+
+// HOW THIS SPEC MUST BE RUN (measured 2026-11-06, do not trust the mocks).
+//
+// `page.route` intercepts only *browser* requests. The dashboard reads the hub
+// through server-side proxy routes (app/api/hub/* call hubFetch(COMMHUB_URL)
+// in RSC/server-route code), so intercepted mocks are never consulted: with
+// COMMHUB_URL pointing at nothing, /api/hub/status is never issued by the
+// browser, sessions stay empty, /nodes renders the `npx … init` quickstart and
+// [data-testid="chat-pane"] never mounts. That is the failure this spec
+// produced when run against mocks — an empty page, not a layout bug.
+//
+// Run it against a live hub, which is also the only shape that reproduces the
+// real green HealthBanner:
+//   E2E_LIVE_HUB=1 TEST_URL=http://127.0.0.1:3199 npx playwright test \
+//     --config playwright.e2e.config.ts tests/e2e-chatpane-viewport-fit.spec.ts
+// The hub needs >= 1 session, >= 1 network, and enough tasks for the thread to
+// overflow. Without E2E_LIVE_HUB the suite skips itself and says why, instead
+// of "passing" against a page that was never asked to render the pane.
+
+const LIVE_HUB = !!process.env.E2E_LIVE_HUB;
+
 const HUB_STATUS = {
   sessions: [
-    { alias: 'fit-1', status: 'idle', network_id: 'net_fit' },
-    { alias: 'fit-2', status: 'working', network_id: 'net_fit' },
+    { alias: 'fit-1', status: 'idle', network_id: 'net_fit', runtime: 'claude-agent-sdk', last_seen: new Date().toISOString() },
+    { alias: 'fit-2', status: 'working', network_id: 'net_fit', runtime: 'codex-sdk', last_seen: new Date().toISOString() },
   ],
 };
 const HUB_NODES = {
-  nodes: [{ alias: 'fit-1', team: null, tags: [] }, { alias: 'fit-2', team: null, tags: [] }],
+  nodes: [
+    { alias: 'fit-1', team: null, tags: [], lifecycle_state: 'online', network_id: 'net_fit' },
+    { alias: 'fit-2', team: null, tags: [], lifecycle_state: 'online', network_id: 'net_fit' },
+  ],
 };
 const HUB_HEALTH = {
   ok: true,
@@ -75,6 +108,8 @@ async function login(context: BrowserContext) {
 }
 
 async function mockHub(page: Page) {
+  if (LIVE_HUB) return; // real hub behind the dashboard's proxy; mocks cannot reach server-side fetches
+  await page.route('**/api/hub/networks**', r => r.fulfill({ json: HUB_NETWORKS }));
   await page.route('**/api/hub/status**', r => r.fulfill({ json: HUB_STATUS }));
   await page.route('**/api/hub/nodes**', r => r.fulfill({ json: HUB_NODES }));
   await page.route('**/api/hub/health', r => r.fulfill({ json: HUB_HEALTH }));
@@ -100,7 +135,7 @@ const geometry = (page: Page) => page.evaluate(() => {
   const doc = document.documentElement;
   const chat = document.querySelector('[data-testid="chat-pane"]')!.getBoundingClientRect();
   const composer = document.querySelector('[data-testid="chat-pane"] textarea')!.getBoundingClientRect();
-  const list = document.querySelector('[data-testid="node-list-scroll"]')!;
+  const list = document.querySelector('[data-testid="node-list-rail"]')!;
   const msgs = document.querySelector('[data-testid="chat-messages-scroll"]')!;
   return {
     innerHeight: window.innerHeight,
@@ -115,6 +150,7 @@ const geometry = (page: Page) => page.evaluate(() => {
 
 test.describe('#chat-pane viewport fit + no auto-jump', () => {
   test.use({ viewport: { width: 1280, height: 800 } });
+  test.skip(!LIVE_HUB, '需要真实 hub：dashboard 的 hub 读走服务端代理（app/api/hub/* → hubFetch），page.route 拦不到；对着空壳页面跑这个断言等于没有断言');
 
   test('the chat column fills to the window bottom — the page itself does not scroll', async ({ page, context }) => {
     await login(context);

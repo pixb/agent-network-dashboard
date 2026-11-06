@@ -3333,3 +3333,15 @@ If, after upgrading, opening the dashboard behaves oddly (redirect loop, half-lo
 ## 0.6.0 — 2026-06-04
 
 Formal release after 27 rounds of the #217 simplification sweep. See git history for the full delta from 0.5.x.
+
+### e2e：聊天栏视口回归测试的前提写清（对着空壳页面跑 = 没有断言）
+
+`tests/e2e-chatpane-viewport-fit.spec.ts` 之前用 `page.route` 造 hub 假数据，实测**拦不到**：
+dashboard 读 hub 走服务端代理（`app/api/hub/*` 在 RSC/server-route 里 `hubFetch(COMMHUB_URL)`），
+浏览器侧根本没有 `/api/hub/*` 请求 ⇒ sessions 为空 ⇒ `/nodes` 渲染的是 `npx … init` 引导页，
+`[data-testid="chat-pane"]` 从不挂载。跑出来的两条红是「空页面」，不是布局 bug。
+
+- 选择器按真实 DOM 修正：`node-list-scroll` → `node-list-rail`（代码里没有前者）。
+- `E2E_LIVE_HUB=1` 时跳过所有路由拦截，用真 hub；缺它整组**显式 skip 并说明原因**。
+- `playwright.e2e.config.ts`：本机 3000/3100 被别的容器占着（`pixbbs-mcp`、`homarr`），
+  3200 是现网 dashboard ⇒ dev 服务器固定跑在 3199，`TEST_URL` 与 spec 共用同一端口。
