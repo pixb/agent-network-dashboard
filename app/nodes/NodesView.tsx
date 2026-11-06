@@ -15,6 +15,7 @@ import { pinyinMatch, usePinyinReady } from '../lib/pinyin-match';
 import { useCollapsibleSearch } from '../components/CollapsibleSearch';
 import { NodeList } from '../components/NodeList';
 import { ChatPane } from '../components/ChatPane';
+import { useFillViewportHeight } from '../lib/main-scroll';
 import type { Session } from '../components/types';
 import { SESSION_STATUS_TEXT_CLASS } from '../lib/status';
 import { SESSION_STATUS_DOT_HEX } from '../lib/status';
@@ -157,39 +158,22 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
     window.addEventListener('popstate', onPop);
     return () => window.removeEventListener('popstate', onPop);
   }, []);
-  // #Stage D: the shell above us (AppShell) keeps a ~28px HealthBanner in
-  // flow even when green, and its root is min-h (content-driven), so a
-  // plain h-[100dvh] here overflows the viewport by exactly the banner
-  // height and the document scrolls again. AppShell is shared by every
-  // page (out of Stage D scope) — instead, size this page to the space
-  // actually left below whatever the shell renders above us. The
-  // ResizeObserver on body re-measures when the banner appears/collapses/
-  // is dismissed. className keeps h-[100dvh] as the SSR first paint.
+  // #Stage D (chat-pane-bottom fix): AppShell used to be min-h-[100dvh]
+  // (content-driven), so a plain h-[100dvh] here stacked ON TOP of the ~28px
+  // green HealthBanner: the document scrolled by exactly the banner height,
+  // the right chat column ran below the fold, and the composer was only
+  // reachable by scrolling the page. The shell is now a fixed h-[100dvh]
+  // column whose content wrapper is the scroll container, and this page is
+  // h-full — CSS alone sizes it correctly.
+  //
+  // useFillViewportHeight stays on top as the JS safety net: 100dvh is the
+  // LARGEST viewport on iOS (toolbar hidden) while window.innerHeight is the
+  // visible one, and the old clamp went stale whenever the shell's height
+  // changed without resizing document.body (banner dismissed → body pinned at
+  // min-height:100% → ResizeObserver(body) never fired → height never
+  // recomputed → the pane was cut off again).
   const rootRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = rootRef.current;
-    if (!el) return;
-    const apply = () => {
-      // 用文档坐标（rect.top + scrollY）算高度，并且**不监听 scroll**。
-      //
-      // 曾经这里用 rect.top（视口坐标）+ scroll 重算，理由是「滚动后要够到窗口底部」；
-      // 但外壳的文档本来就比视口高 80px（移动端底部留白），滚动会让 rect.top 变小，
-      // 高度随之变大 → 文档再变高 → 下次滚动又更大。实测 390 宽每滚一次文档高
-      // +80px、布局高 +80px，无上限（924→1004→1084→1164）。
-      // 高度一旦与滚动无关，这个自激就断了；滚到页面底部看到的是外壳的留白。
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      el.style.height = `${Math.max(240, window.innerHeight - top)}px`;
-    };
-    apply();
-    window.addEventListener('resize', apply);
-    const ro = new ResizeObserver(apply);
-    ro.observe(document.body);
-    return () => {
-      window.removeEventListener('resize', apply);
-      window.removeEventListener('scroll', apply);
-      ro.disconnect();
-    };
-  }, []);
+  useFillViewportHeight(rootRef, 240);
   // #Vincent 插单 (07-31): entering /nodes with nothing selected showed the
   // management table full-bleed — "这样特别难看". Feishu opens INTO a
   // conversation, so desktop /nodes auto-selects the first (sorted) session.
@@ -425,12 +409,17 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
     return () => cancelAnimationFrame(id);
   }, [isDesktop, chatAlias]);
 
+  // h-full, not h-[100dvh]: AppShell now owns the viewport (its root is
+  // h-[100dvh] and the children wrapper is the scroll container), so 100% here
+  // == exactly the space left under the banners. The inline height
+  // useFillViewportHeight writes stays as the mobile safety net (iOS: 100dvh
+  // is the largest viewport, window.innerHeight is the visible one).
   return (
     <div
       ref={rootRef}
       data-testid="nodes-layout"
       data-rail-visible={showRail ? 'true' : 'false'}
-      className="h-[100dvh] max-w-full overflow-hidden bg-[var(--bg)] text-gray-100 flex"
+      className="h-full max-w-full overflow-hidden bg-[var(--bg)] text-gray-100 flex"
     >
       {/* #Stage A rail — only mounted when showRail is true AND we're
           past the mobile breakpoint (below sm, rail is hidden by CSS

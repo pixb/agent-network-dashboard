@@ -8,6 +8,7 @@ import { TaskChatPanel } from '../components/TaskChatPanel';
 import { timeAgo } from '../components/utils';
 import { NodeDetailHeader } from '../components/NodeDetailHeader';
 import { useChatUnread, badgeLabel } from '../lib/chat-unread';
+import { useFillViewportHeight } from '../lib/main-scroll';
 
 interface SessionDetail {
   resume_id: string;
@@ -319,31 +320,14 @@ function NodeFullPanel({ alias, session, sse, sendMsg, setSendMsg, sending, send
 }) {
   const [tab, setTab] = useState<'chat' | 'events' | 'info'>('chat');
   const { hasUnread, unreadCount } = useChatUnread();
-  // 面板高度按「视口底部还剩多少」实测，而不是写死 calc(100vh - 140px)：
+  // 面板高度按「可见区域底部还剩多少」实测，而不是写死 calc(100vh - 140px)：
   // 页头在 390 宽会换行变高，写死的减法算不准，输入区的语音按钮会被切在
-  // 折线下方 11px。外壳（AppShell）根是 min-h、HealthBanner 在流内，文档
-  // 本来就比视口高，所以只量 rect.top（视口坐标），滚动时重测——
-  // 与 NodesView 的 #Stage D 同一套做法。
+  // 折线下方 11px。AppShell 现在是定高 h-[100dvh]、内容区是滚动容器，
+  // 所以用 main-scroll 的帮助函数量「容器可见底边 − 面板顶边」：两项随滚动
+  // 同步位移，量出来的高度与滚动无关（旧写法 rect.top + window.scrollY 在
+  // 文档不再滚动后失去不变性，会重新形成自激增高循环）。
   const panelRef = useRef<HTMLDivElement | null>(null);
-  useEffect(() => {
-    const el = panelRef.current;
-    if (!el) return;
-    // 必须用「文档坐标」而不是视口坐标：外壳的文档本来就比视口高（横幅 + 底部留白），
-    // 若按 rect.top 算高度，每次滚动都会把面板撑高、文档再变高，形成自激增长
-    // （实测 981→1077→1173，滚动多少次涨多少次）。
-    const apply = () => {
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      el.style.height = `${Math.max(240, window.innerHeight - top)}px`;
-    };
-    apply();
-    window.addEventListener('resize', apply);
-    const ro = new ResizeObserver(apply);
-    ro.observe(document.body);
-    return () => {
-      window.removeEventListener('resize', apply);
-      ro.disconnect();
-    };
-  }, []);
+  useFillViewportHeight(panelRef, 240);
   const [events, setEvents] = useState<Array<{ id: number; event_type: string; from_status: string; to_status: string; detail: string; created_at: string }>>([]);
   const [eventsLoaded, setEventsLoaded] = useState(false);
   const chatUnread = hasUnread(alias);
