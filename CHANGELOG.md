@@ -6,6 +6,91 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## Unreleased
+
+### CI：oss-gates 在我们自己仓库上跑通了
+
+`gh workflow run oss-gates.yml -r pixb` 实测连抓两次真问题（都在我们加的文件里）：
+
+1. `[oss-public-surface] personal_home` —— `deploy/compose/Dockerfile.source` 与 `README.md`
+   里写了 `/home/<名字>/…` 形状的路径（仓库里其他文件一律写 `$HOME/.anet`）。
+   门是按形状判的，公开仓库里它就等于「某个人 home 里的路径」。
+   修法只动文字不动运行时：容器家目录换到 `/srv/dashboard`（`useradd -d` + `ENV HOME` 同步），
+   README 写 `$HOME/.anet` 并给出「想知道具体路径就 `docker exec … echo $HOME`」。
+   实测：镜像里 `$HOME/.anet/config.json` 在、uid 10001、`/login`=200、
+   带会话打 `/api/hub/networks` = 502（hub 故意不可达）而日志 **ENOENT/EACCES 次数 0**
+   ⇒ 不是当年那个 500。现网 compose 不挂载容器家目录（config.json 是镜像里预置的），
+   所以部署协调面为零。
+2. Lint 4 处红 `Cannot access refs during render`（`app/messages/page.tsx`）：
+   在渲染里读写 `meRef` 取当前用户名。改成仓库里既有的写法
+   （`useState(() => currentUserAlias())` 惰性初始化，`chat-unread.ts` 早就这么写）。
+   本地 `npm run lint` 0 errors、`npm test` 333 pass / 0 fail。
+
+本地对照：`npm run oss:check` 34/34 PASS。
+
+
+### /nodes 会话面板：右侧聊天栏占不满窗口底部 + 过一会自己弹回底部
+
+- **现象**：点开一个节点聊天，把左侧列表滚到最底部，右侧聊天栏的下沿（输入区）不在窗口底部，
+  要靠滚整个页面才露出来；把会话滑到最顶部，过几秒视图会自己跳回底部。
+- **根因 A（高度链）**：`AppShell` 根是 `min-h-[100dvh]`（内容驱动），HealthBanner 绿色态也在流内占 ~28px，
+  而 `NodesView` 自己写死 `h-[100dvh]` —— 于是文档高 = 横幅 + 100dvh，**文档本身可滚动**，
+  聊天栏底部被推到折线之下。`NodesView` 原来那个「按剩余空间实测高度」的 ResizeObserver 监听的是
+  `document.body`，而 body 被 `min-height:100%` 钉住，横幅消失时 body 尺寸不变 → **回调不再触发，
+  高度停留在旧值**，这就是只有部分时候/部分窗口尺寸下才复现的原因。
+- **修**：`AppShell` 根改为定高 `h-[100dvh]`，`main` 补 `min-h-0`，子容器改为**唯一的滚动容器**
+  （`flex-1 min-h-0 overflow-y-auto`，`data-testid="app-main-scroll"`）；页面改用 `h-full` 拿到的就是
+  横幅之外的剩余空间。派生影响一并处理：路由切换时手动回顶（滚动容器不再随文档免费复位，
+  `app/lib/main-scroll.ts`），`scheduled-tasks` 的「回顶」改走 `scrollMainTop()`，三处自测高度的页面
+  （`nodes` / `node` / `legion/3d`）改用 `fillRemainingHeight()`——旧公式 `rect.top + window.scrollY`
+  在文档不再滚动后失去滚动不变性，会重新触发 #Stage D 已经消灭过的自激增高循环。
+- **根因 B（自动滚底）**：会话自动滚底用 `messagesEndRef.scrollIntoView()`，而 `scrollIntoView` 会滚动
+  **所有可滚动祖先**；15s 历史轮询 / SSE 软刷新每触发一次，就把外层文档一起拖到底 —— 即「过一会自动弹到最底部」。
+  另外 `atBottomRef` 只由聊天容器自己的 scroll 事件更新，用户滚的其实是文档时它永远停在 `true`，于是每次刷新都判定「用户在底部」并滚底。
+- **修**：自动滚底/「↓ N 条新消息」/会话内搜索定位一律改成**容器相对**的 `scrollTo`（内嵌场景原本就有这个守卫，
+  现在列表面板同样适用）；`loadOlder` 的视口锚定改双 rAF 并在回调里重取 `scrollRef`（React 提交可能晚于单帧，
+  锚定量算成 0 就会停在顶部）；切换会话时清 `skipAutoScrollRef`，避免在途的旧页加载吞掉新会话的首次锚定。
+- 回归测试：`tests/e2e-chatpane-viewport-fit.spec.ts`（文档不可滚动 + 聊天栏底边贴窗口底边 + 输入区可见；
+  滚到顶后跨过 15s 轮询周期不被弹回）。
+
+### 节点发给人的私信，第一次在 Dashboard 上有了显示面
+
+- **收件箱行合并进 Messages 时间线，带已读操作**（`app/lib/messages-merge.ts` + `app/api/hub/messages-ack/`）。
+  下一条加了「我的收件箱」页，但两个日常动作仍然做不了：**没有已读能力**（hub 有
+  `POST /api/messages/ack`，dashboard 无代理、无按钮，存量未读永远是红的），以及**时间线里看不见私信**
+  （私信只进 user_inbox，而 Messages 页读的是 inbox：admin 实测 inbox 0 行 / user_inbox 42 行，
+  即这一页对管理员永远是空屏）。
+  - 合并只做在**前端**：hub 侧两张表各有已读语义（`inbox.acked` 由节点消费、`user_inbox.acked` 由人 ack）。
+    把私信在 hub 写成两行，就得到「一处已读一处未读」的红点口径分叉。
+  - 去重按带命名空间的 key（收件箱行加 `ui:` 前缀，常量 `INBOX_ROW_KEY_PREFIX`），**永不按内容去重**：
+    两表 id 都服务端生成、不可能相撞，按内容去重等于把两条无关消息当重复吞掉。
+  - 已读用 hub 的 `{agent}` 形式（按发信人整批标已读）：逐条 ack 清不完 522 条存量。
+  - 页面 chrome / 搜索 / 空态守卫一律改用合并后的列表（原来写死 `messages.length`，
+    「网络消息 0 行 + 收件箱 42 行」这个真实形状下搜索框会整块消失）。
+  - `hub-error-propagation.test.mjs` 的空态守卫同步放宽到合并后的列表：继续写死 `messages.length`
+    会在「读失败 + 收件箱有行」时渲染 EmptyState，正是该测试要拦的「把读失败伪装成很安静」。
+- **dashboard 的 compose 部署定义**：`deploy/compose/{Dockerfile,Dockerfile.source,compose.yaml,dashboard.env.template,README.md}`。
+  背后可重建规则的缺口是：compose 定义只存在于运行机上，仓库里没有权威副本（pm2 那条有）。
+  **分支模型同时重新定义**：`pixb` 是我们自己的生产分支、只在本地部署、**不发 npm**；`main`
+  只作为上游同步分支。于是部署身份从「npm 版本号」改成「pixb 的源码提交」：主路径是
+  `Dockerfile.source`（`npm ci` + `npm run build`，提交写进镜像 label
+  `org.opencontainers.image.revision`）；`Dockerfile`（装发布包）保留作现网形态的权威描述。
+  钉住的约定：基础镜像 `node:24-slim`（#1272 lockfile 主版本一致）、`--include=optional`、非 root、
+  **只监听 127.0.0.1:3001**（源码路径用 `HOST`，因为 bin/start.js 的优先级是 HOST > HOSTNAME > 默认；
+  配 `network_mode: host`，不用 `ports:`）、就绪探针用 `/login` 不用 `/api/hub/health`（后者无会话时 401，
+  实测）、`init: true`（bin/start.js 只转发 SIGINT，docker stop 发的是 SIGTERM）、CMD 跑 `bin/start.js`
+  （本包无 standalone `server.js`）、最终镜像拷完整工作树（next.config.ts 无 standalone 输出）。
+  `DASHBOARD_PASSWORD` 在容器里是**必设项**：代码回落读 `~/.config/anet/cli.json`，容器里无该文件
+  → 口令为空串 → 谁都登不进去，而 `/login` 照常 200。env 模板只记录变量名与占位符，不含密钥值与真实地址。
+- 新增 `/messages/inbox`（「我的收件箱」）：读 Hub 的 `user_inbox`（`GET /api/messages?scope=user`），按发件节点分组，带未读（acked=0）提示与 kind 计数。
+- 之前节点用 `send_desktop_message` 发的私信（kind=`agent_message`）与 Hub 代发的任务过期 / 疑似孤儿通知（`task_expired` / `task_orphan_suspected`）只存在于 `user_inbox`，而 Messages 页读的是 `inbox` 表 —— 生产实测（net_b91c0d535346）admin 有 42 行、全部未确认，界面上却一行都没有。
+- Messages 页头部加入口（带未读数）；入口刻意不受「本页有消息才显示 chrome」的门控制：消息流为空时正好是私信最多的时候。
+- `tests/compose-contract.sh`（新增，`npm run test:compose`）：镜像/端口/探针/env 名字三组契约，含
+  **反向对齐**检查（代码里读的每个 env 名字都必须在模板里声明）、模板泄密扫描、以及
+  `docker compose config` 解析。首次运行就拦下三处：探针检查扫到注释里的「不要用 /api/hub/health」、
+  模板漏了 `ANET_DASHBOARD_PASSWORD` 别名、占位符规则把 `http://REPLACE_ME:9200` 当泄密。
+- 端到端验收脚本 `tests/inbox-e2e/run.sh`（`npm run test:inbox`）：一次性 Hub + 一次性 Dashboard dev server，真登录、真会话 cookie，四条判据全过（代理带 `scope=user` 回 1 行 `kind=agent_message`、`unread=1`；别名读路径里没有那条私信；`/messages/inbox` 渲染；消息流页有入口）。
+
 ## 0.6.4-preview.397 — 2026-11-06
 
 ### 修：调大字号后，消息摘要不再被切一半
@@ -400,6 +485,10 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 - 验收套件新增：断网上传后仍可重发、重发会真正重传附件。
 
 ## 0.6.4-preview.345 — 2026-11-04
+
+- **npm 源慢的根因与出口**：构建期一次容器内 `npm ci` 实测 40 分钟未完成（本机 registry 镜像报 "免费节点当前繁忙"，与 registry 504 同源）。`Dockerfile.source` 加 `ARG NPM_REGISTRY`（只影响镜像层，默认 registry.npmjs.org，不读宿主 .npmrc → 定义可分享），并把 npm 缓存做成跨构建复用的 `--mount=type=cache`：命中后 `npm ci` 31 秒。
+- **部署演练抓到 matcher 少写 `:path*`（已修）**：源码镜像在一次性端口实测 `/messages` → 307 而 `/messages/inbox` → 200。`proxy.ts` 注释记录着 2026-07-31 同类事故（`/nodes/:path*` 漏，`/nodes/<alias>` 无 cookie 返回 200 + 36KB 页面壳）与规则（新增带子路由的页面 = matcher 加 `:path*` + 加进 `tests/e2e-proxy-auth-boundary.spec.ts` 清单）。我加 inbox 子页时两条都没做，现已补齐。门是逐页 cookie 存在性重定向、不是认证，取数侧 `/api/hub/*` 自带会话校验，所以这条是页面壳可达、不是数据可读。
+- **挂载 `~/.anet` 时 uid 决定成败**：镜像默认 uid 10001 读不到宿主 600/uid 1000 的 `config.json`（EACCES → 每个 API 请求 500）。compose 定义里的 `user: "1000:1000"` 是必需项，不是可选优化。
 
 ### 网络抖动与键盘操作纳入自动验收
 
@@ -3265,3 +3354,15 @@ If, after upgrading, opening the dashboard behaves oddly (redirect loop, half-lo
 ## 0.6.0 — 2026-06-04
 
 Formal release after 27 rounds of the #217 simplification sweep. See git history for the full delta from 0.5.x.
+
+### e2e：聊天栏视口回归测试的前提写清（对着空壳页面跑 = 没有断言）
+
+`tests/e2e-chatpane-viewport-fit.spec.ts` 之前用 `page.route` 造 hub 假数据，实测**拦不到**：
+dashboard 读 hub 走服务端代理（`app/api/hub/*` 在 RSC/server-route 里 `hubFetch(COMMHUB_URL)`），
+浏览器侧根本没有 `/api/hub/*` 请求 ⇒ sessions 为空 ⇒ `/nodes` 渲染的是 `npx … init` 引导页，
+`[data-testid="chat-pane"]` 从不挂载。跑出来的两条红是「空页面」，不是布局 bug。
+
+- 选择器按真实 DOM 修正：`node-list-scroll` → `node-list-rail`（代码里没有前者）。
+- `E2E_LIVE_HUB=1` 时跳过所有路由拦截，用真 hub；缺它整组**显式 skip 并说明原因**。
+- `playwright.e2e.config.ts`：本机 3000/3100 被别的容器占着（`pixbbs-mcp`、`homarr`），
+  3200 是现网 dashboard ⇒ dev 服务器固定跑在 3199，`TEST_URL` 与 spec 共用同一端口。

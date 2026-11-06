@@ -34,6 +34,7 @@ import { EXPORT_FPS, LOOP_DURATION_MS, containRect, exportDimensions, loopProgre
 import { EmptyState } from '../../components/EmptyState';
 import { getAvatarUrl } from '../../lib/avatars';
 import { LegionChat } from '../LegionChat';
+import { fillRemainingHeight, getMainScroll } from '../../lib/main-scroll';
 
 // 神明给的参数（PPT 首页 3D 图，admin 已认可）：俯仰约 25–30°、柔和透视
 // （别用强广角，远景缩成点就没有军团体量感）、自转 0.02–0.03 rad/s。
@@ -819,19 +820,27 @@ export default function Legion3DPage() {
     const el = wrapRef.current;
     if (!el) return;
     const fit = () => {
-      const top = el.getBoundingClientRect().top + window.scrollY;
-      const padB = parseFloat(getComputedStyle(el.parentElement ?? document.body).paddingBottom) || 0;
-      setStageHeight(Math.max(480, Math.round(window.innerHeight - top - padB)));
+      // 容器可见底边 − 舞台顶边（减去滚动容器的底部留白）。旧写法用
+      // rect.top + window.scrollY：AppShell 定高后文档不再滚动，window.scrollY
+      // 永远是 0，公式失去滚动不变性 → 滚动把舞台撑高 → 自激增长。
+      setStageHeight(fillRemainingHeight(el, 480));
     };
     // 首帧时 HealthBanner / 侧栏可能还没定高，直接读 top 会读到 0；
     // 放到下一帧再量，并补一次 300ms 后的校正（字体/横幅落位）。
     const raf = requestAnimationFrame(fit);
     const t = setTimeout(fit, 300);
+    // 横幅（Health/Update）挂载、折叠、被关掉都会改变舞台上方占用：
+    // 直接观察外壳的滚动容器，它的高度就是这些变化的直接函数。
+    const ro = new ResizeObserver(fit);
+    const scrollHost = el.closest('[data-testid="app-main-scroll"]') ?? getMainScroll();
+    if (scrollHost) ro.observe(scrollHost);
     window.addEventListener('resize', fit);
     window.addEventListener('orientationchange', fit);
     return () => {
       cancelAnimationFrame(raf);
+      ro.disconnect();
       clearTimeout(t);
+      ro.disconnect();
       window.removeEventListener('resize', fit);
       window.removeEventListener('orientationchange', fit);
     };

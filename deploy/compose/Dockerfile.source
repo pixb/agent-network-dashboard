@@ -1,0 +1,120 @@
+# Dashboard 镜像（**源码构建**路径，pixb 生产模型的主路径）。
+#
+# 为什么要有这个文件，而 `Dockerfile`（装发布包）那份继续留着：
+# 我们的分支模型是 `pixb` = 自己的生产分支，只在本地部署；`main` 只作为上游同步分支。
+# 我们**不发 npm**，于是「部署哪个版本」不能由 npm 版本号表达，只能由**源码提交**表达。
+# 现网目前跑的仍是装发布包那条（`~/.commhub/dashboard-runtime-v56`，脚本注释里写明
+# 「目录名就是部署身份」），所以那条路径不删，作为现网形态的权威描述保留。
+#
+# 三条硬约定：
+#
+# 1. 基础镜像 `node:24-slim`：与 lockfile 验证用的 Node 主版本一致。
+#    基础镜像与 lockfile 不一致时，依赖树完全合规也会构建失败（#1272）。
+#
+# 2. 本包没有 `output: 'standalone'`（next.config.ts 是空配置），
+#    `next start` 需要 node_modules 在位。所以镜像里保留 `npm ci` 的完整依赖树，
+#    不玩「只拷 .next + 精简依赖」那套：那要求 standalone 输出，改了会静默起不来。
+#
+# 3. 部署身份 = 源码提交，写进镜像 label，不靠 npm 版本号。
+#    `SOURCE_REV` 是构建时由 compose 传入的 pixb 提交；label 让「在跑的是哪份代码」
+#    可以用 `docker inspect` 查出来，不必去问某台机器上装的是哪个目录。
+# 基础镜像钉 tag+digest（与 parent 仓库 Dockerfile.dashboard 同一个门，#1740）：
+# 只写 `node:24-slim` 时，同一个源码提交在不同日子会构建出不同的运行时，
+# 「部署身份 = 源码提交」这句话就不成立了。digest 取自本机拉取时的 RepoDigests。
+# 需要换基础镜像时显式覆盖 ARG NODE_IMAGE（换版本是一个决定，不是一个意外）。
+ARG NODE_IMAGE=node:24-slim@sha256:c86ecead9e55a5210ac1727de38a4ca840bf03dcaf34dc9749addbf383b1920c
+FROM ${NODE_IMAGE} AS build
+
+WORKDIR /src
+
+# 先只拷依赖清单：源码改动不应让整棵依赖树重新解析。
+# 不拷 patches/：本仓没有补丁目录（已 ls 确认），多写一行 COPY 就是构建失败。
+# 根目录 .dockerignore 排掉 .git/.next/node_modules/.env*：
+# 构建上下文里不会出现密钥，也不会把本地未提交的产物带进镜像。
+COPY package.json package-lock.json ./
+# `npm ci` 精确按 lockfile 装，不解析出第二套依赖树。
+# 构建需要 devDependencies（next build 本身要用 dev 里的构建期依赖），
+# 所以这里不用 --omit=dev。
+# NPM_REGISTRY 是构建期旋钮：这台机器的 registry 镜像出现过「免费节点当前繁忙」，
+# 一次 `npm ci` 在容器构建里实测跑了 40 分钟仍未完成。重建路径如果只能连一个源，
+# 故障现场就不是重建，是等待。默认走官方源，需要换源时 compose 侧传 ANET_NPM_REGISTRY。
+# --mount=type=cache 让 npm 缓存在多次构建之间复用：同一棵树重复构建不必重新下载。
+ARG NPM_REGISTRY=https://registry.npmjs.org
+# electron / electron-builder 是 devDependency（移动端外壳与打包工具链），npm ci 默认连 dev 一起装，
+# 而 electron 的 postinstall 会去下载二进制包。2026-11-04 实测：这一步 TLS 断流
+# （RequestError: socket hang up at node_modules/electron/install.js）直接把构建判死，
+# 慢的时候是 40 分钟不起。镜像里永不启动 electron，跳过它的二进制下载是纯收益。
+ENV ELECTRON_SKIP_BINARY_DOWNLOAD=1
+RUN --mount=type=cache,id=anet-npm,target=/root/.npm \
+    npm ci --include=optional --prefer-offline --registry="${NPM_REGISTRY}"
+
+# 依赖就位后再拷源码：build 层只在源码变化时重跑。
+COPY . .
+ENV NEXT_TELEMETRY_DISABLED=1
+# 构建产物就位后把 dev 依赖剪掉：next/react/react-dom 都在 dependencies 里（量过），
+# `next start` 运行时不需要 electron / electron-builder / @capacitor/* / @playwright/test。
+# 不剪的话这些全进最终镜像 —— 现网那条装发布包的路径用 --omit=dev，镜像 ~250MB；
+# 本路径此前整树拷贝，构建出来 2.9GB。
+RUN npm run build && npm prune --omit=dev
+
+FROM ${NODE_IMAGE}
+
+# 部署身份（pixb 提交）进 label：`docker inspect` 就能回答「在跑的是哪份代码」。
+# 值由 compose 的 build.args 传入，构建完不改镜像。
+ARG SOURCE_REV=unknown
+ARG PACKAGE=@sleep2agi/agent-network-dashboard
+LABEL org.opencontainers.image.title="agent-network-dashboard" \
+      org.opencontainers.image.source="https://github.com/sleep2agi/agent-network-dashboard" \
+      org.opencontainers.image.revision="${SOURCE_REV}" \
+      ai.anet.deploy.branch="pixb" \
+      ai.anet.deploy.source_revision="${SOURCE_REV}"
+
+WORKDIR /app
+# 与 build 阶段同一棵树：依赖 + 构建产物 + 运行时入口。
+COPY --from=build /src ./
+
+# 不以 root 跑常驻服务。
+# 非 root + `$HOME/.anet/config.json` 必须同时到位。
+#
+# config.json 缺失时 dashboard 在认证请求上直接 ENOENT 500（2026-10-08 记过，
+# 2026-11-04 部署演练里又撞到一次：日志 `ENOENT ... <家目录>/.anet/config.json`）。
+# 现网那条装发布包的路径（parent 仓库 Dockerfile.dashboard）早就在镜像里预置了这份文件，
+# 源码构建路径此前没有 —— 部署到现网形状（无 volume）就是 500。
+#
+# 内容是中性的 hub 默认地址；真实地址由 compose.yaml 的 COMMHUB_URL 环境变量给
+# （env 压过 config.json，已实测）。这里不写任何 token 或主机地址。
+# 家目录放在 /srv/dashboard，不放在 /home/<名字>/：后者在对外发布面上就是「某个人 home 里的路径」
+# （`npm run oss:check` 的 personal_home 就是按 /home/<name>/ 与 /Users/<name> 形状判的，
+# 仓库里除本文件外没有任何文件写这种形状）。运行时形状不变（同样是「家目录/.anet/config.json」），
+# 少一条会被公开仓库扫描出来的个人形状。
+RUN useradd -r -u 10001 -d /srv/dashboard --create-home dashboard \
+    && mkdir -p /srv/dashboard/.anet \
+    && printf '{"hub":"http://127.0.0.1:9200"}\n' > /srv/dashboard/.anet/config.json \
+    && chown -R dashboard:dashboard /srv/dashboard /app
+USER dashboard
+# HOME 显式写死：容器里 HOME 写死后「config.json 在哪」不依赖运行方式
+# （docker run / compose / -u 覆盖 uid 都一样可诊断）。
+ENV HOME=/srv/dashboard
+
+# 监听地址契约：只绑 127.0.0.1。
+# bin/start.js 的优先级是 HOST > HOSTNAME > 默认，所以这里用 HOST ——
+# 单设 HOSTNAME 会被宿主已存在的 HOST 压掉。
+# 绑 0.0.0.0 等于把带会话的 UI 直接挂到局域网，绕过 Caddy/frpc 反代层的访问控制。
+ENV HOST=127.0.0.1
+ENV PORT=3001
+ENV NEXT_TELEMETRY_DISABLED=1
+EXPOSE 3001
+
+# 就绪探针用 /login（公开页）。
+# 不要用 /api/hub/health：无会话时返回 401，`curl -f` 把「活着」判成「不健康」
+# （2026-11-04 实测 /login=200、/api/hub/health=401）。
+# 探针端口从 process.env.PORT 取，不写死：写死 3001 时，任何改端口的运行方式
+# （演练用 3099 实测）服务正常而健康状态恒为 unhealthy，有 service_healthy 依赖门时
+# 会把依赖方一起锁死。start-period 60s：Next 生产启动 + 首次 /login 编译需要时间。
+HEALTHCHECK --interval=30s --timeout=5s --start-period=60s --retries=3 \
+  CMD node -e "const p=process.env.PORT||3001; fetch('http://127.0.0.1:'+p+'/login').then(r=>process.exit(r.ok?0:1)).catch(()=>process.exit(1))"
+
+# 运行时环境变量（COMMHUB_URL / DASHBOARD_PASSWORD 等）只声明名字，值由 env_file 提供。
+# 跑 bin/start.js = 包声明的入口（`npx next start`，cwd=包目录），
+# 与现网固化安装执行的是同一个入口。
+CMD ["node", "bin/start.js"]

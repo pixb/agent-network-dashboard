@@ -54,7 +54,10 @@ describe('读失败必须冒泡，不能伪装成空数据', () => {
     const versions = read('app/versions/page.tsx');
     expect(versions).toContain('failed');
     const messages = read('app/messages/page.tsx');
-    expect(messages).toMatch(/error\s*&&\s*messages\.length === 0/);
+    // 守卫必须跟着**真正渲染的那条列表**走。/messages 现在把收件箱行并进时间线，
+    // 渲染列表是 timeline；若继续写死 messages.length，「网络消息读失败 + 收件箱
+    // 里有私信」会直接渲染 EmptyState —— 把读失败伪装成「这里很安静」，正是本测试要拦的事。
+    expect(messages).toMatch(/error\s*&&\s*(messages|timeline)\.length === 0/);
   });
 });
 

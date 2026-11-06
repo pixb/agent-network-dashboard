@@ -50,6 +50,7 @@ const CASES: Array<{ path: string; label: string }> = [
   { path: '/nodes/node-alpha',   label: '/nodes/<alias> ascii  ← 07-31 regression case' },
   { path: '/nodes/%E6%94%AF%E4%BB%98%E5%8A%A9%E6%89%8B', label: '/nodes/<支付助手> unicode  ← prod-observed alias shape' },
   { path: '/tasks/abc123',       label: '/tasks/<id> hex' },
+  { path: '/messages/inbox',   label: '/messages/inbox  ← 2026-11-04 从源码镜像实测抓到：matcher 只有裸 /messages 时子路由无 cookie 返回 200' },
   { path: '/settings/general',   label: '/settings/<subroute>' },
 ];
 
