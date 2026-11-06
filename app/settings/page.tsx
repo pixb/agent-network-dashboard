@@ -66,6 +66,26 @@ export default function SettingsPage() {
   const density = useDensity();
   const fontScale = useFontScale();
   const [notifyHint, setNotifyHint] = useState('');
+  // 登录设备（对齐客户端「账号 → 登录设备」）：只读列表 + 两个退出动作。
+  const [devices, setDevices] = useState<Array<Record<string, unknown>> | null>(null);
+  const [devicesNote, setDevicesNote] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/hub/auth-sessions')
+      .then(async res => {
+        const data = await res.json().catch(() => null);
+        if (cancelled) return;
+        if (res.ok && Array.isArray(data?.sessions)) setDevices(data.sessions);
+        else if (data?.error === 'user_token_required') {
+          // 节点 token 登录的 Dashboard 拿不到「用户会话」——这是能力边界，不是故障。
+          setDevicesNote('当前登录取自节点 token，Hub 不提供该账号的登录设备列表。');
+        } else {
+          setDevicesNote(`读取失败：${data?.message || data?.error || `HTTP ${res.status}`}`);
+        }
+      })
+      .catch(() => { if (!cancelled) setDevicesNote('读取失败：Hub 不可达'); });
+    return () => { cancelled = true; };
+  }, []);
   const notifyOn = useSyncExternalStore(subscribeNotify, notifySnapshot, () => false);
   useEffect(() => {
     try {
@@ -139,6 +159,51 @@ export default function SettingsPage() {
                 </button>
               </div>
               {pwdResult && <div className={`mt-2 text-xs ${pwdResult.startsWith('Failed') ? 'text-[var(--danger)]' : 'text-[var(--success)]'}`}>{pwdResult}</div>}
+            </div>
+
+            <div className={cardClass} data-login-devices>
+              <h3 className="mb-1 text-sm font-semibold">登录设备</h3>
+              <p className="mb-3 text-xs text-[var(--fg-muted)]">
+                这些设备正以你的账号登录 Hub。退出后该设备需要重新登录。
+              </p>
+              {devicesNote && <p className="text-xs text-[var(--fg-muted)]" data-devices-note>{devicesNote}</p>}
+              {!devicesNote && devices === null && <p className="text-xs text-[var(--fg-muted)]">读取中…</p>}
+              {!devicesNote && devices?.length === 0 && <p className="text-xs text-[var(--fg-muted)]">没有其他登录设备。</p>}
+              {!devicesNote && !!devices?.length && (
+                <ul className="space-y-2">
+                  {devices.map((d, i) => {
+                    const id = String(d.id ?? d.session_id ?? i);
+                    const label = String(d.device ?? d.user_agent ?? d.label ?? '未知设备');
+                    const when = String(d.last_seen_at ?? d.created_at ?? '');
+                    return (
+                      <li key={id} className="flex items-center justify-between gap-3 rounded-lg border border-[var(--border)] px-3 py-2" data-device-row>
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm text-[var(--fg)]">{label}</span>
+                          {when && <span className="block text-[11px] text-[var(--fg-dim)]">{when}</span>}
+                        </span>
+                        <button
+                          onClick={async () => {
+                            const res = await fetch(`/api/hub/auth-sessions?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+                            if (res.ok) { setDevices(prev => (prev ? prev.filter((_, idx) => idx !== i) : prev)); setDevicesNote(''); }
+                            else setDevicesNote('退出失败：Hub 拒绝了该请求');
+                          }}
+                          className="shrink-0 rounded-lg bg-[var(--bg-elevated)] px-3 py-1.5 text-xs text-[var(--fg-muted)] transition-colors hover:text-[var(--fg)]"
+                        >退出</button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              {!devicesNote && !!devices?.length && devices.length > 1 && (
+                <button
+                  onClick={async () => {
+                    const res = await fetch('/api/hub/auth-sessions?action=revoke-others', { method: 'POST' });
+                    if (res.ok) { setDevices(prev => (prev ? prev.slice(0, 1) : prev)); setDevicesNote('已退出其他设备'); }
+                    else setDevicesNote('退出其他设备失败：Hub 拒绝了该请求');
+                  }}
+                  className="mt-3 rounded-lg bg-[var(--bg-elevated)] px-4 py-2 text-sm text-[var(--fg-muted)] transition-colors hover:text-[var(--fg)]"
+                >退出其他所有设备</button>
+              )}
             </div>
 
             <div className={cardClass}>
