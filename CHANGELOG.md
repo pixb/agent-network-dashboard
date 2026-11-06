@@ -6,6 +6,13 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ---
 
+## 0.6.4-preview.389 — 2026-11-06
+
+### 首页未读角标不再下载消息正文
+
+- 未读角标只需要「谁发给谁、什么时候」四项字段，此前却整批下载 200 条消息正文（实测 302 KB → 27 KB）。
+- 同一时间窗内首页接口总传输 654 KB → 364 KB；聊天窗口里的正文显示不受影响。
+
 ## 0.6.4-preview.388 — 2026-11-06
 
 ### 首页节点列表只取用得到的字段
