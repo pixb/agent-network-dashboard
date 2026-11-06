@@ -163,7 +163,7 @@ export function HealthBanner() {
           <Link
             href={cta.href}
             aria-label={cta.label}
-            className="sm:hidden text-[13px] font-medium opacity-90 hover:opacity-100 relative leading-none px-1.5 before:absolute before:inset-y-[-10px] before:inset-x-[-8px] before:content-['']"
+            className="sm:hidden text-[12px] font-medium opacity-90 hover:opacity-100 relative leading-none px-1.5 before:absolute before:inset-y-[-10px] before:inset-x-[-8px] before:content-['']"
           >
             →
           </Link>

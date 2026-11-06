@@ -90,15 +90,15 @@ function AgentCardInner({ session: s, hasSse, sseCount, onChat, unreadCount = 0 
             {unreadCount > 0 && !muted && (
               <span
                 aria-label={t(`${unreadCount} 条未读`, `${unreadCount} unread`)}
-                className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-semibold leading-4 text-center ring-2 ring-[var(--bg-secondary)]"
+                className="absolute -top-1.5 -right-2 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[11px] font-semibold leading-4 text-center ring-2 ring-[var(--bg-secondary)]"
               >
                 {unreadCount > 99 ? '99+' : unreadCount}
               </span>
             )}
           </span>
           <span className="font-semibold text-white truncate text-sm" title={s.alias}>{s.alias}</span>
-          {pinned && <span className="shrink-0 text-[9px] text-[var(--fg-dim)]" aria-label={t('已置顶', 'Pinned')} title={t('已置顶', 'Pinned')}>📌</span>}
-          {hasDraft && <span className="shrink-0 text-[9px] text-red-400/90" aria-label={t('有未发送草稿', 'Unsent draft')}>{t('[草稿]', '[draft]')}</span>}
+          {pinned && <span className="shrink-0 text-[11px] text-[var(--fg-dim)]" aria-label={t('已置顶', 'Pinned')} title={t('已置顶', 'Pinned')}>📌</span>}
+          {hasDraft && <span className="shrink-0 text-[11px] text-red-400/90" aria-label={t('有未发送草稿', 'Unsent draft')}>{t('[草稿]', '[draft]')}</span>}
           <span className={`inline-block w-1.5 h-1.5 rounded-full shrink-0 ${cfg.dot} ${hasSse && s.status === 'working' ? 'animate-pulse' : ''}`} />
         </div>
         <div className="flex items-center gap-1 shrink-0">

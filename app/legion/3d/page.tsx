@@ -3063,7 +3063,7 @@ export default function Legion3DPage() {
       <div ref={headerRef} data-testid="legion-3d-header" className={`pointer-events-none absolute inset-x-3 top-3 flex flex-col gap-2 transition-opacity duration-300 sm:inset-x-4 sm:top-4 sm:flex-row sm:items-start sm:justify-between ${cleanView ? 'invisible' : 'visible'}`}>
       <div className="pointer-events-none min-w-0 max-w-full sm:max-w-sm">
         <div className="flex min-h-11 items-center gap-2 pr-20 sm:min-h-0 sm:items-baseline sm:pr-0">
-          <h1 className="text-lg font-semibold text-[var(--fg)]">军团 · 3D</h1>
+          <h1 className="text-xl font-semibold text-[var(--fg)]">军团 · 3D</h1>
           <span className="hidden text-[11px] text-[var(--fg-dim)] sm:inline">Legion Topology</span>
         </div>
         <p className="mt-1 text-xs text-[var(--fg-muted)]">

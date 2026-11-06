@@ -984,7 +984,7 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
               type="button"
               onClick={handleRestart}
               disabled={lcBusy}
-              className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-[13px] font-medium transition-colors ${
+              className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-[12px] font-medium transition-colors ${
                 lcBusy
                   ? 'border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--fg-dim)] cursor-not-allowed'
                   : 'border-amber-700/50 bg-[var(--warning)]/15/15 text-[var(--warning)] hover:bg-[var(--warning)]/15/25'

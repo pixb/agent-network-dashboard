@@ -182,11 +182,11 @@ nothing blurs. */
    shadow (not the dark navy that the CSS shim would normally translate
    `bg-[#111113]` into). */
 .anet-cmdk kbd {
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1;
   padding: 1px 4px;
   border: 1px solid currentColor;
-  border-radius: 3px;
+  border-radius: 4px;
   opacity: 0.6;
 }/* Round 20 — matched-char highlight inside cmdk titles/hints. Inherits
    line color (`color`) instead of forcing one — keeps text readable on

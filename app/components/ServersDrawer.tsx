@@ -151,7 +151,7 @@ function HealthBadge({ cpu, mem, disk }: { cpu: number | null; mem: number | nul
 function AgentList({ agents }: { agents?: ServerAgent[] }) {
   if (!agents || agents.length === 0) {
     return (
-      <div className="text-[9px] text-[var(--fg-dim)] font-mono italic px-1 py-1" data-server-agents-missing="true">
+      <div className="text-[11px] text-[var(--fg-dim)] font-mono italic px-1 py-1" data-server-agents-missing="true">
         {/* #157 fix — copy update. Pre-#157 the placeholder read
             "agent rollup pending hub ≥ 0.8.2-preview". commhub-server@
             0.8.2 is LIVE in prod (Vincent screenshot 5560 verified) but
@@ -181,10 +181,10 @@ function AgentList({ agents }: { agents?: ServerAgent[] }) {
             <span className="w-1.5 h-1.5 rounded-full shrink-0" style={{ background: statusColor }} />
             <span className="font-semibold truncate" style={{ color: 'var(--fg)' }}>{a.alias}</span>
             {a.runtime && (
-              <span className="text-[9px] text-[var(--fg-dim)] shrink-0">· {a.runtime}</span>
+              <span className="text-[11px] text-[var(--fg-dim)] shrink-0">· {a.runtime}</span>
             )}
             {typeof a.progress === 'number' && a.progress > 0 && (
-              <span className="ml-auto text-[9px] tabular-nums text-[var(--fg-muted)]">
+              <span className="ml-auto text-[11px] tabular-nums text-[var(--fg-muted)]">
                 {Math.round(a.progress * 100)}%
               </span>
             )}
@@ -283,7 +283,7 @@ export function ServersPanel({ enabled = true, className = '' }: { enabled?: boo
                 {/* Hero 1 health badge — worst-of CPU/Mem/Disk */}
                 {!offline && <HealthBadge cpu={cpuPct} mem={memPct} disk={diskPct} />}
                 <span className="font-mono text-[12px] font-semibold truncate" style={{ color: 'var(--fg)' }}>{s.hostname}</span>
-                {s.note && <span className="text-[9px] text-[var(--fg-muted)]">({s.note})</span>}
+                {s.note && <span className="text-[11px] text-[var(--fg-muted)]">({s.note})</span>}
               </div>
               <span className="flex items-center gap-1 shrink-0">
                 <span className="text-[11px] text-[var(--fg-muted)] font-mono tabular-nums">
@@ -320,17 +320,17 @@ export function ServersPanel({ enabled = true, className = '' }: { enabled?: boo
                   /* #157 sibling fix — same misleading version-pin copy
                      dropped at the disk-metric placeholder. Same
                      rationale as the agent-rollup copy above. */
-                  <div className="text-[9px] text-[var(--fg-dim)] font-mono italic" data-server-disk-missing="true">disk metric not reported by hub</div>
+                  <div className="text-[11px] text-[var(--fg-dim)] font-mono italic" data-server-disk-missing="true">disk metric not reported by hub</div>
                 )}
                 {s.cpu_history && s.cpu_history.length >= 2 && (
                   <div className="space-y-0.5">
-                    <div className="text-[9px] text-[var(--fg-muted)] font-mono">CPU · 5-min</div>
+                    <div className="text-[11px] text-[var(--fg-muted)] font-mono">CPU · 5-min</div>
                     <Sparkline values={s.cpu_history} tint="#10b981" label="CPU" />
                   </div>
                 )}
                 {s.mem_history && s.mem_history.length >= 2 && (
                   <div className="space-y-0.5">
-                    <div className="text-[9px] text-[var(--fg-muted)] font-mono">RAM · 5-min</div>
+                    <div className="text-[11px] text-[var(--fg-muted)] font-mono">RAM · 5-min</div>
                     <Sparkline values={s.mem_history} tint="#06b6d4" label="MEM" />
                   </div>
                 )}
@@ -344,12 +344,12 @@ export function ServersPanel({ enabled = true, className = '' }: { enabled?: boo
                    (no sparkline, no broken state). */}
                 {s.disk_history && s.disk_history.length >= 2 && (
                   <div className="space-y-0.5">
-                    <div className="text-[9px] text-[var(--fg-muted)] font-mono">DISK · 5-min</div>
+                    <div className="text-[11px] text-[var(--fg-muted)] font-mono">DISK · 5-min</div>
                     <Sparkline values={s.disk_history} tint="#f59e0b" label="DISK" />
                   </div>
                 )}
                 <div className="pt-1">
-                  <div className="text-[9px] text-[var(--fg-muted)] font-mono mb-0.5">agents</div>
+                  <div className="text-[11px] text-[var(--fg-muted)] font-mono mb-0.5">agents</div>
                   <AgentList agents={s.agents} />
                 </div>
               </div>
@@ -358,7 +358,7 @@ export function ServersPanel({ enabled = true, className = '' }: { enabled?: boo
         );
       })}
       {servers.length > 0 && (
-        <div className="pt-1 text-[9px] text-[var(--fg-dim)] font-mono text-center">
+        <div className="pt-1 text-[11px] text-[var(--fg-dim)] font-mono text-center">
           live · refreshing every 5s
         </div>
       )}

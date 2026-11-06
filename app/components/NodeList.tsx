@@ -125,7 +125,7 @@ function NodeListRow({ session: s, selected, unread, onSelect, onContextMenu }: 
           {/* SPEC §11: alias + optional bell-slash icon at RIGHT of
               alias when muted (12×12, #64748B). NO pin icon — pinned
               state is signaled by row background per §11.1. */}
-          <span className={`text-[13px] truncate flex items-center gap-1.5 min-w-0 ${selected ? 'text-cyan-200 font-medium' : 'text-gray-200'}`}>
+          <span className={`text-[12px] truncate flex items-center gap-1.5 min-w-0 ${selected ? 'text-cyan-200 font-medium' : 'text-gray-200'}`}>
             <span className="truncate">{s.alias}</span>
             {muted && (
               <svg
@@ -162,7 +162,7 @@ function NodeListRow({ session: s, selected, unread, onSelect, onContextMenu }: 
               }
               data-unread-badge
               data-badge-variant={muted ? 'muted' : 'default'}
-              className={`shrink-0 min-w-[16px] h-4 px-1 rounded-full text-[9px] font-semibold leading-4 text-center ${
+              className={`shrink-0 min-w-[16px] h-4 px-1 rounded-full text-[11px] font-semibold leading-4 text-center ${
                 muted
                   ? 'bg-[var(--badge-muted-bg)] text-[var(--badge-muted-fg)]'
                   : 'bg-[var(--danger)] text-white'

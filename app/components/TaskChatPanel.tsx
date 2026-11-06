@@ -307,7 +307,7 @@ function LocalFilePreview({ file, onRemove }: { file: File; onRemove: () => void
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 px-1 text-center">
           <span className="text-lg">📄</span>
-          <span className="max-w-full truncate text-[9px] font-semibold text-[var(--accent-text)]">{ext}</span>
+          <span className="max-w-full truncate text-[11px] font-semibold text-[var(--accent-text)]">{ext}</span>
         </div>
       )}
       <button
@@ -1676,7 +1676,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             const senderLabel = senderLabelFor(m.from_name);
             const senderBadge = fromUser
               ? null
-              : <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-[9px] text-purple-300 font-medium">↳ {senderLabel}</span>;
+              : <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-[11px] text-purple-300 font-medium">↳ {senderLabel}</span>;
             if (event.kind === 'reply') {
               return (
                 <Fragment key={`${m.task_id}:reply`}>
@@ -1687,12 +1687,12 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                       <div className="flex items-center gap-1.5 min-w-0">
                         {m.to_name && <AliasAvatar alias={m.to_name} size={14} />}
                         <span className="text-[11px] text-[var(--fg)] font-medium truncate">{m.to_name}</span>
-                        <span className="text-[9px] text-[var(--success)]">replied</span>
+                        <span className="text-[11px] text-[var(--success)]">replied</span>
                       </div>
                       <CopyButton text={m.result || ''} label={t('复制回复', 'Copy reply')} />
                     </div>
                     <div className="mb-2 rounded-lg border-l-2 border-cyan-400/40 bg-[var(--bg)]/50 px-2.5 py-1.5">
-                      <div className="text-[9px] text-[var(--accent-text)]">
+                      <div className="text-[11px] text-[var(--accent-text)]">
                         引用 {senderLabel} 的任务 · {formatTimestamp(m.created_at)}
                       </div>
                       <div className="mt-0.5 max-h-10 overflow-hidden text-[11px] leading-5 text-[var(--fg-muted)]">
@@ -1739,7 +1739,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 <div title={m.created_at} className={`group/bubble max-w-[92%] sm:max-w-[min(85%,56ch)] bg-[var(--accent)]/8 rounded-2xl rounded-br-md px-3 py-2.5 sm:px-4 ${currentMatchKey === `${m.task_id}:task` ? 'ring-2 ring-yellow-400/60' : ''}`}>
                   <div className="flex items-center gap-2 mb-1">
                     <span className={`text-[11px] font-medium ${fromUser ? 'text-[var(--accent-text)]' : 'text-purple-300'}`}>{senderLabel}</span>
-                    {!fromUser && <span className="text-[9px] text-[var(--fg-dim)]">forwarded to {m.to_name}</span>}
+                    {!fromUser && <span className="text-[11px] text-[var(--fg-dim)]">forwarded to {m.to_name}</span>}
                     <span className="flex-1" />
                     <CopyButton text={m.content || ''} label={t('复制内容', 'Copy message')} />
                   </div>
@@ -1886,7 +1886,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 <select value={priority} onChange={e => setPriority(e.target.value)}
                   aria-label="Priority"
                   title="Priority"
-                  className="hidden bg-transparent text-[9px] text-[var(--fg-dim)] focus:outline-none cursor-pointer sm:block">
+                  className="hidden bg-transparent text-[11px] text-[var(--fg-dim)] focus:outline-none cursor-pointer sm:block">
                   <option value="normal">N</option>
                   <option value="high">H</option>
                   <option value="low">L</option>
@@ -1942,7 +1942,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
               ))}
             </div>
           )}
-          <div className="hidden sm:flex justify-between text-[9px] text-[var(--fg-dim)] mt-1.5">
+          <div className="hidden sm:flex justify-between text-[11px] text-[var(--fg-dim)] mt-1.5">
             <span>{input.includes('@') ? `Sending to: ${alias}` : `Type @ to mention another node`}</span>
             <span>Enter to send · paste image</span>
           </div>

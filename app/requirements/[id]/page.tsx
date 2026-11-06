@@ -676,7 +676,7 @@ function RequirementDetailContent({ networkId }: { networkId: string }) {
               </div>
             ) : (
               <div className="flex min-w-0 items-center gap-2">
-                <h1 className="truncate text-lg font-semibold text-white" title={req.name}>{req.name}</h1>
+                <h1 className="truncate text-xl font-semibold text-white" title={req.name}>{req.name}</h1>
                 <button
                   type="button"
                   data-testid="requirement-rename"

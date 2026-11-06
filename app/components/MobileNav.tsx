@@ -111,7 +111,7 @@ export function MobileNav() {
                   <span aria-label="有未读（已静音）" className="absolute -top-0.5 right-1 h-2 w-2 rounded-full bg-red-500/80" />
                 )}
                 {item.href === '/nodes' && totalUnread > 0 && (
-                  <span className="absolute -top-1 -right-2.5 min-w-[15px] h-[15px] px-1 rounded-full bg-red-500 text-white text-[9px] font-semibold leading-[15px] text-center">
+                  <span className="absolute -top-1 -right-2.5 min-w-[15px] h-[15px] px-1 rounded-full bg-red-500 text-white text-[11px] font-semibold leading-[15px] text-center">
                     {badgeLabel(totalUnread)}
                   </span>
                 )}

@@ -77,7 +77,7 @@ export function CommandCenter({ tabs, activeTab, onOpenTab, onCloseTab, onSetAct
                   <span className="h-2 w-2 shrink-0 rounded-full bg-red-500/80" />
                 )}
                 {activeTab !== alias && unreadCount(alias) > 0 && !isMuted(alias) && (
-                  <span className="min-w-[15px] h-[15px] px-1 rounded-full bg-red-500 text-white text-[9px] font-semibold leading-[15px] text-center">
+                  <span className="min-w-[15px] h-[15px] px-1 rounded-full bg-red-500 text-white text-[11px] font-semibold leading-[15px] text-center">
                     {unreadCount(alias) > 99 ? '99+' : unreadCount(alias)}
                   </span>
                 )}
@@ -135,7 +135,7 @@ export function CommandCenter({ tabs, activeTab, onOpenTab, onCloseTab, onSetAct
 function TabDraftMark({ alias }: { alias: string }) {
   const hasDraft = useHasDraft(alias);
   if (!hasDraft) return null;
-  return <span className="text-[9px] text-red-400/90 shrink-0">{t('[草稿]', '[draft]')}</span>;
+  return <span className="text-[11px] text-red-400/90 shrink-0">{t('[草稿]', '[draft]')}</span>;
 }
 
 /** Inline chat without the panel chrome (used inside CommandCenter tabs) */

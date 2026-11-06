@@ -63,7 +63,7 @@ function GroupSection({ group, depth, counts, focusName, expandAll, overrides, o
         data-org-group={group.name}
         ref={el => { if (focused && el) el.scrollIntoView({ block: 'center' }); }}
       >
-        <span className="text-[13px] font-medium text-[var(--fg)]">{group.name}</span>
+        <span className="text-[12px] font-medium text-[var(--fg)]">{group.name}</span>
         {group.leader && (
           <span className="rounded-full bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)]">
             负责人 {group.leader}
@@ -319,7 +319,7 @@ function OrgContent() {
       <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-lg font-semibold text-[var(--fg)]">Organization</h1>
+            <h1 className="text-xl font-semibold text-[var(--fg)]">Organization</h1>
             <p className="mt-1 text-xs text-[var(--fg-muted)]">
               人、部门与他们名下的 Agent（只读）。
             </p>

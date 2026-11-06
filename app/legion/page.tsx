@@ -759,7 +759,7 @@ export default function LegionPage() {
       <div className="mx-auto max-w-[1400px] px-4 py-6 sm:px-6">
         <div className={`mb-4 flex flex-wrap items-end justify-between gap-3 ${cleanView ? 'invisible' : 'visible'}`}>
           <div>
-            <h1 className="text-lg font-semibold text-white">Legion</h1>
+            <h1 className="text-xl font-semibold text-white">Legion</h1>
             {/* 手机首屏优先给画布：这行说明在窄屏收起（桌面仍显示）。 */}
             <p className="mt-1 hidden text-xs text-[var(--fg-muted)] sm:block">
               军团编制：圆心是网络，外三环依次是部门、成员与名下 Agent。
@@ -1368,7 +1368,7 @@ export default function LegionPage() {
                                 aria-label={`展开 ${node.label}（${node.hiddenMembers ?? 0} 人 · ${node.hiddenAgents ?? 0} Agent）`}
                               >
                                 <circle cx={r + 2} cy={-(r + 2)} r={9} fill="var(--bg)" stroke="var(--hl)" strokeWidth={1} />
-                                <text x={r + 2} y={-(r + 2) + 3} textAnchor="middle" className="fill-[var(--hl)] text-[9px]">
+                                <text x={r + 2} y={-(r + 2) + 3} textAnchor="middle" className="fill-[var(--hl)] text-[11px]">
                                   +{(node.hiddenMembers ?? 0) + (node.hiddenAgents ?? 0)}
                                 </text>
                               </g>

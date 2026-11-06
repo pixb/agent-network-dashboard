@@ -333,7 +333,7 @@ export default function MessagesPage() {
                     {m.from_alias && <AliasAvatar alias={m.from_alias} size={14} />}
                     <span className="shrink-0 font-medium text-[var(--fg)]">{m.from_alias}</span>
                     <span className="text-[var(--fg-muted)] flex-1 truncate" title={m.content || ''}>{previewContent(m.content).slice(0, 120)}</span>
-                    <span className="text-[9px] text-[var(--fg-dim)] shrink-0">{timeAgo(m.created_at || '')}</span>
+                    <span className="text-[11px] text-[var(--fg-dim)] shrink-0">{timeAgo(m.created_at || '')}</span>
                   </div>
                 ))}
               </div>
@@ -366,7 +366,7 @@ export default function MessagesPage() {
                 {gapExceeded && (
                   <div className="my-2 sm:my-4 flex items-center gap-3">
                     <div className="h-px flex-1 bg-white/[0.06]" />
-                    <div className="text-[13px] font-medium text-[var(--fg-muted)]">{formatDividerLabel(message.created_at)}</div>
+                    <div className="text-[12px] font-medium text-[var(--fg-muted)]">{formatDividerLabel(message.created_at)}</div>
                     <div className="h-px flex-1 bg-white/[0.06]" />
                   </div>
                 )}

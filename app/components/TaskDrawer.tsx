@@ -169,7 +169,7 @@ export function TaskDrawer({ taskId, onClose }: TaskDrawerProps) {
                           step.done ? 'text-[var(--fg)]' : isCurrent ? 'text-[var(--accent-text)]' : 'text-[var(--fg-dim)]'
                         }`}>
                           <span>{step.label}</span>
-                          {isCurrent && <span className="text-[9px] uppercase tracking-wide text-[var(--accent-text)]">in&nbsp;progress</span>}
+                          {isCurrent && <span className="text-[11px] uppercase tracking-wide text-[var(--accent-text)]">in&nbsp;progress</span>}
                         </div>
                         <div className="text-[11px] text-[var(--fg-muted)]" title={step.time || undefined}>
                           {step.time ? timeAgo(step.time) : isCurrent ? '—' : 'Pending'}

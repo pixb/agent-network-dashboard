@@ -74,7 +74,7 @@ function DraftMark({ alias }: { alias: string }) {
   const t = useT();
   const hasDraft = useHasDraft(alias);
   if (!hasDraft) return null;
-  return <span className="shrink-0 text-[9px] text-red-400/90" aria-label={t('有未发送草稿', 'Unsent draft')}>{t('[草稿]', '[draft]')}</span>;
+  return <span className="shrink-0 text-[11px] text-red-400/90" aria-label={t('有未发送草稿', 'Unsent draft')}>{t('[草稿]', '[draft]')}</span>;
 }
 
 export function NodesView({ initialAlias = null }: { initialAlias?: string | null }) {
@@ -773,7 +773,7 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
                         <span aria-label={t('有未读（已静音）', 'Unread (muted)')} className="absolute -top-0.5 -right-1 h-2.5 w-2.5 rounded-full bg-red-500/80 ring-2 ring-[var(--bg-secondary)]" />
                       )}
                       {unreadCount(s.alias) > 0 && !isMuted(s.alias) && (
-                        <span aria-label={t(`${unreadCount(s.alias)} 条未读`, `${unreadCount(s.alias)} unread`)} className="absolute -top-1 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-semibold leading-4 text-center ring-2 ring-[var(--bg-secondary)]">
+                        <span aria-label={t(`${unreadCount(s.alias)} 条未读`, `${unreadCount(s.alias)} unread`)} className="absolute -top-1 -right-1.5 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[11px] font-semibold leading-4 text-center ring-2 ring-[var(--bg-secondary)]">
                           {unreadCount(s.alias) > 99 ? '99+' : unreadCount(s.alias)}
                         </span>
                       )}
@@ -866,7 +866,7 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
                             <span aria-label={t('有未读（已静音）', 'Unread (muted)')} className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-red-500/80" />
                           )}
                           {unreadCount(s.alias) > 0 && !isMuted(s.alias) && (
-                            <span aria-label={t(`${unreadCount(s.alias)} 条未读`, `${unreadCount(s.alias)} unread`)} className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-1 rounded-full bg-red-500 text-white text-[9px] font-semibold leading-[15px] text-center">
+                            <span aria-label={t(`${unreadCount(s.alias)} 条未读`, `${unreadCount(s.alias)} unread`)} className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-1 rounded-full bg-red-500 text-white text-[11px] font-semibold leading-[15px] text-center">
                               {unreadCount(s.alias) > 99 ? '99+' : unreadCount(s.alias)}
                             </span>
                           )}
@@ -874,7 +874,7 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
                       </div>
                       <span className="truncate text-sm font-medium text-white">{s.alias}</span>
                       <DraftMark alias={s.alias} />
-                      {unread && isMuted(s.alias) && <span className="shrink-0 rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-red-300">New</span>}
+                      {unread && isMuted(s.alias) && <span className="shrink-0 rounded-full bg-red-500/15 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-red-300">New</span>}
                     </div>
                   </div>
                   <div className="col-span-2 truncate text-xs text-gray-400" title={s.server || ''}>
@@ -912,7 +912,7 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
                         <span aria-label={t('有未读（已静音）', 'Unread (muted)')} className="absolute -right-1 -top-1 h-2 w-2 rounded-full bg-red-500/80" />
                       )}
                       {unread && !isMuted(s.alias) && (
-                        <span aria-label={t(`${unreadCount(s.alias)} 条未读`, `${unreadCount(s.alias)} unread`)} className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-1 rounded-full bg-red-500 text-white text-[9px] font-semibold leading-[15px] text-center">
+                        <span aria-label={t(`${unreadCount(s.alias)} 条未读`, `${unreadCount(s.alias)} unread`)} className="absolute -top-1.5 -right-2 min-w-[15px] h-[15px] px-1 rounded-full bg-red-500 text-white text-[11px] font-semibold leading-[15px] text-center">
                           {unreadCount(s.alias) > 99 ? '99+' : unreadCount(s.alias)}
                         </span>
                       )}
@@ -920,7 +920,7 @@ export function NodesView({ initialAlias = null }: { initialAlias?: string | nul
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2 min-w-0">
                         <div className="truncate text-sm font-medium text-white">{s.alias}</div>
-                        {unread && isMuted(s.alias) && <span className="shrink-0 rounded-full bg-red-500/15 px-1.5 py-0.5 text-[9px] font-semibold uppercase tracking-wide text-red-300">New</span>}
+                        {unread && isMuted(s.alias) && <span className="shrink-0 rounded-full bg-red-500/15 px-1.5 py-0.5 text-[11px] font-semibold uppercase tracking-wide text-red-300">New</span>}
                       </div>
                       <div className="truncate text-[11px] text-gray-500">{s.agent || '—'} · {timeAgo(s.last_seen_at || s.updated_at)}</div>
                     </div>

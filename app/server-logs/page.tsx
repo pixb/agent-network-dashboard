@@ -287,8 +287,8 @@ export default function ServerLogsPage() {
                     at sm. The 2px left rail (LEVEL_STRIPE) already
                     encodes level visually for warn/error, so the LOG badge
                     is redundant on mobile — hide it below sm. */}
-                <span className="text-gray-600 shrink-0 w-[60px] sm:w-[100px] text-[9px] sm:text-[11px] tabular-nums">{shortTime(l.ts)}</span>
-                <span className={`hidden sm:inline shrink-0 px-1.5 rounded border text-[9px] uppercase ${LEVEL_BADGE[l.level]}`}>
+                <span className="text-gray-600 shrink-0 w-[60px] sm:w-[100px] text-[11px] sm:text-[11px] tabular-nums">{shortTime(l.ts)}</span>
+                <span className={`hidden sm:inline shrink-0 px-1.5 rounded border text-[11px] uppercase ${LEVEL_BADGE[l.level]}`}>
                   {l.level}
                 </span>
                 {/* Round 85: CommHub stamps each log line with a `[HH:MM:SS]`

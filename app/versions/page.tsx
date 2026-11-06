@@ -37,7 +37,7 @@ export default function VersionsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 text-[var(--fg)]">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-lg font-semibold">版本</h1>
+        <h1 className="text-xl font-semibold">版本</h1>
         {/* 版本对照看完，下一个问题通常是「这版改了什么」——直接给入口。 */}
         <Link
           href="/changelog"

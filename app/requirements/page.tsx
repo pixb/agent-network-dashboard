@@ -1018,7 +1018,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-lg font-semibold text-white">Requirements</h1>
+            <h1 className="text-xl font-semibold text-white">Requirements</h1>
             {/* 手机首屏寸土寸金：副标题与说明优先让位给第一条需求（实测第一条被推到 741px）。 */}
             <p className="mt-1 hidden text-xs text-[var(--fg-muted)] sm:block">
               只读视图。派单在 <Link href="/tasks" className="text-[var(--hl)] hover:underline">Tasks</Link>。

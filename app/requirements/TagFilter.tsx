@@ -52,7 +52,7 @@ export function TagChip({ name, color, count, className = '' }: {
       {color && <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />}
       {name}
       {typeof count === 'number' && count > 0 && (
-        <span className="tabular-nums text-[9px] text-[var(--fg-dim)]">{count}</span>
+        <span className="tabular-nums text-[11px] text-[var(--fg-dim)]">{count}</span>
       )}
     </span>
   );

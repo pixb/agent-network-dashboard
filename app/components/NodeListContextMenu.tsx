@@ -124,7 +124,7 @@ export function NodeListContextMenu({ alias, x, y, onClose }: NodeListContextMen
   // Menu item below drive the state colors via inline CSS variables to
   // keep both bg + text + icon flipping together on hover.)
   const itemCls =
-    'group w-full text-left flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] font-medium text-[var(--fg)] ' +
+    'group w-full text-left flex items-center gap-2.5 px-2.5 py-1.5 text-[12px] font-medium text-[var(--fg)] ' +
     'hover:bg-[rgba(125,211,252,0.10)] hover:text-white active:bg-[rgba(125,211,252,0.18)] ' +
     'disabled:text-[var(--fg-dim)] disabled:cursor-not-allowed disabled:hover:bg-transparent';
 

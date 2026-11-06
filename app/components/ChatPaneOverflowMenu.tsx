@@ -123,7 +123,7 @@ export function ChatPaneOverflowMenu({ alias, anchorRef, onClose, onOpenSettings
       data-flipped-y={pos.flippedY ? 'true' : undefined}
       data-flipped-x={pos.flippedX ? 'true' : undefined}
       style={{ position: 'fixed', top: pos.top, left: pos.left, width: 200, zIndex: 200 }}
-      className="rounded-md border border-[var(--col-line-strong)] bg-[var(--menu-bg)] py-1 text-[13px] text-gray-100"
+      className="rounded-md border border-[var(--col-line-strong)] bg-[var(--menu-bg)] py-1 text-[12px] text-gray-100"
     >
       <MenuItem
         testid="chat-pane-overflow-pin"
