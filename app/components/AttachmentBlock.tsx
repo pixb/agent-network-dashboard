@@ -483,7 +483,7 @@ export function AttachmentBlock({ attachment }: { attachment: Attachment }) {
         <span className="min-w-0 flex-1 truncate">{safeName}</span>
         {safeSize && <span className="shrink-0 text-xs text-neutral-400">{safeSize}</span>}
         {safeMime && (
-          <span className="shrink-0 rounded bg-[var(--hover-tint)] px-1.5 py-0.5 text-[10px] text-neutral-400">
+          <span className="shrink-0 rounded bg-[var(--hover-tint)] px-1.5 py-0.5 text-[11px] text-neutral-400">
             {safeMime}
           </span>
         )}

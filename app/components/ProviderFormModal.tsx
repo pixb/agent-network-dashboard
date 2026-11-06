@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from 'react';
+import { useReturnFocus } from '../lib/useReturnFocus';
 
 /**
  * Create/edit a model provider (RFC-028 P1 + #393 preset catalog). Single-step
@@ -81,6 +82,7 @@ export function ProviderFormModal({
   onClose: () => void;
   onSaved?: () => void;
 }) {
+  useReturnFocus();
   const editing = !!initial?.provider_id;
   const [presetId, setPresetId] = useState(() => detectPreset(initial?.base_url));
   const [name, setName] = useState(initial?.name ?? '');
@@ -182,7 +184,7 @@ export function ProviderFormModal({
       <div
         role="dialog"
         aria-label={editing ? '编辑供应商' : '新增供应商'}
-        className="fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-[min(94vw,480px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] shadow-2xl"
+        className="fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-[min(94vw,480px)] -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] shadow-2xl"
       >
         <div className="sticky top-0 flex items-center justify-between border-b border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-3">
           <div className="text-sm font-semibold text-[var(--fg)]">{editing ? '编辑供应商' : '新增供应商'}</div>

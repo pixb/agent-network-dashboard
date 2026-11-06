@@ -37,7 +37,7 @@ export default function VersionsPage() {
   return (
     <main className="mx-auto max-w-3xl px-4 py-6 text-[var(--fg)]">
       <div className="flex flex-wrap items-center justify-between gap-2">
-        <h1 className="text-lg font-semibold">版本</h1>
+        <h1 className="text-xl font-semibold">版本</h1>
         {/* 版本对照看完，下一个问题通常是「这版改了什么」——直接给入口。 */}
         <Link
           href="/changelog"
@@ -52,7 +52,7 @@ export default function VersionsPage() {
       </p>
 
       {failed && (
-        <div role="alert" className="mt-4 rounded-xl bg-[var(--bg-secondary)] p-4 text-sm">
+        <div role="alert" className="mt-4 rounded-2xl bg-[var(--bg-secondary)] p-4 text-sm">
           <p className="font-medium text-[var(--danger)]">读不到会话列表</p>
           <p className="mt-1 text-xs text-[var(--fg-muted)]">
             {error instanceof Error ? error.message : String(error)}
@@ -77,7 +77,7 @@ export default function VersionsPage() {
       )}
 
       {showBody && live.length === 0 && (
-        <div className="mt-4 rounded-xl bg-[var(--bg-secondary)] p-6 text-center text-sm text-[var(--fg-muted)]">
+        <div className="mt-4 rounded-2xl bg-[var(--bg-secondary)] p-6 text-center text-sm text-[var(--fg-muted)]">
           当前网络没有在线会话，无法对照版本。
           <Link href="/nodes" className="ml-1 text-[var(--hl)]">去看节点</Link>
         </div>

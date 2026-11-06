@@ -141,7 +141,7 @@ export default function LegionPlazaPage() {
     className={`relative min-w-0 bg-[var(--bg)] p-3 text-[var(--fg)] outline-none sm:p-5 ${fullscreen ? 'h-dvh overflow-auto' : 'min-h-screen'}`}>
     <div className="mx-auto max-w-[1720px]">
       <header className={`mb-4 flex flex-wrap items-center justify-between gap-3 ${fullscreen ? '' : 'lg:pr-10'}`}>
-        <div><h1 className="text-lg font-semibold">军团 · 平台视角</h1>
+        <div><h1 className="text-xl font-semibold">军团 · 平台视角</h1>
           <p className="mt-1 text-xs text-[var(--fg-muted)]" data-testid="plaza-counts">{loading ? '正在读取完整编制…' : `${platforms.length} 个展台 · ${directory.people} 名成员 · ${directory.agents} 个 Agent`}</p>
           <p className="mt-1 text-[11px] text-[var(--fg-muted)]">Agent 独立编制 · 点击展台查看节点属性</p></div>
         <nav className="flex flex-wrap items-center gap-1" aria-label="军团视图">

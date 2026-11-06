@@ -334,11 +334,22 @@ export function CommandPalette() {
   }, [open]);
 
   // Reset state on open + auto-focus input
+  const lastFocusRef = useRef<HTMLElement | null>(null);
   useEffect(() => {
     if (open) {
+      // 记住打开前的焦点元素：关闭时归还。否则按 Esc 后焦点掉到 <body>，
+      // 键盘用户会丢失位置，只能从头 Tab（WCAG 2.4.3 焦点顺序）。
+      lastFocusRef.current = (document.activeElement as HTMLElement | null) ?? null;
       setQuery('');
       setSelected(0);
       setTimeout(() => inputRef.current?.focus(), 50);
+      return;
+    }
+    const back = lastFocusRef.current;
+    lastFocusRef.current = null;
+    if (back && document.contains(back)) {
+      // 等遮罩卸载后再还，preventScroll 避免页面被拽动
+      setTimeout(() => { try { back.focus({ preventScroll: true }); } catch { /* 元素已不可聚焦 */ } }, 0);
     }
   }, [open]);
 
@@ -478,7 +489,7 @@ export function CommandPalette() {
             placeholder="Type a command or search…"
             className="flex-1 bg-transparent text-base sm:text-sm text-gray-200 placeholder-gray-600 focus:outline-none"
           />
-          <kbd className="text-[10px] text-gray-600 border border-[#26262b] rounded px-1.5 py-0.5 font-mono">esc</kbd>
+          <kbd className="text-[11px] text-gray-600 border border-[#26262b] rounded px-1.5 py-0.5 font-mono">esc</kbd>
         </div>
 
         <div className="max-h-[60vh] overflow-y-auto py-2">
@@ -489,7 +500,7 @@ export function CommandPalette() {
           ) : (
             Object.entries(grouped).map(([groupName, items]) => (
               <div key={groupName} className="mb-2 last:mb-0">
-                <div className="text-[10px] uppercase tracking-[0.12em] text-gray-600 px-3 py-1">{groupName}</div>
+                <div className="text-[11px] uppercase tracking-[0.12em] text-gray-600 px-3 py-1">{groupName}</div>
                 {items.map(c => {
                   const idx = runningIdx++;
                   const isActive = idx === selected;
@@ -513,7 +524,7 @@ export function CommandPalette() {
                           </span>
                         )}
                       </span>
-                      {isActive && <span className="text-[10px] text-gray-500">↵</span>}
+                      {isActive && <span className="text-[11px] text-gray-500">↵</span>}
                     </button>
                   );
                 })}
@@ -522,7 +533,7 @@ export function CommandPalette() {
           )}
         </div>
 
-        <div className="border-t border-[#26262b] px-3 py-1.5 flex items-center justify-between text-[10px] text-gray-600">
+        <div className="border-t border-[#26262b] px-3 py-1.5 flex items-center justify-between text-[11px] text-gray-600">
           <span className="flex items-center gap-3">
             <span><kbd className="font-mono">↑↓</kbd> navigate</span>
             <span><kbd className="font-mono">↵</kbd> select</span>

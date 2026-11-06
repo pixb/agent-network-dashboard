@@ -786,18 +786,17 @@ export function TopoGraph({ sessions, sseSessions, renameSignal }: TopoGraphProp
   useEffect(() => {
     const fetchFlows = async () => {
       try {
-        const [messageRes, taskRes] = await Promise.all([
-          fetch('/api/hub/messages?limit=50'),
-          fetch('/api/hub/tasks?limit=100'),
-        ]);
-        if (messageRes.status === 401 || taskRes.status === 401) {
+        // 拓扑连线只用到 from/to/时间戳/内容首句，不需要任务与消息全文。
+        // 旧实现每 5 秒拉 messages?limit=50 + tasks?limit=100（生产实测合计约 430 KB），
+        // 现在走服务端投影端点（内容截断 60 字），每次轮询降到十几 KB。
+        const res = await fetch('/api/hub/flow-lite?messages=50&tasks=100');
+        if (res.status === 401) {
           window.location.assign('/login');
           return;
         }
-
-        const [messageData, taskData] = await Promise.all([messageRes.json(), taskRes.json()]);
-        setMessages(messageData.messages || []);
-        setTasks(taskData.tasks || []);
+        const data = await res.json();
+        setMessages(data.messages || []);
+        setTasks(data.tasks || []);
       } catch {}
     };
     fetchFlows();
@@ -3625,7 +3624,7 @@ export function TopoGraph({ sessions, sseSessions, renameSignal }: TopoGraphProp
                     chip-row 'working / online / active links' unit
                     spans (chip-level font-medium R313). data-fleet-
                     pressure-kicker attr exposes the kicker for tests. */}
-                <span className="text-[10px] tracking-wide font-medium" data-fleet-pressure-kicker>pressure</span>
+                <span className="text-[11px] tracking-wide font-medium" data-fleet-pressure-kicker>pressure</span>
                 {/* Round 374 / Loop: pressure-bar height h-1.5 → h-2
                     (6 → 8 px) — sibling visual-weight bump (8th anchor
                     in the family):

@@ -123,7 +123,7 @@ export function CreateRequirement({ networkId, onCreated }: {
             aria-label="新建需求"
             data-testid="requirements-create-dialog"
             onClick={event => event.stopPropagation()}
-            className="w-full max-w-lg rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--fg)] shadow-xl"
+            className="w-full max-w-lg rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4 text-sm text-[var(--fg)] shadow-xl"
           >
             <div className="mb-3 flex items-center justify-between">
               <h2 className="text-sm font-semibold">新建需求</h2>
@@ -141,7 +141,7 @@ export function CreateRequirement({ networkId, onCreated }: {
                   aria-label="名称"
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-2.5 py-2 text-sm text-[var(--fg)] focus:border-[var(--border-hover)] focus:outline-none"
                 />
-                <span className="mt-1 block text-[10px] text-[var(--fg-dim)]">{name.length}/80 · Hub 仍会校验</span>
+                <span className="mt-1 block text-[11px] text-[var(--fg-dim)]">{name.length}/80 · Hub 仍会校验</span>
               </label>
               <div className="grid gap-3 sm:grid-cols-2">
                 <label className="block">
@@ -167,7 +167,7 @@ export function CreateRequirement({ networkId, onCreated }: {
                   <option value="">不选项目</option>
                   {projects && projectOptions(projects).map(item => <option key={item.id} value={item.id}>{item.label}</option>)}
                 </select>
-                {projectError && <span role="status" className="mt-1 block text-[10px] text-[var(--warning)]">{projectError}</span>}
+                {projectError && <span role="status" className="mt-1 block text-[11px] text-[var(--warning)]">{projectError}</span>}
               </label>
               <label className="block">
                 <span className="mb-1 block text-xs text-[var(--fg-muted)]">标签（逗号分隔，最多 10 个）</span>

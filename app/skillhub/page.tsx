@@ -129,10 +129,10 @@ export default function SkillHubPage() {
 
       <div className="grid max-w-5xl gap-3 md:grid-cols-2 xl:grid-cols-3">
         {loading ? [1,2,3].map(i => <div key={i} className="h-40 animate-pulse rounded-xl bg-[var(--bg-elevated)]" />) : skills.map(skill => (
-          <article key={skill.skill_id} className="flex min-h-40 flex-col rounded-xl bg-[var(--bg-secondary)] p-4">
+          <article key={skill.skill_id} className="flex min-h-40 flex-col rounded-2xl bg-[var(--bg-secondary)] p-4">
             <div className="flex items-start gap-2">
               <div className="min-w-0 flex-1"><h2 className="truncate font-semibold text-[var(--fg)]">{skill.name}</h2><code className="text-xs text-[var(--hl)]">{skill.slug}@{skill.version}</code></div>
-              <span className={`rounded-full bg-[var(--hover-tint)] px-2 py-0.5 text-[10px] ${skill.status === 'published' ? 'text-[var(--success)]' : skill.status === 'pending' ? 'text-[var(--warning)]' : 'text-[var(--danger)]'}`}>{skill.status === 'published' ? '网络内发布' : skill.status === 'pending' ? '待审核' : '已拒绝'}</span>
+              <span className={`rounded-full bg-[var(--hover-tint)] px-2 py-0.5 text-[11px] ${skill.status === 'published' ? 'text-[var(--success)]' : skill.status === 'pending' ? 'text-[var(--warning)]' : 'text-[var(--danger)]'}`}>{skill.status === 'published' ? '网络内发布' : skill.status === 'pending' ? '待审核' : '已拒绝'}</span>
             </div>
             <p className="mt-3 line-clamp-3 text-sm text-[var(--fg-muted)]">{skill.description || '暂无说明'}</p>
             <div className="mt-auto flex items-center gap-2 pt-4 text-xs text-[var(--fg-muted)]">
@@ -142,7 +142,7 @@ export default function SkillHubPage() {
             </div>
           </article>
         ))}
-        {!loading && skills.length === 0 && <div className="col-span-full rounded-xl bg-[var(--bg-secondary)] p-10 text-center text-sm text-[var(--fg-muted)]">还没有 Skill。让节点总结经验，或上传第一份 SKILL.md。</div>}
+        {!loading && skills.length === 0 && <div className="col-span-full rounded-2xl bg-[var(--bg-secondary)] p-10 text-center text-sm text-[var(--fg-muted)]">还没有 Skill。让节点总结经验，或上传第一份 SKILL.md。</div>}
       </div>
 
       {showUpload && <div className="fixed inset-0 z-50 flex items-end justify-center p-0 sm:items-center sm:p-4" style={{ backgroundColor: 'color-mix(in srgb, var(--bg) 70%, transparent)' }} onMouseDown={e => { if (e.target === e.currentTarget) setShowUpload(false); }}>

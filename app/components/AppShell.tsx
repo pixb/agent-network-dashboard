@@ -9,6 +9,7 @@ import { CommandPalette } from './CommandPalette';
 import { HelpOverlay } from './HelpOverlay';
 import { ServersDrawer } from './ServersDrawer';
 import { MobileNav } from './MobileNav';
+import { useRadiusTier } from '../lib/useRadiusTier';
 
 const NO_SHELL_PATHS = ['/login'];
 
@@ -22,6 +23,9 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     mainScrollRef.current?.scrollTo({ top: 0 });
   }, [pathname]);
+
+  // 小控件圆角（item=8）：客户端按渲染高度定义，CSS 选不到，只能在挂载后量一次。
+  useRadiusTier();
 
   if (NO_SHELL_PATHS.includes(pathname)) {
     return <>{children}</>;

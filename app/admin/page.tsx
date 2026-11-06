@@ -121,7 +121,7 @@ export default function AdminPage() {
             2×2 numeric grid shrinks ~25 % on mobile (~60 px of fold
             reclaimed) while reading identically on desktop. mb-4 on
             the section heading also drops to mb-3 sm:mb-4. */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-4 sm:p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-4 sm:p-5">
           <h2 className="text-sm font-semibold text-[var(--fg)] mb-3 sm:mb-4">Server Overview</h2>
           <div className="grid grid-cols-2 gap-4 text-sm">
             <div>
@@ -163,7 +163,7 @@ export default function AdminPage() {
         </section>
 
         {/* Online Sessions — pulled into Status group (was below Send Task) */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-[var(--fg)] mb-4">
             Online Sessions <span className="text-[var(--fg-dim)]">({onlineNodes.length})</span>
           </h2>
@@ -184,7 +184,7 @@ export default function AdminPage() {
                       SESSION_STATUS_CHIP_CLASS (was working-vs-other, which
                       rendered blocked/error identical to idle). */}
                   <span className={`text-xs px-2 py-0.5 rounded border ${SESSION_STATUS_CHIP_CLASS[s.status] || SESSION_STATUS_CHIP_CLASS.idle}`}>{s.status}</span>
-                  <span className="text-[10px] text-[var(--fg-dim)]">{timeAgo(s.updated_at)}</span>
+                  <span className="text-[11px] text-[var(--fg-dim)]">{timeAgo(s.updated_at)}</span>
                 </div>
               </div>
             ))}
@@ -205,14 +205,14 @@ export default function AdminPage() {
                registered agent. Surfacing the empty cards above an empty
                fleet is the same dead-control class as the Overview
                Dispatch button (r70). Replace with a single inline hint. */
-            <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-5 py-4 text-sm text-[var(--fg-muted)]">
+            <div className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl px-5 py-4 text-sm text-[var(--fg-muted)]">
               Broadcast and Send Task become available after the first agent registers.
             </div>
           ) : (
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* Broadcast */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-[var(--fg)] mb-4">Broadcast</h2>
           <textarea
             value={broadcastMsg}
@@ -235,7 +235,7 @@ export default function AdminPage() {
         </section>
 
         {/* Send Task */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-[var(--fg)] mb-4">Send Task</h2>
           <select
             value={taskTarget}
@@ -284,7 +284,7 @@ export default function AdminPage() {
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
 
         {/* User Management (V3 Auth) */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-[var(--fg)] mb-4">Register User (V3)</h2>
           <div className="space-y-3">
             <input

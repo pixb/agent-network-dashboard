@@ -94,7 +94,7 @@ export default function ProvidersPage() {
     <div className="min-h-screen bg-[var(--bg)] p-4 text-[var(--fg)] sm:p-6">
       <div className="flex items-center gap-4 mb-6">
         <h1 className="ml-10 text-xl font-semibold text-[var(--fg)] lg:ml-0">Model Providers</h1>
-        {mock && <span className="text-[10px] px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/5 text-amber-300">preview fixture</span>}
+        {mock && <span className="text-[11px] px-2 py-0.5 rounded-full border border-amber-500/30 bg-amber-500/5 text-amber-300">preview fixture</span>}
         <button
           onClick={openCreate}
           className="ml-auto inline-flex shrink-0 items-center gap-1.5 whitespace-nowrap rounded-md bg-[var(--hl)] px-3 py-1.5 text-sm font-medium text-[var(--bg)] hover:opacity-90"
@@ -125,7 +125,7 @@ export default function ProvidersPage() {
           </div>
         )}
 
-        <section className="rounded-xl bg-[var(--bg-secondary)] p-5">
+        <section className="rounded-2xl bg-[var(--bg-secondary)] p-5">
           {loading ? (
             <div className="animate-pulse space-y-2">{[1, 2, 3].map(i => <div key={i} className="h-14 rounded bg-[var(--bg-elevated)]" />)}</div>
           ) : providers.length === 0 ? (
@@ -148,10 +148,10 @@ export default function ProvidersPage() {
                       <div className="min-w-0 flex-1">
                         <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                           <span className="truncate text-sm font-semibold text-[var(--fg)]">{p.name}</span>
-                          <span className="shrink-0 text-[10px] text-[var(--fg-muted)]" title={p.type}>{typeLabel(p.type)}</span>
+                          <span className="shrink-0 text-[11px] text-[var(--fg-muted)]" title={p.type}>{typeLabel(p.type)}</span>
                           {p.hasKey
-                            ? <span className="shrink-0 text-[10px] text-[var(--success)]">key set</span>
-                            : <span className="shrink-0 text-[10px] text-[var(--fg-muted)]">no key</span>}
+                            ? <span className="shrink-0 text-[11px] text-[var(--success)]">key set</span>
+                            : <span className="shrink-0 text-[11px] text-[var(--fg-muted)]">no key</span>}
                         </div>
                         <div className="truncate text-[11px] text-[var(--fg-muted)]">
                           {hostOf(p.base_url)} · {(p.models?.length || 0)} model{(p.models?.length || 0) === 1 ? '' : 's'}

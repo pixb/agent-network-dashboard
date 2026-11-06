@@ -83,7 +83,7 @@ export default function TokensPage() {
 
       <div className="max-w-2xl space-y-6">
         {/* Create token */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-[var(--fg)] mb-3">Create Token</h2>
           <div className="flex gap-2">
             <input type="text" value={newName} onChange={e => setNewName(e.target.value)}
@@ -104,7 +104,7 @@ export default function TokensPage() {
         </section>
 
         {/* Token list */}
-        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl p-5">
+        <section className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl p-5">
           <h2 className="text-sm font-semibold text-[var(--fg)] mb-3">Active Tokens ({tokens.length})</h2>
           {loading ? (
             <div className="animate-pulse space-y-2">{[1,2].map(i => <div key={i} className="h-12 bg-[var(--bg-elevated)]/20 rounded" />)}</div>
@@ -133,11 +133,11 @@ export default function TokensPage() {
                   <div>
                     <div className="flex items-center gap-2">
                       <span className="text-sm text-[var(--fg)] font-medium">{t.name}</span>
-                      <span className={`text-[10px] px-1.5 py-0.5 rounded border ${
+                      <span className={`text-[11px] px-1.5 py-0.5 rounded border ${
                         t.scope === 'full' ? 'text-[var(--accent-text)] border-[var(--accent)]/20 bg-[var(--accent)]/5' : 'text-[var(--fg-muted)] border-gray-600/20'
                       }`}>{t.scope}</span>
                     </div>
-                    <div className="text-[10px] text-[var(--fg-muted)]">{t.token_id} · network: {t.network_id?.slice(0, 12) || '--'} · used {timeAgo(t.last_used_at)}</div>
+                    <div className="text-[11px] text-[var(--fg-muted)]">{t.token_id} · network: {t.network_id?.slice(0, 12) || '--'} · used {timeAgo(t.last_used_at)}</div>
                   </div>
                   <button onClick={() => revokeToken(t.token_id)}
                     className="text-xs text-[var(--danger)] hover:text-red-300 px-2 py-1 rounded border border-red-800/30 hover:bg-[var(--danger)]/10 transition-colors">

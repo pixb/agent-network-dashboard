@@ -3,6 +3,7 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { togglePin, usePinned } from '../lib/chat-pin';
+import { useReturnFocus } from '../lib/useReturnFocus';
 import { t } from '../lib/ui-lang';
 
 // SPEC §12: chat header ⋮ opens an overflow menu. Container reuses the
@@ -31,6 +32,30 @@ export interface ChatPaneOverflowMenuProps {
 const EDGE = 8;
 
 export function ChatPaneOverflowMenu({ alias, anchorRef, onClose, onOpenSettings }: ChatPaneOverflowMenuProps) {
+  // 菜单在 DOM 末尾（portal），打开后焦点若不进来，键盘用户要 Tab 穿过整页才能到达。
+  // 按 role=menu 的标准模式：打开聚焦第一项，↑/↓ 循环，Esc 关闭并归还焦点。
+  useReturnFocus();
+  const onMenuKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    const items = Array.from(
+      menuRef.current?.querySelectorAll<HTMLElement>('[role="menuitem"]') ?? [],
+    ).filter(el => el.offsetParent !== null);
+    if (items.length === 0) return;
+    const current = items.indexOf(document.activeElement as HTMLElement);
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      items[(current + 1) % items.length]?.focus();
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      items[(current - 1 + items.length) % items.length]?.focus();
+    } else if (e.key === 'Home') {
+      e.preventDefault();
+      items[0]?.focus();
+    } else if (e.key === 'End') {
+      e.preventDefault();
+      items[items.length - 1]?.focus();
+    }
+  };
+
   const pinned = usePinned(alias);
   const menuRef = useRef<HTMLDivElement | null>(null);
   const [pos, setPos] = useState<{ top: number; left: number; flippedY: boolean; flippedX: boolean }>({
@@ -81,6 +106,11 @@ export function ChatPaneOverflowMenu({ alias, anchorRef, onClose, onOpenSettings
     };
   }, [anchorRef, onClose]);
 
+  useEffect(() => {
+    const first = menuRef.current?.querySelector<HTMLElement>('[role="menuitem"]');
+    first?.focus({ preventScroll: true });
+  }, []);
+
   if (typeof window === 'undefined') return null;
 
   return createPortal(
@@ -88,11 +118,12 @@ export function ChatPaneOverflowMenu({ alias, anchorRef, onClose, onOpenSettings
       ref={menuRef}
       role="menu"
       aria-label={t('会话溢出菜单', 'Chat overflow menu')}
+      onKeyDown={onMenuKeyDown}
       data-testid="chat-pane-overflow-menu"
       data-flipped-y={pos.flippedY ? 'true' : undefined}
       data-flipped-x={pos.flippedX ? 'true' : undefined}
       style={{ position: 'fixed', top: pos.top, left: pos.left, width: 200, zIndex: 200 }}
-      className="rounded-md border border-[var(--col-line-strong)] bg-[var(--menu-bg)] py-1 text-[13px] text-gray-100"
+      className="rounded-md border border-[var(--col-line-strong)] bg-[var(--menu-bg)] py-1 text-[12px] text-gray-100"
     >
       <MenuItem
         testid="chat-pane-overflow-pin"

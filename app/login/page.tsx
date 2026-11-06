@@ -76,7 +76,7 @@ export default function LoginPage() {
             </svg>
           </div>
           <h1 className="text-[22px] sm:text-2xl font-semibold text-white tracking-tight">Agent Network</h1>
-          <p className="text-[13px] text-gray-400 mt-1.5 leading-snug">
+          <p className="text-[12px] text-gray-400 mt-1.5 leading-snug">
             {mode === 'login'
               ? <>Welcome back · <span className="text-gray-500">Tasks · Mesh · Messages</span></>
               : <>Create your account · <span className="text-gray-500">Free preview · no credit card</span></>}

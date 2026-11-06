@@ -28,7 +28,7 @@ export default function ChangelogPage() {
   return (
     <main className="mx-auto w-full max-w-3xl px-4 py-6 sm:px-6" data-testid="changelog-page">
       <header className="mb-4">
-        <h1 className="text-lg font-semibold text-[var(--fg)]">更新日志</h1>
+        <h1 className="text-xl font-semibold text-[var(--fg)]">更新日志</h1>
         <p className="mt-1 text-xs text-[var(--fg-muted)]">
           按版本列出的用户可见变化，来自仓库 <code className="rounded bg-[var(--hover-tint)] px-1">CHANGELOG.md</code>。
           preview 版本是开发通道的迭代，会在合入稳定版时折叠归档。

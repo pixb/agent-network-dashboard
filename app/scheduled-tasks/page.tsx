@@ -450,7 +450,7 @@ function ScheduledTasks({ networkId }: { networkId: string }) {
       {error && <div className="mb-5 rounded-lg border border-[var(--danger)] bg-[var(--hover-tint)] px-4 py-3 text-sm text-[var(--danger)]">{error}</div>}
 
       {showForm && (
-        <section className="mb-8 rounded-xl bg-[var(--bg-secondary)] p-5">
+        <section className="mb-8 rounded-2xl bg-[var(--bg-secondary)] p-5">
           <div className="mb-4 flex items-center justify-between"><h2 className="font-semibold text-[var(--fg)]">{editing ? '编辑计划' : '新建计划'}</h2>{editing && <button type="button" onClick={() => { setShowForm(false); resetForm(); }} className="text-sm text-[var(--fg-dim)]">取消编辑</button>}</div>
           <div className="grid gap-4 md:grid-cols-2">
             <label className="text-sm text-[var(--fg-muted)]">名称<input value={name} onChange={e => setName(e.target.value)} maxLength={120} className="mt-1 w-full rounded-lg border border-[var(--border)] bg-[var(--col-inset)] px-3 py-2 text-[var(--fg)]" placeholder="例如：每日发布巡检" /></label>
@@ -478,9 +478,9 @@ function ScheduledTasks({ networkId }: { networkId: string }) {
         // was out of scope for this fix.
         const visible = schedules.filter(row => row.status !== 'cancelled');
         return visible.length === 0 ? (
-          <div className="rounded-xl bg-[var(--bg-secondary)] py-20 text-center text-[var(--fg-dim)]">还没有 Hub 定时任务</div>
+          <div className="rounded-2xl bg-[var(--bg-secondary)] py-20 text-center text-[var(--fg-dim)]">还没有 Hub 定时任务</div>
         ) : <div className="space-y-3">{visible.map(row => (
-        <section key={row.schedule_id} className="rounded-xl bg-[var(--bg-secondary)] p-5">
+        <section key={row.schedule_id} className="rounded-2xl bg-[var(--bg-secondary)] p-5">
           <div className="flex flex-wrap items-start justify-between gap-4">
             <div className="min-w-0 flex-1"><div className="flex items-center gap-2"><h2 className="font-semibold text-[var(--fg)]">{row.name}</h2><span className={`rounded-full bg-[var(--hover-tint)] px-2 py-0.5 text-xs ${row.status === 'active' ? 'text-[var(--success)]' : row.status === 'paused' ? 'text-[var(--warning)]' : 'text-[var(--fg-dim)]'}`}>{row.status}</span></div><p className="mt-1 text-sm text-[var(--hl)]">{row.target_alias}</p><p className="mt-2 line-clamp-2 text-sm text-[var(--fg-muted)]">{row.task_content}</p><p className="mt-3 text-xs text-[var(--fg-dim)]">{describeSchedule(row.schedule, row.timezone)} · {describeMisfire(row.misfire_policy)} · 下次 {formatTime(row.next_run_at)} · 上次 {formatTime(row.last_run_at)}</p></div>
             <div className="flex flex-wrap gap-2"><button type="button" disabled={busy || !['active','paused'].includes(row.status)} onClick={() => openEdit(row)} className="rounded-md px-3 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]">编辑</button><button type="button" disabled={busy || !['active','paused'].includes(row.status)} onClick={() => mutate(row, 'toggle')} className="rounded-md px-3 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]">{row.status === 'active' ? '暂停' : '恢复'}</button><button type="button" disabled={busy || row.status === 'cancelled'} onClick={() => mutate(row, 'run')} className="rounded-md px-3 py-1.5 text-xs text-[var(--hl)] hover:bg-[var(--hover-tint)]">立即执行</button><button type="button" onClick={() => openHistory(row)} aria-expanded={historyFor === row.schedule_id} aria-controls={`schedule-history-${row.schedule_id}`} className="min-h-11 min-w-11 rounded-md px-3 py-1.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]">记录</button><button type="button" disabled={busy || row.status === 'cancelled'} onClick={() => mutate(row, 'cancel')} className="rounded-md px-3 py-1.5 text-xs text-[var(--danger)] hover:bg-[var(--hover-tint)]">取消</button></div>

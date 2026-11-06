@@ -123,14 +123,14 @@ function TimelineView({ rows }: { rows: Requirement[] }) {
     return { left: (i / 3) * 100, label: new Date(ms).toISOString().slice(5, 10) };
   });
   return (
-    <div data-testid="requirements-timeline" className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]/40 p-3">
+    <div data-testid="requirements-timeline" className="rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]/40 p-3">
       {dated.length === 0 ? (
         <p className="px-1 py-6 text-center text-xs text-[var(--fg-muted)]" data-testid="timeline-empty">
           已加载的需求里都没有截止日期，先给需求补一个 due 再看时间线。
         </p>
       ) : (
         <>
-          <div className="mb-2 flex items-center justify-between gap-3 pr-1 text-[10px] text-[var(--fg-dim)]">
+          <div className="mb-2 flex items-center justify-between gap-3 pr-1 text-[11px] text-[var(--fg-dim)]">
             <span className="whitespace-nowrap">{dated.length} 条带截止日期的需求</span>
             <span className="whitespace-nowrap">逾期 {dated.filter(row => String(row.due).slice(0, 10) < today && row.column !== 'done').length} 条</span>
           </div>
@@ -138,7 +138,7 @@ function TimelineView({ rows }: { rows: Requirement[] }) {
             {ticks.map((tick, index) => (
               <span
                 key={tick.left}
-                className="absolute whitespace-nowrap text-[10px] text-[var(--fg-dim)]"
+                className="absolute whitespace-nowrap text-[11px] text-[var(--fg-dim)]"
                 style={{
                   // 贴边刻度改用 right 定位：left:100% 时绝对定位元素可用宽度为 0，文字会被折行
                   // 成「11-」/「20」，正好压到右上角的「逾期 N 条」上（实拍）。
@@ -170,7 +170,7 @@ function TimelineView({ rows }: { rows: Requirement[] }) {
                 // 整行都是链接：手机上用户会直接点条形/圆点，原来那 66% 的图表区域点了没反应。
                 <Link key={row.id} href={`/requirements/${row.id}`} className="flex min-h-12 items-center gap-2 border-b border-[var(--border)]/60 text-gray-300 last:border-0 hover:bg-[var(--hover-tint)]" data-testid="timeline-row" data-column={row.column} title={row.name}>
                   <span className="flex w-[34%] shrink-0 items-center truncate text-xs">
-                    <span className="mr-1 tabular-nums text-[10px] text-[var(--fg-dim)]">#{row.seq}</span>
+                    <span className="mr-1 tabular-nums text-[11px] text-[var(--fg-dim)]">#{row.seq}</span>
                     {row.name}
                   </span>
                   <div className="relative h-5 flex-1">
@@ -191,7 +191,7 @@ function TimelineView({ rows }: { rows: Requirement[] }) {
                       style={{ left: `${left}%` }}
                     />
                     <span
-                      className={`absolute top-1/2 -translate-y-1/2 text-[10px] ${overdue ? 'text-[var(--danger)]' : 'text-[var(--fg-dim)]'}`}
+                      className={`absolute top-1/2 -translate-y-1/2 text-[11px] ${overdue ? 'text-[var(--danger)]' : 'text-[var(--fg-dim)]'}`}
                       style={left > 88 ? { right: `${100 - left}%`, marginRight: 8 } : { left: `${left}%`, marginLeft: 8 }}
                     >
                       {String(row.due).slice(5, 10)}
@@ -204,7 +204,7 @@ function TimelineView({ rows }: { rows: Requirement[] }) {
         </>
       )}
       {undated.length > 0 && (
-        <p data-testid="timeline-undated" className="mt-2 text-[10px] text-[var(--fg-dim)]">
+        <p data-testid="timeline-undated" className="mt-2 text-[11px] text-[var(--fg-dim)]">
           另有 {undated.length} 条没有截止日期，未画在轴上。
         </p>
       )}
@@ -256,7 +256,7 @@ function SummaryPanel({ rows, labelFor, projects, onPickOwner, onPickProject }: 
   const projectRows = [...byProject.entries()].sort((a, b) => b[1].total - a[1].total).slice(0, 5);
   const projectWidest = Math.max(1, ...projectRows.map(([, entry]) => entry.total));
   return (
-    <section data-testid="requirements-summary" className="mb-3 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]/40 p-3">
+    <section data-testid="requirements-summary" className="mb-3 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]/40 p-3">
       <div className="flex flex-wrap items-center gap-4">
         {counts.map(item => (
           <div key={item.key} data-testid={`summary-status-${item.key}`} data-count={item.value} className="flex items-center gap-1.5 text-[11px] text-[var(--fg-muted)]">
@@ -315,7 +315,7 @@ function SummaryPanel({ rows, labelFor, projects, onPickOwner, onPickProject }: 
           ))}
         </div>
       )}
-      <p className="mt-2 text-[10px] text-[var(--fg-dim)]" data-testid="summary-scope">基于已加载的 {rows.length} 条（不是全网总量）；左侧数值是完成/总数。</p>
+      <p className="mt-2 text-[11px] text-[var(--fg-dim)]" data-testid="summary-scope">基于已加载的 {rows.length} 条（不是全网总量）；左侧数值是完成/总数。</p>
     </section>
   );
 }
@@ -1018,7 +1018,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
       <div className="mx-auto max-w-6xl px-4 py-6 sm:px-6">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-lg font-semibold text-white">Requirements</h1>
+            <h1 className="text-xl font-semibold text-white">Requirements</h1>
             {/* 手机首屏寸土寸金：副标题与说明优先让位给第一条需求（实测第一条被推到 741px）。 */}
             <p className="mt-1 hidden text-xs text-[var(--fg-muted)] sm:block">
               只读视图。派单在 <Link href="/tasks" className="text-[var(--hl)] hover:underline">Tasks</Link>。
@@ -1043,7 +1043,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
               aria-label="切换排序方向"
               disabled={!sortSpec.key}
               onClick={() => setParam({ sort: sortSpec.key, dir: sortSpec.dir === 'asc' ? 'desc' : 'asc' })}
-              className="rounded border border-[var(--border)] px-1.5 py-1 text-[11px] text-[var(--fg-muted)] disabled:opacity-40"
+              className="inline-flex min-w-[44px] items-center justify-center rounded border border-[var(--border)] px-1.5 py-1 text-[11px] text-[var(--fg-muted)] disabled:opacity-40"
             >
               {sortSpec.dir === 'asc' ? '↑' : '↓'}
             </button>
@@ -1116,7 +1116,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
         </div>
 
         {/* Status tabs */}
-        <div className="mb-4 flex flex-wrap items-center gap-1.5" aria-label="状态筛选，数量为当前已加载结果">
+        <div role="group" aria-label="状态筛选，数量为当前已加载结果" className="mb-4 flex flex-wrap items-center gap-1.5">
           {COLUMNS.map(col => {
             const count = col.key ? counts[col.key] || 0 : rows.length;
             const active = status === col.key;
@@ -1125,6 +1125,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                 key={col.key || 'all'}
                 type="button"
                 onClick={() => setParam({ status: col.key })}
+                aria-pressed={active}
                 className={`rounded-md px-3 py-1.5 text-xs transition-colors ${
                   active
                     ? 'bg-[var(--bg-elevated)] text-gray-100'
@@ -1132,7 +1133,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                 }`}
               >
                 {col.label}
-                <span className="ml-1.5 text-[10px] tabular-nums opacity-70">{count}</span>
+                <span className="ml-1.5 text-[11px] tabular-nums">{count}</span>
               </button>
             );
           })}
@@ -1148,14 +1149,14 @@ function RequirementsContent({ networkId }: { networkId: string }) {
           >
             已逾期
           </button>
-          <span className="text-[10px] text-[var(--fg-dim)]">未完成且截止已过</span>
+          <span className="text-[11px] text-[var(--fg-dim)]">未完成且截止已过</span>
           {(loadedUrgency.overdue > 0 || loadedUrgency.thisWeek > 0) && (
             <span
               data-testid="requirements-loaded-urgency"
               data-overdue={loadedUrgency.overdue}
               data-this-week={loadedUrgency.thisWeek}
               title="只统计当前已加载的结果，不是全网总量"
-              className="ml-1 inline-flex items-center gap-1 rounded-md border border-[var(--border)] px-2 py-0.5 text-[10px] tabular-nums text-[var(--fg-muted)]"
+              className="ml-1 inline-flex items-center gap-1 rounded-md border border-[var(--border)] px-2 py-0.5 text-[11px] tabular-nums text-[var(--fg-muted)]"
             >
               <span className="text-[var(--fg-dim)]">已加载中</span>
               {loadedUrgency.overdue > 0 && <span className="text-[var(--danger)]">超期 {loadedUrgency.overdue}</span>}
@@ -1199,12 +1200,12 @@ function RequirementsContent({ networkId }: { networkId: string }) {
             </button>
           )}
           {participating && (
-            <span className="text-[10px] text-[var(--fg-dim)]" data-testid="requirements-participating-hint">
+            <span className="text-[11px] text-[var(--fg-dim)]" data-testid="requirements-participating-hint">
               只筛已加载的 {rows.length} 条
             </span>
           )}
           <span className="ml-2 flex items-center gap-1" data-testid="requirements-priority-chips">
-            <span className="text-[10px] text-[var(--fg-dim)]">优先级</span>
+            <span className="text-[11px] text-[var(--fg-dim)]">优先级</span>
             {PRIORITIES.map(value => {
               const on = priorities?.has(value) ?? false;
               return (
@@ -1219,7 +1220,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                     if (next.has(value)) next.delete(value); else next.add(value);
                     setParam({ priority: [...next].join(','), q: qInput, tag: tagInput });
                   }}
-                  className={`rounded px-1.5 py-0.5 text-[10px] transition-colors ${on ? 'bg-[var(--bg-elevated)] text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-gray-200'}`}
+                  className={`rounded px-1.5 py-0.5 text-[11px] transition-colors ${on ? 'bg-[var(--bg-elevated)] text-[var(--accent-text)]' : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-gray-200'}`}
                 >
                   {priorityLabel(value)}
                 </button>
@@ -1227,12 +1228,12 @@ function RequirementsContent({ networkId }: { networkId: string }) {
             })}
           </span>
           {priorities && (
-            <span className="text-[10px] text-[var(--fg-dim)]" data-testid="requirements-priority-hint">
+            <span className="text-[11px] text-[var(--fg-dim)]" data-testid="requirements-priority-hint">
               只筛已加载的 {rows.length} 条
             </span>
           )}
           {weekOnly && (
-            <span className="text-[10px] text-[var(--fg-dim)]" data-testid="requirements-week-hint">
+            <span className="text-[11px] text-[var(--fg-dim)]" data-testid="requirements-week-hint">
               只筛已加载的 {rows.length} 条中的本周内
             </span>
           )}
@@ -1299,7 +1300,12 @@ function RequirementsContent({ networkId }: { networkId: string }) {
 
         {/* Text filters */}
         <div className="mb-4 flex flex-wrap items-center gap-2">
-          <div className="rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-2.5 py-1.5 focus-within:border-[var(--border-hover)]">
+          {/* 窄屏实测：输入框本体只有 160×20，点外框内边距不聚焦（低于 24px 最低点击线）。
+              整框可点后再聚焦输入，别让用户对准那一条。 */}
+          <div
+            className="cursor-text rounded-lg border border-[var(--border)] bg-[var(--bg-secondary)] px-2.5 py-1.5 focus-within:border-[var(--border-hover)]"
+            onClick={() => searchInputRef.current?.focus()}
+          >
             <input
               ref={searchInputRef}
               title="按 / 聚焦搜索"
@@ -1325,7 +1331,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
             <span
               data-testid="requirements-search-pending"
               aria-hidden={!(qInput && qInput !== q)}
-              className={`text-[10px] text-[var(--fg-dim)] ${qInput && qInput !== q ? 'visible' : 'invisible'}`}
+              className={`text-[11px] text-[var(--fg-dim)] ${qInput && qInput !== q ? 'visible' : 'invisible'}`}
             >回车搜索</span>
             {qInput && (
               <button
@@ -1669,7 +1675,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                     key={col.key}
                     aria-label={`${col.label}列`}
                     data-testid={`requirements-column-${col.key}`}
-                    className={`snap-start shrink-0 rounded-xl border bg-[var(--bg-secondary)]/60 transition-colors ${isCollapsed ? 'w-12' : 'w-72 sm:w-[19rem] lg:w-[calc((100%-1.5rem)/3)] lg:max-w-[19rem]'} ${dragOverColumn === col.key ? 'border-[var(--hl)] bg-[var(--hover-tint)]' : 'border-[var(--border)]'}`}
+                    className={`snap-start shrink-0 rounded-2xl border bg-[var(--bg-secondary)]/60 transition-colors ${isCollapsed ? 'w-12' : 'w-72 sm:w-[19rem] lg:w-[calc((100%-1.5rem)/3)] lg:max-w-[19rem]'} ${dragOverColumn === col.key ? 'border-[var(--hl)] bg-[var(--hover-tint)]' : 'border-[var(--border)]'}`}
                     onDragOver={event => { event.preventDefault(); event.dataTransfer.dropEffect = 'move'; setDragOverColumn(col.key); }}
                     onDragLeave={event => { if (!(event.currentTarget as HTMLElement).contains(event.relatedTarget as Node | null)) setDragOverColumn(null); }}
                     onDrop={event => {
@@ -1704,12 +1710,12 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                             data-testid={`requirements-column-overdue-${col.key}`}
                             data-overdue-count={overdueCount}
                             aria-pressed={overdue}
-                            className="rounded bg-[var(--danger)]/12 px-1 py-0.5 text-[10px] tabular-nums text-[var(--danger)] hover:bg-[var(--danger)]/20"
+                            className="rounded bg-[var(--danger)]/12 px-1 py-0.5 text-[11px] tabular-nums text-[var(--danger)] hover:bg-[var(--danger)]/20"
                           >
                             超期 {overdueCount}
                           </button>
                         )}
-                        <span className="text-[10px] tabular-nums text-[var(--fg-muted)]">{items.length}</span>
+                        <span className="text-[11px] tabular-nums text-[var(--fg-muted)]">{items.length}</span>
                         <button
                           type="button"
                           onClick={() => toggleColumn(col.key)}
@@ -1746,7 +1752,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                               onDragEnd={() => setDragOverColumn(null)}
                               className="block rounded-t-lg px-3 pb-1 pt-2.5 hover:bg-[var(--hover-tint)]"
                             >
-                              <span className="flex items-center justify-between gap-2 text-[10px] text-[var(--fg-muted)]">
+                              <span className="flex items-center justify-between gap-2 text-[11px] text-[var(--fg-muted)]">
                                 <span className="tabular-nums">#{row.seq}</span>
                                 <span className="flex items-center gap-2">
                                   <span className={priorityClass(row.priority)} title={priorityTitle(row.priority)}>{priorityLabel(row.priority)}</span>
@@ -1757,7 +1763,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                                 <span className="line-clamp-2" title={row.name}>{row.name}</span>
                               </span>
                               {row.archived === true && (
-                                <span className="mt-1 inline-flex rounded border border-[var(--border)] bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] leading-4 text-[var(--fg-muted)]">已归档</span>
+                                <span className="mt-1 inline-flex rounded border border-[var(--border)] bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[11px] leading-4 text-[var(--fg-muted)]">已归档</span>
                               )}
                               {(() => {
                                 // 和列表行共用同一份 planHealth：同一批需求在两种视图里
@@ -1767,7 +1773,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                                 const tone = planHealthTone(plan);
                                 return (
                                   <span data-testid={`requirements-card-plan-${row.id}`} data-plan-kind={plan.kind} data-this-week={plan.thisWeek ? 'true' : 'false'}
-                                    className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[10px] tabular-nums ${tone}`}>
+                                    className={`mt-1 inline-flex rounded px-1.5 py-0.5 text-[11px] tabular-nums ${tone}`}>
                                     {plan.label}
                                   </span>
                                 );
@@ -1775,7 +1781,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                               {(row.tags || []).length > 0 && (
                                 <span className="mt-2 flex flex-wrap gap-1">
                                   {(row.tags || []).slice(0, 3).map(name => (
-                                    <TagChip key={name} name={name} color={tagColor(tagCatalog, name)} className="text-[10px] text-gray-400" />
+                                    <TagChip key={name} name={name} color={tagColor(tagCatalog, name)} className="text-[11px] text-gray-400" />
                                   ))}
                                 </span>
                               )}
@@ -1788,7 +1794,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                                 <span className="block truncate">Agent · {personLabel(row.agent_owner, personNames)}</span>
                               </span>
                               {(chk || kids) && (
-                                <span className="mt-1 flex gap-3 text-[10px] tabular-nums text-[var(--fg-muted)]">
+                                <span className="mt-1 flex gap-3 text-[11px] tabular-nums text-[var(--fg-muted)]">
                                   {chk && chk.total > 0 && <span>✓ {chk.done}/{chk.total}</span>}
                                   {kids && kids.total > 0 && <span>↳ {kids.done}/{kids.total}</span>}
                                 </span>
@@ -1796,7 +1802,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                             </Link>
                             <div className="flex items-center justify-end gap-2 px-2 pb-1.5">
                               {bulkMode && (
-                                <label className="mr-auto flex items-center gap-1 text-[10px] text-[var(--fg-muted)]">
+                                <label className="mr-auto flex items-center gap-1 text-[11px] text-[var(--fg-muted)]">
                                   <input
                                     type="checkbox"
                                     aria-label={`选择 #${row.seq} ${row.name}`}
@@ -1814,7 +1820,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                                 disabled={movingId === row.id}
                                 onChange={event => void moveCard(row, event.target.value as Requirement['column'])}
                                 title="移动到其它状态（键盘/触屏可用）"
-                                className="rounded border border-[var(--border)] bg-transparent px-1 py-0.5 text-[10px] text-[var(--fg-muted)] disabled:opacity-50"
+                                className="rounded border border-[var(--border)] bg-transparent px-1 py-0.5 text-[11px] text-[var(--fg-muted)] disabled:opacity-50"
                               >
                                 {COLUMNS.filter(item => item.key).map(item => (
                                   <option key={item.key} value={item.key}>{item.label}</option>
@@ -1834,7 +1840,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
           </div>
           </>
         ) : (
-          <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-xl bg-[var(--bg-secondary)]">
+          <ul className="divide-y divide-[var(--border)] overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
             {(treeRows ?? viewRows.map(row => ({ row, depth: 0, hasChildren: false }))).map(({ row, depth, hasChildren }) => {
               const chk = row.checklist_count;
               const kids = row.children;
@@ -1873,17 +1879,17 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                   )}
                   <Link href={rowHref(row.id)} data-req-row onClick={() => rememberRowAnchor(row.id)} className="flex flex-wrap items-center gap-x-3 gap-y-1.5 px-3 py-2.5 sm:px-4" style={treeMode ? { paddingLeft: 8 + depth * 16 } : undefined}>
                     <span className="w-12 shrink-0 text-[11px] tabular-nums text-[var(--fg-muted)]">#{row.seq}</span>
-                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-[10px] ${COLUMN_CHIP[row.column] || COLUMN_CHIP.abandoned}`}>
+                    <span className={`shrink-0 rounded px-1.5 py-0.5 text-[11px] ${COLUMN_CHIP[row.column] || COLUMN_CHIP.abandoned}`}>
                       {row.column}
                     </span>
                     <span className="min-w-0 flex-1 basis-32 text-sm text-gray-100 sm:basis-0">
                       <span className="block truncate" title={row.name}>{row.name}</span>
                       {row.archived === true && (
-                        <span className="mt-1 inline-flex rounded border border-[var(--border)] bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] leading-4 text-[var(--fg-muted)]">已归档</span>
+                        <span className="mt-1 inline-flex rounded border border-[var(--border)] bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[11px] leading-4 text-[var(--fg-muted)]">已归档</span>
                       )}
                     </span>
                     {(row.tags || []).slice(0, 3).map(name => (
-                      <TagChip key={name} name={name} color={tagColor(tagCatalog, name)} className="hidden shrink-0 text-[10px] text-gray-400 sm:inline-flex" />
+                      <TagChip key={name} name={name} color={tagColor(tagCatalog, name)} className="hidden shrink-0 text-[11px] text-gray-400 sm:inline-flex" />
                     ))}
                     <span className={`shrink-0 text-[11px] ${priorityClass(row.priority)}`} title={priorityTitle(row.priority)}>{priorityLabel(row.priority)}</span>
                     <span data-responsibility className="hidden w-36 shrink-0 text-[11px] leading-4 text-[var(--fg-muted)] sm:block"
@@ -1900,7 +1906,7 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                       return (
                         <span data-testid={`requirements-plan-${row.id}`} data-plan-kind={plan.kind} data-this-week={plan.thisWeek ? 'true' : 'false'}
                           title={`开始：${row.start || '—'}；截止：${row.due || '—'}`}
-                          className={`hidden shrink-0 rounded px-1.5 py-0.5 text-[10px] tabular-nums sm:inline-flex ${tone}`}>
+                          className={`hidden shrink-0 rounded px-1.5 py-0.5 text-[11px] tabular-nums sm:inline-flex ${tone}`}>
                           {plan.label}
                         </span>
                       );
@@ -1908,18 +1914,18 @@ function RequirementsContent({ networkId }: { networkId: string }) {
                     {(() => {
                       const updated = relativeTime(row.updatedAt);
                       return updated ? (
-                        <span data-role="updated" className="hidden w-16 shrink-0 text-right text-[10px] text-[var(--fg-dim)] lg:inline" title={`更新于 ${updated.exact.replace('T', ' ').slice(0, 16)}`}>
+                        <span data-role="updated" className="hidden w-16 shrink-0 text-right text-[11px] text-[var(--fg-dim)] lg:inline" title={`更新于 ${updated.exact.replace('T', ' ').slice(0, 16)}`}>
                           {updated.text}
                         </span>
                       ) : null;
                     })()}
                     {chk && chk.total > 0 && (
-                      <span className="hidden shrink-0 text-[10px] tabular-nums text-[var(--fg-muted)] sm:inline">
+                      <span className="hidden shrink-0 text-[11px] tabular-nums text-[var(--fg-muted)] sm:inline">
                         ✓ {chk.done}/{chk.total}
                       </span>
                     )}
                     {kids && kids.total > 0 && (
-                      <span className="hidden shrink-0 text-[10px] tabular-nums text-[var(--fg-muted)] md:inline">
+                      <span className="hidden shrink-0 text-[11px] tabular-nums text-[var(--fg-muted)] md:inline">
                         ↳ {kids.done}/{kids.total}
                       </span>
                     )}

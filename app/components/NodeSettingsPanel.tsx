@@ -8,6 +8,7 @@ import { useNodeLifecycle } from '../lib/hooks';
 import { toggleMute, useMuted } from '../lib/chat-mute';
 import { togglePin, usePinned } from '../lib/chat-pin';
 import { useLifecycleCaps } from './NodeLifecycleMenu';
+import { useReturnFocus } from '../lib/useReturnFocus';
 
 /**
  * Per-node settings panel (issue #260 → v0.11 flagship #262, Vincent tg
@@ -183,7 +184,7 @@ function MuteSection({ alias }: { alias: string }) {
           <span className={`inline-block h-4 w-4 transform rounded-full bg-white transition-transform ${muted ? 'translate-x-4.5' : 'translate-x-0.5'}`} style={{ transform: muted ? 'translateX(18px)' : 'translateX(2px)' }} />
         </span>
       </button>
-      <p className="mt-1.5 text-[10px] text-[var(--fg-dim)]">置顶=列表最前；静音=未读只显红点、不计入全局数字（均存本浏览器）</p>
+      <p className="mt-1.5 text-[11px] text-[var(--fg-dim)]">置顶=列表最前；静音=未读只显红点、不计入全局数字（均存本浏览器）</p>
     </section>
   );
 }
@@ -272,11 +273,11 @@ function AvatarSection({ alias }: { alias: string }) {
               </button>
             )}
             {saveState === 'error' ? (
-              <span className="text-[10px] text-red-400" data-testid="avatar-save-error">{saveMsg}</span>
+              <span className="text-[11px] text-red-400" data-testid="avatar-save-error">{saveMsg}</span>
             ) : saveState === 'saved' ? (
-              <span className="text-[10px] text-emerald-400" data-testid="avatar-save-ok">已保存，全设备同步</span>
+              <span className="text-[11px] text-emerald-400" data-testid="avatar-save-ok">已保存，全设备同步</span>
             ) : (
-              <span className="text-[10px] text-[var(--fg-dim)]">保存后跨设备同步（经 hub）</span>
+              <span className="text-[11px] text-[var(--fg-dim)]">保存后跨设备同步（经 hub）</span>
             )}
           </div>
         </div>
@@ -374,6 +375,7 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
    *  the app stays interactive. */
   positioning?: 'fixed' | 'absolute';
 }) {
+  useReturnFocus();
   const runtime = s.runtime || '—';
   const initialModel = s.model || s.agent || '';
   // imageCapable: read-only, auto from model (MiniMax-M3 / Claude = yes).
@@ -398,6 +400,11 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
   // node can take config updates, whether a readable snapshot exists at all,
   // and the loaded baselines used to build a minimal diff patch.
   const revisionRef = useRef<number | null>(null);
+  // 抽屉打开时把焦点移进来：否则焦点留在触发按钮上，Esc 也到不了这里。
+  const dialogRef = useRef<HTMLDivElement | null>(null);
+  useEffect(() => {
+    dialogRef.current?.focus({ preventScroll: true });
+  }, []);
   const loadedModelRef = useRef(initialModel);
   const loadedFlagsRef = useRef<FlagsForm>(DEFAULT_FLAGS);
   // Channels baseline for the diff patch (#31 + RFC-024): seeded from the
@@ -418,6 +425,13 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
   const lifecycleCaps = useLifecycleCaps();
   const [renameVal, setRenameVal] = useState('');
   const [applyMode, setApplyMode] = useState<string | null>(null);
+  // RFC-024 `warnings[]`: hub 在**接受**这次写入的同时给出的旁注。
+  // 🔴 为什么单独一个 state、而不是塞进 phaseMsg：
+  //    它们是两个不同的事实 —— phase 说「这次写入有没有成」，
+  //    warnings 说「它成不成得了，取决于这台机器上别的东西」。
+  //    合并成一个字符串之后，超时那条会被读成「写入失败」，而实际是
+  //    「写入了，但可能永远不生效」。这两种结局对用户要做的事完全相反。
+  const [applyWarnings, setApplyWarnings] = useState<string[]>([]);
   // Outstanding lifecycle timers (real poll, auto-dismiss);
   // cleared on unmount and at the start of each new save so a stale timer can't
   // overwrite a fresh result.
@@ -562,6 +576,19 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
     }
   }
 
+  // RFC-024 `warnings[]` code → 一句能指导动作的话。
+  // 与 mapUpdateError 同一条纪律：**未知 code 原样露出**，不折叠成通用文案。
+  // 理由：折叠之后，「Hub 新增了一条提醒」这件事在界面上不可见 ——
+  // 而「没显示」与「没有」长得一模一样。
+  function warningText(code: string): string {
+    switch (code) {
+      case 'restart_supervision_unknown':
+        return '该节点没有声明「由守护进程托管重启」（restart_supervised 为 false 或未知）。写入已被接受，但重启级改动可能永远不会生效 —— 需要在目标机器上手动 `anet node` 重启。';
+      default:
+        return `未知旁注 ${code}：Hub 给了一条本界面还不认识的提醒，内容未翻译，请勿当作「没问题」。`;
+    }
+  }
+
   // Build a minimal diff patch vs the loaded snapshot (RFC-024 patch semantics:
   // only changed fields are sent — never force-writes untouched flags, and so
   // never trips invalid_patch on a field the user didn't touch).
@@ -594,6 +621,7 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
     const runId = ++applySeqRef.current;
     settledRef.current = false;
     setApplyMode(null);
+    setApplyWarnings([]);
 
     const patch = buildPatch();
     if (patch.model === undefined && !patch.flags && !patch.channels) {
@@ -671,6 +699,12 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
       // Accepted → optimistic "applying"; apply_mode flavours the progress copy.
       setDirty(false);
       setApplyMode(typeof d.apply_mode === 'string' ? (d.apply_mode as string) : null);
+      // Hub 接受这次写入时附带的旁注。**未知 code 原样保留**，不吞：
+      // 一个我们还不认识的 warning，正确显示是「未知旁注 xyz」，
+      // 而不是消失 —— 消失会让下一次新增的 warning 静默失效。
+      setApplyWarnings(
+        Array.isArray(d?.warnings) ? (d.warnings as unknown[]).filter((w): w is string => typeof w === 'string') : [],
+      );
       setPhase('applying');
       // Hard 30s ceiling regardless of poll/hub state (通信牛 review #11 blocker 2).
       after(APPLY_TIMEOUT_MS, () => markTimeout(runId));
@@ -723,11 +757,34 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
       />
 
       <div
+        ref={dialogRef}
+        tabIndex={-1}
         role="dialog"
         aria-label={`${s.alias} 节点设置`}
-        className={scoped
+        aria-modal="true"
+        onKeyDown={e => {
+          if (e.key === 'Escape') { e.stopPropagation(); onClose(); return; }
+          // 焦点陷阱：抽屉有遮罩，Tab 不能跑到被遮住的背景页去
+          //（实测未加之前，第 15 次 Tab 就落到 Expand servers panel / 背景链接）。
+          if (e.key !== 'Tab') return;
+          const focusables = Array.from(dialogRef.current?.querySelectorAll<HTMLElement>(
+            'a[href], button:not([disabled]), input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]:not([tabindex="-1"])',
+          ) ?? []).filter(el => el.offsetParent !== null);
+          if (focusables.length === 0) return;
+          const first = focusables[0];
+          const last = focusables[focusables.length - 1];
+          const active = document.activeElement as HTMLElement | null;
+          if (!e.shiftKey && (active === last || active === dialogRef.current)) {
+            e.preventDefault();
+            first.focus();
+          } else if (e.shiftKey && (active === first || active === dialogRef.current)) {
+            e.preventDefault();
+            last.focus();
+          }
+        }}
+        className={`focus:outline-none ${scoped
           ? 'absolute top-0 right-0 h-full w-full sm:w-[360px] max-w-[360px] bg-[var(--bg)] border-l border-[var(--border)] z-50 flex flex-col animate-slide-in'
-          : 'fixed top-0 right-0 h-[100dvh] w-full sm:w-[440px] bg-[var(--bg)] border-l border-[var(--border)] z-50 flex flex-col shadow-2xl shadow-black/60 animate-slide-in'}
+          : 'fixed top-0 right-0 h-[100dvh] w-full sm:w-[440px] bg-[var(--bg)] border-l border-[var(--border)] z-50 flex flex-col shadow-2xl shadow-black/60 animate-slide-in'}`}
       >
         {/* Header */}
         <div className="flex items-center gap-2.5 px-4 py-3 border-b border-[var(--border)]">
@@ -861,11 +918,24 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
                 </div>
               );
             })()}
+            {/* RFC-024 warnings —— 与上面那条 phase 提示**分开渲染**：
+                它说的不是「这次写入成没成」，而是「它成不成得了，取决于这台机器上别的东西」。
+                只在写入已被接受的那几个 phase 显示（saving 还没结果，error 已被拒绝）。 */}
+            {applyWarnings.length > 0 && (phase === 'applying' || phase === 'applied' || phase === 'timeout') && (
+              <ul role="status" aria-live="polite" className="mt-2 space-y-1 rounded-lg border border-[var(--warning)]/40 bg-[var(--warning)]/15/15 px-3 py-2 text-[12px] text-[var(--warning)]">
+                {applyWarnings.map(w => (
+                  <li key={w} className="flex items-start gap-2">
+                    <span className="shrink-0 leading-5" aria-hidden>⚠</span>
+                    <span>{warningText(w)}</span>
+                  </li>
+                ))}
+              </ul>
+            )}
             {snapUnavailable && (
-              <p className="mt-1 text-[10px] text-[var(--warning)]/80">无法读取该节点的配置快照（Hub 不可达或节点离线），暂不能保存。</p>
+              <p className="mt-1 text-[11px] text-[var(--warning)]/80">无法读取该节点的配置快照（Hub 不可达或节点离线），暂不能保存。</p>
             )}
             {!snapUnavailable && !capable && (
-              <p className="mt-1 text-[10px] text-[var(--fg-dim)]">该节点未在 W1 supervisor 下运行，重启类改动可能不生效。</p>
+              <p className="mt-1 text-[11px] text-[var(--fg-dim)]">该节点未在 W1 supervisor 下运行，重启类改动可能不生效。</p>
             )}
           </section>
 
@@ -883,7 +953,7 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
                     <label className={`flex items-center justify-between px-3 py-2 text-sm text-[var(--fg)] ${editable ? 'cursor-pointer hover:bg-[var(--bg-elevated)]' : 'cursor-not-allowed'}`}>
                       <span className="flex items-center gap-2">
                         {ch.label}
-                        {ch.roadmap && <span className="text-[10px] px-1.5 py-0.5 rounded bg-[var(--control-off)] text-[var(--fg-muted)]">即将支持</span>}
+                        {ch.roadmap && <span className="text-[11px] px-1.5 py-0.5 rounded bg-[var(--control-off)] text-[var(--fg-muted)]">即将支持</span>}
                       </span>
                       <input
                         type="checkbox"
@@ -914,7 +984,7 @@ export function NodeSettingsPanel({ session: s, onClose, positioning = 'fixed' }
               type="button"
               onClick={handleRestart}
               disabled={lcBusy}
-              className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-[13px] font-medium transition-colors ${
+              className={`flex w-full items-center justify-center gap-2 rounded-lg border px-3 py-2.5 text-[12px] font-medium transition-colors ${
                 lcBusy
                   ? 'border-[var(--border)] bg-[var(--bg-elevated)] text-[var(--fg-dim)] cursor-not-allowed'
                   : 'border-amber-700/50 bg-[var(--warning)]/15/15 text-[var(--warning)] hover:bg-[var(--warning)]/15/25'

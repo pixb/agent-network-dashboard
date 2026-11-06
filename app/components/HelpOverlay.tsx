@@ -276,13 +276,13 @@ export function HelpOverlay() {
         <div className="px-4 py-3 max-h-[70vh] overflow-y-auto">
           {SHORTCUTS.map(g => (
             <div key={g.group} className="mb-3 last:mb-0">
-              <div className="text-[10px] uppercase tracking-[0.12em] text-gray-600 mb-1.5">{g.group}</div>
+              <div className="text-[11px] uppercase tracking-[0.12em] text-gray-600 mb-1.5">{g.group}</div>
               <ul className="space-y-1.5">
                 {g.items.map((s, i) => (
                   <li key={i} className="flex items-center gap-3 text-xs">
                     <span className="flex items-center gap-1">
                       {s.keys.map((k, ki) => (
-                        <kbd key={ki} className="text-[10px] font-mono border border-[#26262b] rounded px-1.5 py-0.5 text-gray-400 bg-[#1c1c1f]/40">
+                        <kbd key={ki} className="text-[11px] font-mono border border-[#26262b] rounded px-1.5 py-0.5 text-gray-400 bg-[#1c1c1f]/40">
                           {k}
                         </kbd>
                       ))}
@@ -295,7 +295,7 @@ export function HelpOverlay() {
           ))}
         </div>
 
-        <div className="border-t border-[#26262b] px-4 py-1.5 text-[10px] text-gray-600 flex items-center justify-between">
+        <div className="border-t border-[#26262b] px-4 py-1.5 text-[11px] text-gray-600 flex items-center justify-between">
           <span>Press <kbd className="font-mono">?</kbd> to toggle</span>
           <span>or <kbd className="font-mono">esc</kbd> to close</span>
         </div>

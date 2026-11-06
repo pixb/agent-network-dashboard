@@ -21,7 +21,7 @@ const components: Components = {
       {...props}
     />
   ),
-  h3: props => <h3 className="mt-3 mb-1 text-[13px] font-medium text-[var(--fg)] [overflow-wrap:anywhere]" {...props} />,
+  h3: props => <h3 className="mt-3 mb-1 text-[12px] font-medium text-[var(--fg)] [overflow-wrap:anywhere]" {...props} />,
   p: props => <p className="my-1.5 text-xs leading-relaxed text-[var(--fg-muted)] [overflow-wrap:anywhere]" {...props} />,
   ul: props => <ul className="my-1.5 list-disc space-y-1 pl-5 text-xs text-[var(--fg-muted)]" {...props} />,
   ol: props => <ol className="my-1.5 list-decimal space-y-1 pl-5 text-xs text-[var(--fg-muted)]" {...props} />,
@@ -85,7 +85,7 @@ export default function ChangelogView({ markdown }: { markdown: string }) {
     <article
       data-testid="changelog-body"
       data-sections={sections.length}
-      className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]/60 px-4 py-3"
+      className="rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]/60 px-4 py-3"
     >
       {preamble.trim() ? <div className="mb-2">{renderMarkdown(preamble)}</div> : null}
       {/* 版本索引：243 条折叠后仍有 8.5k px，给最近 12 个版本一个直达入口。 */}

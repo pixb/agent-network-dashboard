@@ -327,12 +327,9 @@ export default function MessagesPage() {
       )}
 
       {/* 读失败不等于「没有消息」。旧实现忽略 error，把失败渲染成空态，
-          用户看到的是「这里很安静」而不是「没读到」。
-          门槛用合并后的列表：网络消息读失败、但收件箱行读到了时，时间线里只剩
-          上一次/部分数据 —— 这一幕必须明说「刷新失败」，不能默默把缺掉的网络
-          消息当成不存在。 */}
+          用户看到的是「这里很安静」而不是「没读到」。 */}
       {error && timeline.length > 0 && (
-        <div role="status" className="mb-3 flex items-center justify-between gap-3 rounded-xl bg-[var(--bg-secondary)] px-3 py-2 text-xs">
+        <div role="status" className="mb-3 flex items-center justify-between gap-3 rounded-2xl bg-[var(--bg-secondary)] px-3 py-2 text-xs">
           <span className="text-[var(--fg-muted)]">刷新失败，下面是上一次读到的消息。</span>
           <button
             type="button"
@@ -349,7 +346,7 @@ export default function MessagesPage() {
           {[1, 2, 3, 4, 5].map(i => <div key={i} className="h-20 rounded-2xl bg-[var(--bg-elevated)]/20" />)}
         </div>
       ) : error && timeline.length === 0 ? (
-        <div role="alert" className="rounded-xl bg-[var(--bg-secondary)] p-6 text-center text-sm">
+        <div role="alert" className="rounded-2xl bg-[var(--bg-secondary)] p-6 text-center text-sm">
           <p className="font-medium text-[var(--danger)]">读不到消息</p>
           <p className="mt-1 text-xs text-[var(--fg-muted)]">
             {error instanceof Error ? error.message : String(error)}
@@ -367,7 +364,7 @@ export default function MessagesPage() {
       ) : viewMode === 'grouped' ? (
         <div className="space-y-4">
           {conversations.map((conv, ci) => (
-            <div key={ci} className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl overflow-hidden">
+            <div key={ci} className="bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl overflow-hidden">
               <div className="px-4 py-2.5 border-b border-[var(--border)] flex items-center justify-between">
                 <div className="flex items-center gap-2">
                   <AliasAvatar alias={conv.participants[0]} size={16} />
@@ -376,7 +373,7 @@ export default function MessagesPage() {
                   <AliasAvatar alias={conv.participants[1]} size={16} />
                   <span className="text-sm text-[var(--fg)] font-medium">{conv.participants[1]}</span>
                 </div>
-                <span className="text-[10px] text-[var(--fg-dim)]">{conv.messages.length} messages</span>
+                <span className="text-[11px] text-[var(--fg-dim)]">{conv.messages.length} messages</span>
               </div>
               <div className="px-4 py-2 space-y-2 max-h-64 overflow-y-auto">
                 {conv.messages.map(m => (
@@ -384,7 +381,7 @@ export default function MessagesPage() {
                     {m.from_alias && <AliasAvatar alias={m.from_alias} size={14} />}
                     <span className="shrink-0 font-medium text-[var(--fg)]">{m.from_alias}</span>
                     <span className="text-[var(--fg-muted)] flex-1 truncate" title={m.content || ''}>{previewContent(m.content).slice(0, 120)}</span>
-                    <span className="text-[9px] text-[var(--fg-dim)] shrink-0">{timeAgo(m.created_at || '')}</span>
+                    <span className="text-[11px] text-[var(--fg-dim)] shrink-0">{timeAgo(m.created_at || '')}</span>
                   </div>
                 ))}
               </div>
@@ -417,7 +414,7 @@ export default function MessagesPage() {
                 {gapExceeded && (
                   <div className="my-2 sm:my-4 flex items-center gap-3">
                     <div className="h-px flex-1 bg-white/[0.06]" />
-                    <div className="text-[13px] font-medium text-[var(--fg-muted)]">{formatDividerLabel(message.created_at)}</div>
+                    <div className="text-[12px] font-medium text-[var(--fg-muted)]">{formatDividerLabel(message.created_at)}</div>
                     <div className="h-px flex-1 bg-white/[0.06]" />
                   </div>
                 )}

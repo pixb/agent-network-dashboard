@@ -6,6 +6,7 @@ import { TaskChatPanel } from './TaskChatPanel';
 import { useSessions, useHealth } from '../lib/hooks';
 import { relativeAgo } from '../lib/time';
 import { isOnline as presenceIsOnline } from '../lib/presence';
+import { useReturnFocus } from '../lib/useReturnFocus';
 
 interface ChatPopoverProps {
   /** Node alias to chat with. Changing it switches the conversation. */
@@ -51,6 +52,7 @@ const MOBILE_BP = 640;
  *  this round). */
 
 export function ChatPopover({ alias, onClose }: ChatPopoverProps) {
+  useReturnFocus();
   // Position + size are resolved on mount (SSR-safe defaults here).
   const [pos, setPos] = useState({ x: 0, y: 0 });
   const [size, setSize] = useState({ w: MAX_W, h: MAX_H });
@@ -178,17 +180,17 @@ export function ChatPopover({ alias, onClose }: ChatPopoverProps) {
                 window away from the node. Fall back to the drag-hint
                 when no metadata is reported. */}
             {session?.project_dir ? (
-              <div className="text-[10px] text-[var(--fg-muted)] truncate font-mono" title={session.project_dir} data-popover-cwd>
+              <div className="text-[11px] text-[var(--fg-muted)] truncate font-mono" title={session.project_dir} data-popover-cwd>
                 cwd: {session.project_dir}
               </div>
             ) : null}
             {lastSeenLine ? (
-              <div className="text-[10px] text-[var(--fg-muted)] truncate" data-popover-lastseen>
+              <div className="text-[11px] text-[var(--fg-muted)] truncate" data-popover-lastseen>
                 last seen: {lastSeenLine}
               </div>
             ) : null}
             {!session?.project_dir && !lastSeenLine ? (
-              <div className="text-[10px] text-[var(--fg-muted)]">Drag to move · Esc to close</div>
+              <div className="text-[11px] text-[var(--fg-muted)]">Drag to move · Esc to close</div>
             ) : null}
           </div>
         </div>

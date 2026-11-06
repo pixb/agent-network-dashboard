@@ -118,7 +118,7 @@ export default function LogsPage() {
               >
                 {c.dot && <span aria-hidden className="inline-block w-1.5 h-1.5 rounded-full" style={{ backgroundColor: c.dot }} />}
                 <span>{c.label}</span>
-                <span className={`text-[10px] tabular-nums ${isActive ? 'text-cyan-400' : 'text-gray-600'}`}>{count}</span>
+                <span className={`text-[11px] tabular-nums ${isActive ? 'text-cyan-400' : 'text-gray-600'}`}>{count}</span>
               </button>
             );
           });
@@ -195,7 +195,7 @@ export default function LogsPage() {
                 <span className="text-xs text-gray-600 ml-auto">{timeAgo(log.created_at)}</span>
               </div>
               {log.detail && <div className="text-xs text-gray-500">{log.detail}</div>}
-              {log.ip && log.ip !== 'unknown' && <div className="text-[10px] text-gray-700">IP: {log.ip}</div>}
+              {log.ip && log.ip !== 'unknown' && <div className="text-[11px] text-gray-700">IP: {log.ip}</div>}
             </div>
             );
           })}

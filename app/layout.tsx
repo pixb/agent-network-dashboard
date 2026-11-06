@@ -83,6 +83,10 @@ const themeBootScript = `
 try {
   var t = localStorage.getItem('anet-theme') || 'cyber';
   var el = document.documentElement;
+  // 「跟随系统」要在首帧前就解析掉，否则会先按默认深色画一帧再跳成浅色。
+  if (t === 'system') {
+    t = (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) ? 'cyber' : 'light';
+  }
   // slack 是 light 主题上的皮肤：两头都要在首帧前设好，否则会先闪一下
   // 普通浅色再切到 Slack 配色（applyTheme 的同一套约定）。
   if (t === 'slack') {
@@ -92,6 +96,17 @@ try {
     el.setAttribute('data-theme', t);
     el.removeAttribute('data-skin');
   }
+  // 界面密度也要在首帧前生效，否则会先按标准行高画一帧再跳（列表会「抖一下」）。
+  var f = localStorage.getItem('anet-font-scale');
+  if (f === 'small' || f === 'large' || f === 'xlarge') {
+    var map = { small: 0.9, large: 1.15, xlarge: 1.3 };
+    el.setAttribute('data-font', f);
+    el.style.setProperty('--font-scale', String(map[f]));
+  }
+  // 军团配色：属性给 CSS/断言用，画布本身读 localStorage（两处保持一致）。
+  el.setAttribute('data-legion-palette', localStorage.getItem('anet-legion-palette') === 'warm' ? 'warm' : 'deep');
+  var d = localStorage.getItem('anet-density');
+  if (d === 'compact' || d === 'comfortable') el.setAttribute('data-density', d);
 } catch (e) {}
 `;
 

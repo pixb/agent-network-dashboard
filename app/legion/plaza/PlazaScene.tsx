@@ -28,7 +28,7 @@ export function PlazaScene({ platforms, selected, onSelect }: {
     y: 100 + Math.floor(i / perRow) * ROW, scale: Math.max(0.88, 1 - Math.floor(i / perRow) * 0.025) }));
   const byId = new Map(slots.map(s => [s.platform.id, s]));
   return (
-    <div ref={container} className="max-h-[65dvh] overflow-auto rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]" data-testid="plaza-scene">
+    <div ref={container} className="max-h-[65dvh] overflow-auto rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]" data-testid="plaza-scene">
       <svg viewBox={`0 0 ${viewW} ${viewH}`} className="block h-auto w-full" role="group" aria-label="部门展台与真实编制连线" data-testid="legion-plaza-svg">
         <defs>
           <filter id={`${id}-glow`} x="-100%" y="-100%" width="300%" height="300%"><feGaussianBlur stdDeviation="4" /></filter>

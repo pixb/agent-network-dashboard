@@ -109,7 +109,7 @@ function CopyButton({ text, label }: { text: string; label: string }) {
       onClick={copy}
       aria-label={label}
       title={label}
-      className="shrink-0 rounded p-0.5 text-[10px] leading-none transition-opacity opacity-50 sm:opacity-0 sm:group-hover/bubble:opacity-70 hover:!opacity-100 text-[var(--fg-dim)] hover:text-[var(--accent-text)]"
+      className="shrink-0 rounded p-0.5 text-[11px] leading-none transition-opacity opacity-50 sm:opacity-0 sm:group-hover/bubble:opacity-70 hover:!opacity-100 text-[var(--fg-dim)] hover:text-[var(--accent-text)]"
     >
       {copied ? <span className="text-[var(--success)]">✓</span> : (
         <svg className="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
@@ -128,7 +128,7 @@ function ChatImage({ src, alt, thumbClass, onOpen }: { src: string; alt?: string
   const [state, setState] = useState<'loading' | 'ready' | 'error'>('loading');
   if (state === 'error') {
     return (
-      <span className={`${thumbClass} flex items-center justify-center bg-black/20 border border-[var(--border)] text-[10px] text-[var(--fg-dim)]`}>
+      <span className={`${thumbClass} flex items-center justify-center bg-black/20 border border-[var(--border)] text-[11px] text-[var(--fg-dim)]`}>
         {t('图片加载失败', 'Image failed to load')}
       </span>
     );
@@ -307,7 +307,7 @@ function LocalFilePreview({ file, onRemove }: { file: File; onRemove: () => void
       ) : (
         <div className="flex h-full w-full flex-col items-center justify-center gap-0.5 px-1 text-center">
           <span className="text-lg">📄</span>
-          <span className="max-w-full truncate text-[9px] font-semibold text-[var(--accent-text)]">{ext}</span>
+          <span className="max-w-full truncate text-[11px] font-semibold text-[var(--accent-text)]">{ext}</span>
         </div>
       )}
       <button
@@ -354,9 +354,9 @@ type StatusInfo = { label: string; hover: string; color: string; icon: React.Rea
 const STATUS_INFO: Record<string, StatusInfo> = {
   created:   { label: '发送中',   hover: '客户端已建消息，尚未收到 hub 回执。', color: 'text-[var(--fg-muted)]',   icon: <IconSending /> },
   queued:    { label: '排队中',   hover: '已入队，尚未推给节点。节点可能离线、或通道拥堵。', color: 'text-[var(--fg-muted)]',   icon: <IconClock /> },
-  delivered: { label: '已推送',   hover: 'hub 侧已标记推送。尚未确认节点是否收到（delivered_at 是入队时刻，不代表 SSE 已到达）。', color: 'text-sky-400',    icon: <IconCheck /> },
+  delivered: { label: '已推送',   hover: 'hub 侧已标记推送。尚未确认节点是否收到（delivered_at 是入队时刻，不代表 SSE 已到达）。', color: 'text-[var(--info)]', icon: <IconCheck /> },
   acked:     { label: '已接收',   hover: '节点进程已确认收到。未必已处理——对方 agent 可能尚未唤醒。', color: 'text-[var(--fg)]',   icon: <IconCheckDouble /> },
-  replied:   { label: '已回复',   hover: '对方已针对此消息回复。', color: 'text-emerald-400', icon: <IconCheckDouble filled /> },
+  replied:   { label: '已回复',   hover: '对方已针对此消息回复。', color: 'text-[var(--success)]', icon: <IconCheckDouble filled /> },
   failed:    { label: '失败',     hover: '发送失败——详细原因见消息下方文本。', color: 'text-[var(--danger)]',    icon: <IconWarn /> },
   closed:    { label: '已关闭',   hover: '会话已被关闭，不再期待回复。', color: 'text-[var(--fg-muted)]',   icon: <IconClose /> },
   expired:   { label: '已超时',   hover: '在期限内未收到回复，任务已超时。', color: 'text-[var(--fg-muted)]',   icon: <IconClock /> },
@@ -419,7 +419,7 @@ function StatusBar({ status, result }: { status: string; result?: string }) {
       {failedReason !== null && (
         <span
           data-status-reason={failedReason}
-          className="text-[10px] text-[var(--danger)]/80 max-w-[260px] truncate"
+          className="text-[11px] text-[var(--danger)]/80 max-w-[260px] truncate"
           title={result || undefined}
         >
           {failedReason}
@@ -540,7 +540,7 @@ function buildMdComponents(onImageClick?: (url: string) => void) {
             const lang = className?.replace(/^language-/, '') || '';
             return (
               <div className="my-2 rounded-lg overflow-hidden border border-[var(--border)]">
-                {lang && <div className="bg-[var(--code-bg)] px-3 py-1 text-[10px] text-[var(--fg-muted)] border-b border-[var(--border)]">{lang}</div>}
+                {lang && <div className="bg-[var(--code-bg)] px-3 py-1 text-[11px] text-[var(--fg-muted)] border-b border-[var(--border)]">{lang}</div>}
                 <pre className="bg-[var(--code-bg)] px-3 py-2 text-[11px] text-green-300 overflow-x-auto"><code>{children}</code></pre>
               </div>
             );
@@ -1604,7 +1604,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 placeholder={t('搜索会话…', 'Search conversation…')}
                 className="min-w-0 flex-1 bg-transparent text-xs text-[var(--fg)] placeholder-[var(--fg-dim)] focus:outline-none"
               />
-              <span className="shrink-0 text-[10px] tabular-nums text-[var(--fg-dim)]">
+              <span className="shrink-0 text-[11px] tabular-nums text-[var(--fg-dim)]">
                 {searchMatches.length ? `${Math.min(searchIdx, searchMatches.length - 1) + 1}/${searchMatches.length}` : searchQuery.trim() ? t('0 条', '0 found') : t(`${chatEvents.length} 条内`, `in ${chatEvents.length}`)}
               </span>
               <button type="button" onClick={() => stepMatch(-1)} aria-label={t('上一条（更早）', 'Previous (older)')} className="shrink-0 rounded px-1 text-[var(--fg-dim)] hover:text-[var(--accent-text)]">↑</button>
@@ -1648,11 +1648,15 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             </button>
           )}
           {historyLoaded && !hasOlder && messages.length > 0 && (
-            <div className="text-center text-[10px] text-[var(--fg-dim)] py-1">— beginning of history —</div>
+            <div className="text-center text-[11px] text-[var(--fg-dim)] py-1">— beginning of history —</div>
           )}
           {historyLoaded && !historyError && messages.length === 0 && (
             <div className="text-center py-12">
-              <div className="text-3xl mb-3">💬</div>
+              {/* 图标位不用 emoji：缺 emoji 字体的环境（无头容器、部分 Linux 桌面）会渲染成方框叉号，
+                  实测该页空态就是这样。仓库既有约定也是描边 SVG。 */}
+              <svg aria-hidden className="mx-auto mb-3 h-8 w-8 text-[var(--fg-dim)]" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z" />
+              </svg>
               <div className="text-[var(--fg-muted)] text-sm">Start a conversation</div>
               <div className="text-[var(--fg-dim)] text-xs mt-1">Send a task to {alias}</div>
             </div>
@@ -1683,7 +1687,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             const showSep = !prevAt || eventTime(event.at) - eventTime(prevAt) > TIME_GROUP_GAP_MS;
             const sepEl = showSep ? (
               <div className="flex justify-center py-1.5">
-                <span className="text-[10px] text-[var(--fg-dim)] bg-[var(--bg-elevated)] rounded px-2 py-0.5">{formatWeChatTime(event.at)}</span>
+                <span className="text-[11px] text-[var(--fg-dim)] bg-[var(--bg-elevated)] rounded px-2 py-0.5">{formatWeChatTime(event.at)}</span>
               </div>
             ) : null;
             // Distinguish task source so users can tell when a peer agent
@@ -1694,7 +1698,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             const senderLabel = senderLabelFor(m.from_name);
             const senderBadge = fromUser
               ? null
-              : <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-[9px] text-purple-300 font-medium">↳ {senderLabel}</span>;
+              : <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-purple-500/15 border border-purple-500/30 text-[11px] text-purple-300 font-medium">↳ {senderLabel}</span>;
             if (event.kind === 'reply') {
               return (
                 <Fragment key={`${m.task_id}:reply`}>
@@ -1704,13 +1708,13 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                     <div className="flex items-center justify-between gap-2 mb-2">
                       <div className="flex items-center gap-1.5 min-w-0">
                         {m.to_name && <AliasAvatar alias={m.to_name} size={14} />}
-                        <span className="text-[10px] text-[var(--fg)] font-medium truncate">{m.to_name}</span>
-                        <span className="text-[9px] text-green-300/70">replied</span>
+                        <span className="text-[11px] text-[var(--fg)] font-medium truncate">{m.to_name}</span>
+                        <span className="text-[11px] text-[var(--success)]">replied</span>
                       </div>
                       <CopyButton text={m.result || ''} label={t('复制回复', 'Copy reply')} />
                     </div>
-                    <div className="mb-2 rounded-lg border-l-2 border-cyan-400/40 bg-black/20 px-2.5 py-1.5">
-                      <div className="text-[9px] text-[var(--accent-text)]/80">
+                    <div className="mb-2 rounded-lg border-l-2 border-cyan-400/40 bg-[var(--bg)]/50 px-2.5 py-1.5">
+                      <div className="text-[11px] text-[var(--accent-text)]">
                         引用 {senderLabel} 的任务 · {formatTimestamp(m.created_at)}
                       </div>
                       <div className="mt-0.5 max-h-10 overflow-hidden text-[11px] leading-5 text-[var(--fg-muted)]">
@@ -1756,8 +1760,8 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 )}
                 <div title={m.created_at} className={`group/bubble max-w-[92%] sm:max-w-[min(85%,56ch)] bg-[var(--accent)]/8 rounded-2xl rounded-br-md px-3 py-2.5 sm:px-4 ${currentMatchKey === `${m.task_id}:task` ? 'ring-2 ring-yellow-400/60' : ''}`}>
                   <div className="flex items-center gap-2 mb-1">
-                    <span className={`text-[10px] font-medium ${fromUser ? 'text-[var(--accent-text)]' : 'text-purple-300'}`}>{senderLabel}</span>
-                    {!fromUser && <span className="text-[9px] text-[var(--fg-dim)]">forwarded to {m.to_name}</span>}
+                    <span className={`text-[11px] font-medium ${fromUser ? 'text-[var(--accent-text)]' : 'text-purple-300'}`}>{senderLabel}</span>
+                    {!fromUser && <span className="text-[11px] text-[var(--fg-dim)]">forwarded to {m.to_name}</span>}
                     <span className="flex-1" />
                     <CopyButton text={m.content || ''} label={t('复制内容', 'Copy message')} />
                   </div>
@@ -1785,7 +1789,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                         <button
                           type="button"
                           onClick={() => retrySend(m)}
-                          className="inline-flex items-center gap-1 rounded-md border border-red-500/40 bg-[var(--danger)]/10 px-1.5 py-0.5 text-[10px] font-medium text-red-300 hover:bg-[var(--danger)]/20"
+                          className="inline-flex items-center gap-1 rounded-md border border-red-500/40 bg-[var(--danger)]/10 px-1.5 py-0.5 text-[11px] font-medium text-red-300 hover:bg-[var(--danger)]/20"
                         >
                           <span aria-hidden>↻</span> {t('重发', 'Resend')}
                         </button>
@@ -1863,8 +1867,9 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 onKeyDown={handleKeyDown}
                 onPaste={handlePaste}
                 placeholder={`Message ${alias}...`}
+                aria-label={`Message ${alias}`}
                 rows={1}
-                className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-xl px-3 py-2.5 pr-[6.75rem] text-base sm:px-4 sm:pr-24 sm:text-sm text-[var(--fg)] placeholder-[var(--fg-dim)] focus:border-[var(--accent)]/40 focus:outline-none resize-none transition-colors"
+                className="w-full bg-[var(--bg-secondary)] border border-[var(--border)] rounded-2xl px-3 py-2.5 pr-[6.75rem] text-base sm:px-4 sm:pr-24 sm:text-sm text-[var(--fg)] placeholder-[var(--fg-dim)] focus:border-[var(--accent)]/40 focus:outline-none resize-none transition-colors"
               />
               <div className="absolute right-2 bottom-1.5 flex items-center gap-1">
                 <label className="inline-flex min-h-[44px] min-w-[44px] -my-3 items-center justify-center sm:min-h-0 sm:min-w-0 sm:m-0 sm:p-1 text-[var(--fg-dim)] hover:text-[var(--accent-text)] cursor-pointer rounded hover:bg-[var(--accent)]/10" title={t('附加文件', 'Attach file')}>
@@ -1900,7 +1905,9 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 {/* 窄屏隐藏：44px 的附件与语音按钮之后，这个下拉会把输入区再压掉一截
                     （实测 320 下按钮块占 125px，输入框 212px，留给文本的只剩几十像素）。 */}
                 <select value={priority} onChange={e => setPriority(e.target.value)}
-                  className="hidden bg-transparent text-[9px] text-[var(--fg-dim)] focus:outline-none cursor-pointer sm:block">
+                  aria-label="Priority"
+                  title="Priority"
+                  className="hidden bg-transparent text-[11px] text-[var(--fg-dim)] focus:outline-none cursor-pointer sm:block">
                   <option value="normal">N</option>
                   <option value="high">H</option>
                   <option value="low">L</option>
@@ -1922,7 +1929,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             </button>
           </div>
           {(recording || recError) && (
-            <div className="mt-1 flex items-center gap-1.5 text-[10px]" role="status" data-testid="chat-voice-status">
+            <div className="mt-1 flex items-center gap-1.5 text-[11px]" role="status" data-testid="chat-voice-status">
               {recording ? (
                 <>
                   <span className="inline-block h-2 w-2 animate-pulse rounded-full bg-[var(--danger)]" aria-hidden="true" />
@@ -1937,13 +1944,13 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
             </div>
           )}
           {uploadProgress && (
-            <div className="mt-1 flex items-center gap-1.5 text-[10px] text-[var(--accent-text)]" role="status">
+            <div className="mt-1 flex items-center gap-1.5 text-[11px] text-[var(--accent-text)]" role="status">
               <span className="inline-block h-2.5 w-2.5 animate-spin rounded-full border-2 border-[var(--accent)]/30 border-t-cyan-400" />
               {t(`上传附件 ${uploadProgress.done}/${uploadProgress.total}…`, `Uploading ${uploadProgress.done}/${uploadProgress.total}…`)}
             </div>
           )}
           {attachLimitHit && (
-            <div className="mt-1 text-[10px] text-amber-400" role="status">{t('最多同时附带 6 个附件', 'Up to 6 attachments at a time')}</div>
+            <div className="mt-1 text-[11px] text-amber-400" role="status">{t('最多同时附带 6 个附件', 'Up to 6 attachments at a time')}</div>
           )}
           {attachedFiles.length > 0 && (
             <div className="mt-2 flex flex-wrap gap-2">
@@ -1956,7 +1963,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
               ))}
             </div>
           )}
-          <div className="hidden sm:flex justify-between text-[9px] text-[var(--fg-dim)] mt-1.5">
+          <div className="hidden sm:flex justify-between text-[11px] text-[var(--fg-dim)] mt-1.5">
             <span>{input.includes('@') ? `Sending to: ${alias}` : `Type @ to mention another node`}</span>
             <span>Enter to send · paste image</span>
           </div>
@@ -1986,7 +1993,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                   </svg>
                 )}
               </div>
-              <div className="flex items-center gap-1.5 text-[10px] text-[var(--fg-muted)]">
+              <div className="flex items-center gap-1.5 text-[11px] text-[var(--fg-muted)]">
                 {sseOnline !== null && (
                   <span aria-hidden className={`inline-block h-1.5 w-1.5 rounded-full ${sseOnline ? 'bg-green-400' : 'bg-gray-600'}`} />
                 )}

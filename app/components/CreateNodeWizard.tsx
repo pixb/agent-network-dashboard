@@ -177,7 +177,7 @@ export function CreateNodeWizard({
         aria-label="新建节点"
         // RFC-026 §9.4 responsive: mobile single-screen (full width minus
         // gutter, taller); desktop ~3-col-friendly width when picker is shown.
-        className="fixed left-1/2 top-1/2 z-50 w-[min(94vw,440px)] md:w-[min(92vw,720px)] -translate-x-1/2 -translate-y-1/2 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] shadow-2xl"
+        className="fixed left-1/2 top-1/2 z-50 w-[min(94vw,440px)] md:w-[min(92vw,720px)] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] shadow-2xl"
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-[var(--border)] px-4 py-3">
@@ -194,7 +194,7 @@ export function CreateNodeWizard({
           {STEPS.map((label, i) => (
             <div key={label} className="flex flex-1 flex-col items-center gap-1">
               <div className={`h-1 w-full rounded-full ${i <= step ? 'bg-[var(--accent)]' : 'bg-[var(--bg-elevated)]'}`} />
-              <span className={`text-[10px] ${i === step ? 'text-[var(--accent-text)]' : 'text-[var(--fg-dim)]'}`}>{label}</span>
+              <span className={`text-[11px] ${i === step ? 'text-[var(--accent-text)]' : 'text-[var(--fg-dim)]'}`}>{label}</span>
             </div>
           ))}
         </div>
@@ -295,7 +295,7 @@ export function CreateNodeWizard({
                       >
                         <span>
                           {r.label}
-                          {disabled && <span className="ml-2 text-[10px] text-gray-700">该 daemon 不支持</span>}
+                          {disabled && <span className="ml-2 text-[11px] text-gray-700">该 daemon 不支持</span>}
                         </span>
                         {selected && !disabled && (
                           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden>

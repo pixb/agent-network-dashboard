@@ -45,6 +45,16 @@ export async function GET(req: Request) {
     // 旧实现在这里撤掉 network_id 再查一次，把别的网络的命中以 `source: 'global'`
     // 返回给调用方；如果那次兜底是 401，还会被吞成「200 + 原空集合」。
     // 作用域不能因为「结果为空」被放宽 —— 要跨网络看，由调用方显式切换。
+    // lite=1：未读角标只需要 id/from/to/时间戳（见 chat-unread-feed 的 UnreadFeedMessage），
+    // 正文与其余字段都不读。生产实测 messages?limit=200 为 319,928 B，正文占了绝大部分。
+    if (searchParams.get('lite') === '1' && Array.isArray(data.messages)) {
+      data.messages = data.messages.map((m: Record<string, unknown>) => ({
+        id: m.id ?? null,
+        from_alias: m.from_alias ?? null,
+        to_alias: m.to_alias ?? null,
+        created_at: m.created_at ?? null,
+      }));
+    }
     return Response.json(data);
   } catch (e: unknown) {
     return Response.json({ ok: false, messages: [] }, { status: 502 });

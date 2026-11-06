@@ -141,10 +141,10 @@ function StatCard({ value, label, sub, color }: {
   // Surfaces are now neutral (shared border + bg); color survives only
   // on the number itself. Mobile density values are #209 R39.
   return (
-    <div className="anet-stat-card rounded-xl border border-transparent bg-[var(--bg-secondary)] px-3 sm:px-4 py-2.5 sm:py-3 transition-all">
+    <div className="anet-stat-card rounded-2xl border border-transparent bg-[var(--bg-secondary)] px-3 sm:px-4 py-2.5 sm:py-3 transition-all">
       <div className={`text-2xl sm:text-3xl font-bold ${color} tabular-nums leading-tight`}>{value}</div>
       <div className="text-xs sm:text-sm text-gray-300 mt-0.5">{label}</div>
-      <div className="text-[10px] sm:text-xs text-gray-500 mt-1">{sub}</div>
+      <div className="text-[11px] sm:text-xs text-gray-500 mt-1">{sub}</div>
     </div>
   );
 }

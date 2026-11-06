@@ -177,16 +177,65 @@ nothing blurs. */
    Light: mid-grey on white card (not too light or it disappears). */
 .anet-skeleton-bar {
   background-color: #1c1c1f;
-}/* Command palette modal surface — bumped depth so it sits clearly above
+}/* 字号放大时，「行高/高度上限」类工具也必须跟着放大，否则内容会被硬裁。
+   2026-11-06 组合巡检实测：特大字 + /nodes 有 12 个元素被裁，
+   根因是 `max-h-10 overflow-hidden leading-5` 的摘要卡：字放大 1.3 倍后
+   2 行变成 52px，但 max-height 与 line-height 仍是固定值（40 / 20），
+   于是裁在行中间。这里让这几档跟着 --font-scale 走，2 行仍是完整 2 行。 */
+[data-font] .leading-4 { line-height: calc(1rem * var(--font-scale)) !important; }
+[data-font] .leading-5 { line-height: calc(1.25rem * var(--font-scale)) !important; }
+[data-font] .leading-6 { line-height: calc(1.5rem * var(--font-scale)) !important; }
+[data-font] .max-h-8 { max-height: calc(2rem * var(--font-scale)) !important; }
+[data-font] .max-h-10 { max-height: calc(2.5rem * var(--font-scale)) !important; }
+[data-font] .max-h-12 { max-height: calc(3rem * var(--font-scale)) !important; }
+
+/* ─────────────────────────────────────────────────────────────────────
+   字号缩放（对齐客户端「设置 → 字体大小」）
+   ---------------------------------------------------------------------
+   只覆盖排版类，不动 padding/gap/宽高 —— 与「界面密度」保持正交。
+   不用「缩放根字号」的原因：Tailwind 的间距也是 rem，缩根字号会连带
+   改变整个布局的松紧，那就变成第二个密度开关了。
+   行高一起缩放，否则 xlarge 下 11px→14.3px 的字会挤在 16px 行高里。
+   ───────────────────────────────────────────────────────────────────── */
+[data-font] .text-xs { font-size: calc(0.75rem * var(--font-scale)) !important; line-height: calc(1rem * var(--font-scale)) !important; }
+[data-font] .text-sm { font-size: calc(0.875rem * var(--font-scale)) !important; line-height: calc(1.25rem * var(--font-scale)) !important; }
+[data-font] .text-base { font-size: calc(1rem * var(--font-scale)) !important; line-height: calc(1.5rem * var(--font-scale)) !important; }
+[data-font] .text-lg { font-size: calc(1.125rem * var(--font-scale)) !important; line-height: calc(1.75rem * var(--font-scale)) !important; }
+[data-font] .text-xl { font-size: calc(1.25rem * var(--font-scale)) !important; line-height: calc(1.75rem * var(--font-scale)) !important; }
+[data-font] .text-\[11px\] { font-size: calc(11px * var(--font-scale)) !important; }
+[data-font] .text-\[12px\] { font-size: calc(12px * var(--font-scale)) !important; }
+
+/* ─────────────────────────────────────────────────────────────────────
+   界面密度（对齐客户端「设置 → 界面密度」）
+   ---------------------------------------------------------------------
+   只调「行高 + 上下内边距」，**不动字号**：客户端把字号与密度当两个独立
+   开关（src/ui-scale.ts），这里保持同样的语义。
+   作用面明确限定在三处高频列表，避免 !important 波及全站：
+     侧栏导航 [data-nav-item] / 节点列表 [data-node-list-item] / 需求行 a[data-req-row]
+   标准档不写属性，因此默认样式完全不变（无需回滚风险）。
+   ───────────────────────────────────────────────────────────────────── */
+[data-density="compact"] [data-node-list-item],
+[data-density="compact"] a[data-req-row] {
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+}
+[data-density="comfortable"] [data-node-list-item],
+[data-density="comfortable"] a[data-req-row] {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+/* 侧栏是「图标轨」：44×44 的方块，改高度只会让图标错位，不纳入密度作用面。 */
+
+/* Command palette modal surface — bumped depth so it sits clearly above
    the page content in both themes. Light/mint: white shell with a real
    shadow (not the dark navy that the CSS shim would normally translate
    `bg-[#111113]` into). */
 .anet-cmdk kbd {
-  font-size: 9px;
+  font-size: 11px;
   line-height: 1;
   padding: 1px 4px;
   border: 1px solid currentColor;
-  border-radius: 3px;
+  border-radius: 4px;
   opacity: 0.6;
 }/* Round 20 — matched-char highlight inside cmdk titles/hints. Inherits
    line color (`color`) instead of forcing one — keeps text readable on
@@ -1444,8 +1493,14 @@ joining the R145
   --border:       #e3e6eb;
   --border-hover: #c8cdd6;
   --scrim:        rgba(17, 17, 19, 0.35);
-  --accent:       #007a61; /* was #009e7e — 3.39:1 as text on white */
-  --accent-text:  var(--accent); /* 浅底上 accent 本身就够深 */
+  /* 对齐客户端的晴蓝：客户端 theme.ts 的 light.accent=#1b65db，并写明
+     「Vincent 2026-10-04『感觉这个绿色是真的丑』→ 换掉墨青」。
+     此前这里是 #007a61 墨青绿，正是被否掉的那一版。对比度 4.98:1（对 --bg）/5.34:1（白底）。 */
+  --accent:       #1b65db;
+  /* 浅色下 --accent(#1b65db) 作为文字放在「accent 15% 底」上只有 4.05:1（实测 /legion 的 3D 视图、
+     节点头部的 新建节点）。这里压深 0.9 到 #185bc5：同一色相，在 accent/15 上 4.76:1，
+     纯白底 ~5.3:1。填充与描边仍用 --accent，品牌色不变。 */
+  --accent-text:  #185bc5;
   --accent-fg:    #ffffff;
   --success:      #047857; /* was #059669 — 3.7:1 as text on white */
   --warning:      #a34708; /* was #d97706 — 3.19:1 as text on white */
@@ -1558,6 +1613,39 @@ joining the R145
   color: var(--fg-muted) !important;
 }
 
+/* 小控件圆角（item = 8）：由 app/lib/useRadiusTier.ts 在挂载后按**渲染高度**打标
+   （≤32 高 → data-radius-tier="item"）。CSS 看不到自身高度，故这里只认标签。 */
+[data-radius-tier="item"] {
+  border-radius: 8px !important;
+}
+
+/* 控件圆角对齐客户端 radius.control = 12（第二批）。
+   依据客户端 theme.ts 语义刻度：控件（输入框/按钮/分段/搜索/菜单）= 12；
+   ≤32 高的小控件属 item = 8，**本批不动**（保持原有 6px，避免新旧混排）。
+
+   两条实测教训（都来自圆角普查探针，不靠截图）：
+   1) 按类名猜语义会误伤 chip/告警条 → 改成按元素类型选（button/a/input/select/textarea）；
+   2) CSS 无法按高度选，「小尺寸」只能靠 class 线索排除。实测两次选错线索：
+      先用 `text-xs` → 把设置页 44px 高的分区标签（也是 text-xs）误排除，留 6 个 6px；
+      改用 `py-1`（小控件都用 py-1/py-1.5，大控件没有）后归零。
+      排除必须写在**同一条规则**里，否则会被 :not(.h-*) 抬高的特异性压过。
+   排除后：普通控件 12px，小控件维持原状（item 档另批处理）。 */
+:where(button, a, input, select, textarea):is([class*="rounded-lg"], [class*="rounded-md"]):not(.h-6):not(.h-7):not(.h-8):not(.size-6):not(.size-7):not(.size-8):not([class*="py-1"]) {
+  border-radius: 12px;
+}
+
+/* 暗色（cyber）：light/mint 早就把 gray 类映射到了 token，cyber 漏了。
+   实测深底上 gray-500 = 3.66:1、gray-600 = 2.19:1（「离线」几乎看不见）。
+   只映射 500/600：gray-400(#9ca3af) 在深底已是 7:1，不动。 */
+[data-theme="cyber"] .text-gray-500,
+[data-theme="cyber"] .placeholder-gray-600::placeholder {
+  color: var(--fg-muted) !important;
+}
+
+[data-theme="cyber"] .text-gray-600 {
+  color: var(--fg-dim) !important;
+}
+
 [data-theme="light"] .text-white,
 [data-theme="mint"] .text-white {
   color: var(--fg) !important;
@@ -1640,7 +1728,9 @@ joining the R145
 [data-theme="light"] .text-cyan-400,
 [data-theme="light"] .text-cyan-300,
 [data-theme="light"] .text-indigo-400 {
-  color: var(--accent) !important;
+  /* 用 accent-text 而不是 accent：这些类常出现在 accent 的浅色 tint 按钮上
+     （新建节点 bg-cyan-900/15），accent 原值在 tint 上只有 3.85:1。 */
+  color: var(--accent-text) !important;
 }
 
 /* Light theme: every "-300/400" accent text color needs a darker mid-tone
@@ -2247,7 +2337,7 @@ html[data-skin="slack"] [data-topo-showcase] [class*="bg-cyan"] { background-col
   --col-hairline: #e9ebf0;
   --badge-muted-bg: #CBD5E1;
   --badge-muted-fg: #334155;
-  --hl:          #0369a1; /* was #0284c7 — 4.1:1 as text/按钮上白字在浅底不够 */
+  --hl:          #1b65db; /* 与 --accent 同色：客户端只有一个晴蓝；白字压色 5.34:1 */
   --menu-bg:     #ffffff;
   --bubble-in:   #F1F5F9;
   --bubble-out:  #DBEAFE;

@@ -136,8 +136,8 @@ export function Sidebar() {
   // Theme switcher (Vincent 07-20 "主题还不能切换吗" — the Settings entry was
   // too buried; a sidebar control is findable from every page). Cycle order
   // matches Settings: 深色(默认) → 浅色 → Slack.
-  const THEME_CYCLE = ['cyber', 'light', 'slack'] as const;
-  const THEME_LABEL: Record<string, string> = { cyber: '深色', light: '浅色', slack: 'Slack' };
+  const THEME_CYCLE = ['cyber', 'light', 'slack', 'system'] as const;
+  const THEME_LABEL: Record<string, string> = { cyber: '深色', light: '浅色', slack: 'Slack', system: '跟随系统' };
   const [theme, setTheme] = useState('cyber');
   useEffect(() => {
     try { const t = localStorage.getItem('anet-theme'); if (t && THEME_LABEL[t]) setTheme(t); } catch {}
@@ -159,8 +159,10 @@ export function Sidebar() {
   // The unfiltered /api/status response carries every visible session with
   // its network_id, so derive networks from there and merge them in — the
   // admin can then switch to any network that actually has agents.
+  // 只需 network_id 来推导网络列表；/api/hub/status 会回 710 KB 的全量对象
+  //（实测），这里换成投影后的紧凑端点（约 18 KB）。
   const { data: statusData } = useSWR<StatusData>(
-    '/api/hub/status', statusFetcher, { refreshInterval: 15000, dedupingInterval: 10000 },
+    '/api/hub/session-status', statusFetcher, { refreshInterval: 15000, dedupingInterval: 10000 },
   );
   const apiNetworks = netData?.networks || [];
   const networks: SidebarNetwork[] = (() => {
@@ -277,7 +279,7 @@ export function Sidebar() {
                 <span
                   aria-label={`${item.label} — ${badgeLabel(badge)} unread`}
                   data-nav-badge
-                  className="absolute top-0 right-0 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[9px] font-semibold leading-4 text-center pointer-events-none"
+                  className="absolute top-0 right-0 min-w-[16px] h-4 px-1 rounded-full bg-red-500 text-white text-[11px] font-semibold leading-4 text-center pointer-events-none"
                 >
                   {badgeLabel(badge)}
                 </span>
@@ -375,7 +377,7 @@ export function Sidebar() {
         {/* Network list */}
         {!collapsed && networks.length > 0 && (
           <div className="px-2 py-3 border-b border-[var(--border)]">
-            <div className="px-3 text-[10px] text-[var(--fg-dim)] uppercase mb-2">Network</div>
+            <div className="px-3 text-[11px] text-[var(--fg-dim)] uppercase mb-2">Network</div>
             <div className="relative" ref={netRef}>
               <button
                 type="button"
@@ -394,9 +396,9 @@ export function Sidebar() {
                     an admin can still tell at a glance whether the network
                     they are looking at is the one holding the fleet. */}
                 {activeNetwork?.agentCount ? (
-                  <span className="shrink-0 tabular-nums text-[10px] text-[var(--fg-dim)]">{activeNetwork.agentCount}</span>
+                  <span className="shrink-0 tabular-nums text-[11px] text-[var(--fg-dim)]">{activeNetwork.agentCount}</span>
                 ) : null}
-                <span className={`shrink-0 text-[9px] text-[var(--fg-dim)] transition-transform ${netOpen ? 'rotate-180' : ''}`}>▼</span>
+                <span className={`shrink-0 text-[11px] text-[var(--fg-dim)] transition-transform ${netOpen ? 'rotate-180' : ''}`}>▼</span>
               </button>
 
               {netOpen && (
@@ -422,7 +424,7 @@ export function Sidebar() {
                       <span>{ROLE_ICON[n.role || 'member'] || '👤'}</span>
                       <span className="truncate flex-1">{n.displayName || n.network_name}</span>
                       {n.agentCount ? (
-                        <span className="shrink-0 tabular-nums text-[10px] text-[var(--fg-dim)]">{n.agentCount}</span>
+                        <span className="shrink-0 tabular-nums text-[11px] text-[var(--fg-dim)]">{n.agentCount}</span>
                       ) : null}
                     </button>
                   ))}
@@ -463,7 +465,7 @@ export function Sidebar() {
               </svg>
               {!collapsed && '主题'}
             </span>
-            {!collapsed && <span className="text-[10px] border border-current rounded px-1.5 py-0.5 opacity-70">{THEME_LABEL[theme]}</span>}
+            {!collapsed && <span className="text-[11px] border border-current rounded px-1.5 py-0.5">{THEME_LABEL[theme]}</span>}
           </button>
           <button
             onClick={() => {
@@ -481,7 +483,7 @@ export function Sidebar() {
               </svg>
               {!collapsed && 'Quick search'}
             </span>
-            {!collapsed && <kbd className="text-[10px] border border-current rounded px-1 py-0.5 opacity-60 font-mono">⌘K</kbd>}
+            {!collapsed && <kbd className="text-[11px] border border-current rounded px-1 py-0.5 font-mono">⌘K</kbd>}
           </button>
           <button
             onClick={async () => {
@@ -549,33 +551,24 @@ const statusFetcher = async (url: string) => {
 };
 
 function SidebarBrand({ collapsed }: { collapsed: boolean }) {
-  // Live online count — re-uses the same /api/hub/status endpoint the
-  // Overview already polls, so SWR dedupes the request. Pulse is muted —
-  // emerald dot at 4px with a 1.6s slow opacity pulse, no glow, no halo.
-  const { data } = useSWR<StatusData>('/api/hub/status', statusFetcher, {
-    refreshInterval: 10000,
-    dedupingInterval: 4000,
-  });
-  // #515: sse_sessions map lives on hub's /health (Health.sse_sessions),
-  // not on /api/status. Re-use useHealth so SWR dedupes with page.tsx
-  // rather than fetching twice, and the count agrees with the stats card
-  // and the topology legend by construction (all three consume the same
-  // presence.ts + same health.sse_sessions source).
-  const { health } = useHealth();
-  const sessions = data?.sessions || [];
-  const sseSessions = health?.sse_sessions;
-  // #53: three-state presence — when the sseSessions map is missing but
-  // hub reports live connections, we're seeing an anonymized view.
-  // Render '?' instead of '0/N online' so the sidebar doesn't confidently
-  // claim the fleet died. HealthBanner surfaces the CTA.
-  const presenceState = presenceStatus(sseSessions, health || undefined);
-  // The old `status !== 'offline'` predicate was systematically inflated
-  // because hub `status` doesn't age out on heartbeat loss (see #520 /
-  // presence.ts). SSE-reachability is the "can I talk to it right now"
-  // ground truth.
-  const online = sessions.filter(s => s.alias ? presenceIsOnline({ alias: s.alias, network_id: s.network_id }, sseSessions) : false).length;
+  const { networkId, ready } = useNetworkId();
+  // 网络未解析完不发请求（否则先打一枪无作用域的，见 .383 的修复）。
+  const overviewKey = ready && networkId
+    ? `/api/hub/overview?network_id=${encodeURIComponent(networkId)}`
+    : null;
+  // 首屏只取「计数」：/api/hub/status 会回全部 session 对象（生产实测 709 KB），
+  // 公网约 240 KB/s，光这一份就要 3 秒。聚合端点让浏览器只收几百字节。
+  const { data, error, isLoading } = useSWR<{ ok: boolean; total: number; online: number; presence: 'ready' | 'blind' | 'loading' }>(
+    overviewKey as string | null,
+    statusFetcher as (url: string) => Promise<{ ok: boolean; total: number; online: number; presence: 'ready' | 'blind' | 'loading' }>,
+    { refreshInterval: 10000, dedupingInterval: 4000 },
+  );
+  // 三态（ready/blind/loading）由服务端用同一个 presence.ts 判定，
+  // 避免侧栏、统计卡、拓扑各算一套（#53 的老问题）。
+  const presenceState = data?.presence ?? 'loading';
+  const online = data?.online ?? 0;
   const onlineDisplay: number | string = presenceState === 'ready' ? online : '?';
-  const total = sessions.length;
+  const total = data?.total ?? 0;
 
   if (collapsed) {
     return (
@@ -593,13 +586,19 @@ function SidebarBrand({ collapsed }: { collapsed: boolean }) {
     >
       <BrandMark size={32} />
       <div className="min-w-0">
-        <div className="text-white text-[13px] font-semibold leading-tight">Agent Network</div>
-        <div className="text-[10px] text-[var(--fg-muted)] flex items-center gap-1.5 mt-0.5">
+        <div className="text-white text-[12px] font-semibold leading-tight">Agent Network</div>
+        <div className="text-[11px] text-[var(--fg-muted)] flex items-center gap-1.5 mt-0.5">
           <span
-            className={`inline-block w-1.5 h-1.5 rounded-full ${online > 0 ? 'bg-emerald-400 anet-brand-pulse' : 'bg-gray-600'}`}
+            className={`inline-block w-1.5 h-1.5 rounded-full ${isLoading && total === 0 ? 'bg-[var(--fg-dim)]/60' : error && total === 0 ? 'bg-[var(--danger)]' : online > 0 ? 'bg-emerald-400 anet-brand-pulse' : 'bg-gray-600'}`}
             aria-hidden
           />
-          {total === 0 ? (
+          {isLoading && total === 0 ? (
+            // 数据还没到：既不是「空」也不是「挂」，只是一个尚未知的状态。
+            <span aria-live="polite">loading…</span>
+          ) : error && total === 0 ? (
+            // 取失败：必须说清是「读不到」，不能伪装成空舰队。
+            <span className="text-[var(--danger)]" title={String(error?.message || error)}>status unavailable</span>
+          ) : total === 0 ? (
             <span>waiting for agents</span>
           ) : (
             <span><span className="text-[var(--fg)] font-medium tabular-nums">{onlineDisplay}</span><span className="text-[var(--fg-dim)]">/{total}</span> online</span>

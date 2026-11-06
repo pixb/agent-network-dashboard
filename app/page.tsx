@@ -10,14 +10,41 @@ import { TopoGraph } from './components/TopoGraph';
 // changes (SWR structural sharing / health object / rare rename state),
 // so a memo wrapper skips the redraw entirely on unrelated state churn.
 const MemoTopoGraph = memo(TopoGraph);
+
+/** 桌面通知：仅在用户开启、已授权、且页面不可见时弹系统通知。
+ *  载荷在 SSE 事件的 data 里，这里摊平后交给纯函数判定。 */
+// 同一事件可能因 SSE 重连被重放（实测：桩流关闭后重连，一条事件弹了 4 次）。
+// 浏览器原生会按 tag 覆盖，但这里再加 10 秒去重，避免重复构造/闪烁。
+const notifiedTags = new Map<string, number>();
+function maybeDesktopNotify(event: { type?: string; data?: unknown }) {
+  if (typeof window === 'undefined' || typeof document === 'undefined') return;
+  if (!('Notification' in window)) return;
+  const data = (event.data && typeof event.data === 'object') ? event.data as Record<string, unknown> : {};
+  const message = notificationFor(
+    { ...data, type: event.type ?? '' },
+    { enabled: readNotifyPreference(window.localStorage), permission: Notification.permission, hidden: document.hidden },
+  );
+  if (!message) return;
+  const now = Date.now();
+  const last = notifiedTags.get(message.tag) ?? 0;
+  if (now - last < 10_000) return;
+  if (notifiedTags.size > 50) notifiedTags.clear();
+  notifiedTags.set(message.tag, now);
+  try {
+    const n = new Notification(message.title, { body: message.body, tag: message.tag });
+    // 点通知把窗口拉回前台：否则用户点了没反应，还得自己找窗口。
+    n.onclick = () => { try { window.focus(); n.close(); } catch { /* 忽略 */ } };
+  } catch { /* 权限被回收等情况忽略 */ }
+}
 import { AgentCard } from './components/AgentCard';
 import { LoadingSkeleton } from './components/LoadingSkeleton';
 import { NodesEmptyState as EmptyState } from './components/EmptyState';
 import { CommandCenter, useCommandCenter } from './components/CommandCenter';
-import { useSessions, useHealth, useTasks, useStats } from './lib/hooks';
+import { useSessions, useHealth, useTaskStats, useStats } from './lib/hooks';
 import { useChatUnread } from './lib/chat-unread';
 import { isPinned, usePinVersion } from './lib/chat-pin';
 import { useSSE } from './lib/useSSE';
+import { notificationFor, readNotifyPreference } from './lib/desktop-notify';
 import { isOnline as presenceIsOnline, sseCountFor as presenceSseCountFor, presenceStatus } from './lib/presence';
 import { useSWRConfig } from 'swr';
 
@@ -31,10 +58,15 @@ export default function Dashboard() {
   // pre-V3 cookie now surfaces as API 401s with the error banner
   // instead of silent session destruction.
 
-  const { sessions, hint: sessHint, error: sessError, isLoading } = useSessions();
+  // lite：首页只用 alias/status/network_id 等字段；不拉 host / process_telemetry（约 65% 体积）。
+  const { sessions, hint: sessHint, error: sessError, isLoading } = useSessions({ lite: true });
   const { health } = useHealth();
-  const { tasks } = useTasks({ limit: '500' });
   const { stats } = useStats();
+  // 首页只在 /api/stats 没给 by_status 时才需要统计任务状态。
+  // 以前回退是拉 tasks?limit=500（生产实测 665,867 B）；现在改叫服务端计数端点
+  //（/api/hub/task-stats，回几百字节），浏览器不再为 5 个数字下载 666 KB。
+  const statsHasTaskStatus = Boolean(stats?.tasks?.by_status?.length);
+  const { taskStats: fallbackTaskStats } = useTaskStats(stats != null && !statsHasTaskStatus);
   const [showTopo, setShowTopo] = useState(typeof window !== 'undefined' && window.innerWidth >= 1024);
   const cmd = useCommandCenter();
   // R8: one page-level unread computation; counts flow to memo'd cards as props.
@@ -53,6 +85,7 @@ export default function Dashboard() {
     url: '/api/hub/events',
     enabled: sseEnabled,
     onEvent: (event) => {
+      maybeDesktopNotify(event);
       // #84 (RFC-010 §3.4): node.renamed — revalidate the session list so the
       // new alias propagates instantly (TopoGraph + node grid re-render, the
       // avatar hue recomputes as a pure fn of alias) instead of waiting for
@@ -105,10 +138,8 @@ export default function Dashboard() {
     for (const s of stats.tasks.by_status) {
       taskStats[s.status] = s.count;
     }
-  } else {
-    for (const t of tasks) {
-      taskStats[t.status] = (taskStats[t.status] || 0) + 1;
-    }
+  } else if (fallbackTaskStats) {
+    Object.assign(taskStats, fallbackTaskStats);
   }
 
   // R29 (通信龙批准): 'working' demoted from sort key to visual badge —

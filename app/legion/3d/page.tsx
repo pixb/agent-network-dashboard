@@ -19,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useLegionPalette, type LegionPalette } from '../../lib/legion-palette';
 import { buildLegionLayout, nearestDept, deptWorldRadius, tourOrder, type LegionNode } from '../../lib/legion-layout';
 import { tourStepMs } from '../../lib/legion-tour';
 import { restoreFocusAfterUnmount } from '../../lib/focus-fallback';
@@ -322,6 +323,10 @@ export default function Legion3DPage() {
   // 不再从画面中心一眼糊过去。纯装饰，减少动态效果下不跑（peak 恒为 0）。
   const camArcRef = useRef<{ t0: number; peak: number }>({ t0: 0, peak: 0 });
   const presentingRef = useRef(false);
+  // 军团配色（默认深空；设置里可切暖金）。用 ref 让绘制循环每帧读到最新值。
+  const legionPalette = useLegionPalette();
+  const paletteRef = useRef<LegionPalette>(legionPalette);
+  paletteRef.current = legionPalette;
   const [shareInfo, setShareInfo] = useState('');
   const [exportHigh, setExportHigh] = useState(false);
   const sharedView = useRef<{ yaw: number; pitch: number; zoom: number } | null>(null);
@@ -361,6 +366,10 @@ export default function Legion3DPage() {
   const introRef = useRef<{ t0: number; from: number; to: number } | null>(null);
   const yawAnimRef = useRef<{ t0: number; from: number; to: number } | null>(null);
   const introDone = useRef(false);
+  // 入场第二段：部门环依次点亮。跟 intro 同时启动，但比镜头缓动（480ms）活得久，
+  // 所以单独一个时间基准；结束后置 null，稳态每帧零开销。
+  const revealT0 = useRef<number | null>(null);
+  const revealOrderRef = useRef<{ nodes: unknown; order: Map<string, number> }>({ nodes: null, order: new Map() });
   const dragRef = useRef<{ x: number; y: number; yaw: number; pitch: number; moved: number } | null>(null);
   const pointersRef = useRef(new Map<number, { x: number; y: number }>());
   const pinchRef = useRef<{ span: number; dist: number } | null>(null);
@@ -464,7 +473,7 @@ export default function Legion3DPage() {
     refreshInterval: 60000,
     shouldRetryOnError: false,
   });
-  const status = useSWR<StatusResponse>(networkReady && networkId ? scopedUrl('/api/hub/status', networkId) : null, legionFetcher, {
+  const status = useSWR<StatusResponse>(networkReady && networkId ? scopedUrl('/api/hub/session-status', networkId) : null, legionFetcher, {
     refreshInterval: 15000,
     shouldRetryOnError: false,
   });
@@ -934,7 +943,17 @@ export default function Legion3DPage() {
     };
     // 每帧按「是否在演示」挑一份 token：进入/退出演示是运行时状态，
     // 只在 effect 里选一次的话，切换后画布不会跟着换配色（踩过）。
+    // 深空冷光（2026-11-06 视觉方案 A）：只改深色画布的配色与光晕，
+    // 强调色仍在客户端 accent 的蓝 family 内（#5e9bff → #6f86ff），不引入新品牌色。
+    // 两套取向（设置里可切，默认深空）。门闩仍是「深色 且 非演示」。
+    const PALETTES = {
+      deep: { bg: '#05070f', accent: '#6f86ff', info: '#5b8cff', haloRadius: 0.38, haloAlpha: 0.22, starBoost: 1.3 },
+      warm: { bg: '#0f0b08', accent: '#d99a3c', info: '#c08a45', haloRadius: 0.30, haloAlpha: 0.20, starBoost: 0.9 },
+    } as const;
+    let FX = PALETTES[paletteRef.current];
     let tk = presentingRef.current ? presentingInk : tkLive;
+    const fxOn = () => Boolean(FX) && isDarkBg(tk.bg) && !presentingRef.current;
+    if (FX?.accent && fxOn()) tk = { ...tk, accent: FX.accent, info: FX.info ?? tk.info };
     let dark = isDarkBg(tk.bg);
     let raf = 0;
     let stopped = false;
@@ -952,7 +971,8 @@ export default function Legion3DPage() {
       const g2 = cv.getContext('2d');
       if (!g2) return null;
       g2.setTransform(dpr, 0, 0, dpr, 0, 0);
-      g2.fillStyle = tk.bg;
+      const fxBg = fxOn() ? FX?.bg : null;
+      g2.fillStyle = fxBg ?? tk.bg;
       g2.fillRect(0, 0, size.width, size.height);
       const grad = g2.createRadialGradient(
         size.width / 2, size.height * 0.5, 0,
@@ -961,14 +981,15 @@ export default function Legion3DPage() {
       // 浅底上大面积的 accent 晕染会把整张图洗成一片绿；白天只留很薄一层，
       // 深底保持原来的呼吸感。
       const present = presentingRef.current;
-      grad.addColorStop(0, hexToRgba(tk.accent, present ? 0.16 : dark ? 0.11 : 0.032));
-      grad.addColorStop(0.55, hexToRgba(tk.accent, present ? 0.055 : dark ? 0.035 : 0.012));
+      const bgAccent = (fxOn() ? FX?.accent : null) ?? tk.accent;
+      grad.addColorStop(0, hexToRgba(bgAccent, present ? 0.16 : dark ? (fxOn() ? 0.15 : 0.11) : 0.032));
+      grad.addColorStop(0.55, hexToRgba(bgAccent, present ? 0.055 : dark ? (fxOn() ? 0.05 : 0.035) : 0.012));
       grad.addColorStop(1, 'rgba(0,0,0,0)');
       g2.fillStyle = grad;
       g2.fillRect(0, 0, size.width, size.height);
       g2.fillStyle = tk.fg;
       for (const st of starsRef.current) {
-        g2.globalAlpha = st.a;
+        g2.globalAlpha = Math.min(1, st.a * (fxOn() ? FX.starBoost : 1));
         g2.beginPath();
         g2.arc(st.x * size.width, st.y * size.height, st.r, 0, Math.PI * 2);
         g2.fill();
@@ -996,6 +1017,10 @@ export default function Legion3DPage() {
       const dt = Math.min(0.05, (now - lastFrame) / 1000);
       lastFrame = now;
       tk = presentingRef.current ? presentingInk : tkLive;
+      FX = PALETTES[paletteRef.current];
+      // 每帧都会重挑 token，FX 的强调色必须在这里再套一次，否则只有背景换色、
+      // 边线与扇区仍是原色（2026-11-06 实测：棕底蓝线）。
+      if (FX?.accent && fxOn()) tk = { ...tk, accent: FX.accent, info: FX.info ?? tk.info };
       dark = isDarkBg(tk.bg);
       const capture = captureRef.current;
       if (capture) {
@@ -1257,6 +1282,8 @@ export default function Legion3DPage() {
               // 动画期间也别让「尺寸漂移」触发重算。
               userAdjusted.current = true;
               introRef.current = { t0: now, from: want * 0.62, to: want };
+              // 镜头推进之外，部门环再按顺序亮起（第二段入场）。
+              revealT0.current = now;
               try { sessionStorage.setItem('legion3d-intro', '1'); } catch {}
             }
           }
@@ -1433,11 +1460,12 @@ export default function Legion3DPage() {
       // 圆心光晕：给整张图一个视觉重心，不然四周的环会散掉。
       const coreCenter = byIdProbe();
       if (coreCenter) {
-        const halo = ctx.createRadialGradient(coreCenter.x, coreCenter.y, 0, coreCenter.x, coreCenter.y, Math.min(size.width, size.height) * 0.34);
+        const halo = ctx.createRadialGradient(coreCenter.x, coreCenter.y, 0, coreCenter.x, coreCenter.y, Math.min(size.width, size.height) * (fxOn() ? FX.haloRadius : 0.34));
         // 浅底上这层核心光晕是整张图泛绿的主因：只留到能看出重心为止。
-        halo.addColorStop(0, hexToRgba(tk.accent, dark ? 0.16 : 0.035));
-        halo.addColorStop(0.45, hexToRgba(tk.accent, dark ? 0.05 : 0.012));
-        halo.addColorStop(1, hexToRgba(tk.accent, 0));
+        const haloInk = (fxOn() ? FX?.accent : null) ?? tk.accent;
+        halo.addColorStop(0, hexToRgba(haloInk, dark ? (fxOn() ? FX.haloAlpha : 0.16) : 0.035));
+        halo.addColorStop(0.45, hexToRgba(haloInk, dark ? (fxOn() ? 0.07 : 0.05) : 0.012));
+        halo.addColorStop(1, hexToRgba(haloInk, 0));
         ctx.fillStyle = halo;
         ctx.fillRect(0, 0, size.width, size.height);
       }
@@ -1730,7 +1758,25 @@ export default function Legion3DPage() {
         const breathe = breatheTarget && breathePhaseRef.current >= 0
           ? 1 - Math.abs(0.5 - breathePhaseRef.current) * 0.12
           : 1;
-        let alpha = (1 - depthT * depthFade) * (dim ? (selectedRef.current ? 0.14 : 0.22) : 1) * (offline ? 0.42 : 1)
+        // —— 入场第二段：部门环依次点亮 ——
+        // 目标：开场镜头推进（480ms）之后，部门按顺序逐个亮起，而不是整片同时出现。
+        // 约束：只在首访的那一秒多里生效；稳态 reveal 恒为 1，不影响任何交互与帧率。
+        let reveal = 1;
+        if (revealT0.current !== null && node.kind === 'group') {
+          const elapsed = now - revealT0.current;
+          if (revealOrderRef.current.nodes !== nodes) {
+            const groups = nodes.filter(n => n.item.kind === 'group')
+              .slice()
+              .sort((a, b) => (a.item.order ?? 0) - (b.item.order ?? 0));
+            revealOrderRef.current = { nodes, order: new Map(groups.map((n, i) => [n.item.id, i])) };
+          }
+          const idx = revealOrderRef.current.order.get(node.id) ?? 0;
+          const REVEAL_STEP = 120;   // 每个部门之间的间隔
+          const REVEAL_DUR = 260;    // 单个部门淡入时长
+          reveal = Math.min(1, Math.max(0, (elapsed - idx * REVEAL_STEP) / REVEAL_DUR));
+          reveal = reveal * reveal * (3 - 2 * reveal); // smoothstep，避免线性淡入的突兀
+        }
+        let alpha = (1 - depthT * depthFade) * (dim ? (selectedRef.current ? 0.14 : 0.22) : 1) * (offline ? 0.42 : 1) * reveal
           * (emptyDept ? 0.3 : deepDept ? 0.12 : 1)
           * (offLayer ? 0.34 : 1) * breathe;
         if (node.kind === 'core') alpha = Math.min(1, alpha + 0.15);
@@ -2009,37 +2055,78 @@ export default function Legion3DPage() {
         ctx.globalAlpha = 1;
         // 整帧画完再记：此时 nodeTextAlphaMin 已经覆盖本帧所有节点文字。
         if (canvasRef.current) canvasRef.current.dataset.nodeTextAlpha = nodeTextAlphaMin.toFixed(2);
+        // 入场揭示进度：既是「结束后停掉」的开关，也是验收断言的数据源
+        //（画布亮度肉眼看不准，进度是确定的）。
+        if (revealT0.current !== null) {
+          const groups = nodes.filter(n => n.item.kind === 'group').length;
+          const total = groups * 120 + 260 + 200;
+          const elapsed = now - revealT0.current;
+          if (elapsed > total) {
+            revealT0.current = null;
+            if (canvasRef.current?.dataset.deptReveal) delete canvasRef.current.dataset.deptReveal;
+          } else if (canvasRef.current) {
+            const order = revealOrderRef.current.order;
+            const vals = nodes.filter(n => n.item.kind === 'group')
+              .slice(0, 12)
+              .map(n => {
+                const idx = order.get(n.item.id) ?? 0;
+                const v = Math.min(1, Math.max(0, (elapsed - idx * 120) / 260));
+                return `${n.item.id}:${v.toFixed(2)}`;
+              });
+            canvasRef.current.dataset.deptReveal = vals.join(',');
+          }
+        }
 
         // 悬停提示：不点也能知道「这是谁、什么状态」。
         // 选中时不画（右侧详情卡已经有完整信息）。
         const hv = hoverRef.current;
         const hp = hoverPos.current;
+        // 没有悬停时清掉钩子，避免探针读到上一次的残留文本。
+        if ((!hv || !hp) && canvasRef.current?.dataset.hoverCard) delete canvasRef.current.dataset.hoverCard;
         if (hv && hp && !selectedRef.current && !interacting) {
           const hitNode = nodes.find(n => n.item.id === hv);
           if (hitNode) {
             const nd = hitNode.item;
-            const status = nd.kind === 'agent' ? (statusByAlias.get(nd.label) ?? '未上报') : nd.kind === 'person' ? `${nd.agentCount} 个 Agent` : '';
-            const text = status ? `${nd.label} · ${status}` : nd.label;
+            // 两行：第一行「是什么」，第二行「有多少」。
+            // 部门节点此前只显示名字，看不出这个部门到底有没有人 —— 军团图最该回答的
+            // 恰恰是「这个部门多少人、多少 Agent」。
+            const line1 = nd.kind === 'group' && nd.leader ? `${nd.label} · ${nd.leader}` : nd.label;
+            const line2 = nd.kind === 'group'
+              ? `${nd.memberCount} 人 · ${nd.agentCount} Agent`
+              : nd.kind === 'person'
+                ? `${nd.agentCount} 个 Agent`
+                : nd.kind === 'agent'
+                  ? `${statusByAlias.get(nd.label) ?? '未上报'}`
+                  : '';
+            const lines = line2 ? [line1, line2] : [line1];
             ctx.font = '400 11px system-ui, -apple-system, "Noto Sans SC", sans-serif';
-            const w = ctx.measureText(text).width;
-            const padX = 6;
-            const boxW = w + padX * 2;
-            const boxH = 20;
+            const padX = 9;
+            const lineH = 16;
+            const boxH = lines.length === 2 ? 40 : 22;
+            const boxW = Math.max(...lines.map(l => ctx.measureText(l).width)) + padX * 2;
             const x = Math.max(6, Math.min(size.width - boxW - 6, hp.x + 14));
-            const y = Math.max(6, hp.y - boxH - 8);
-            ctx.globalAlpha = 0.94;
+            const y = Math.max(6, hp.y - boxH - 12);
+            ctx.globalAlpha = 0.97;
             ctx.fillStyle = tk.surface;
             ctx.beginPath();
-            ctx.roundRect(x, y, boxW, boxH, 5);
+            ctx.roundRect(x, y, boxW, boxH, 6);
             ctx.fill();
             ctx.strokeStyle = tk.border;
             ctx.lineWidth = 1;
             ctx.stroke();
-            ctx.fillStyle = tk.fg;
             ctx.textAlign = 'left';
             ctx.textBaseline = 'middle';
-            ctx.fillText(text, x + padX, y + boxH / 2);
+            lines.forEach((line, i) => {
+              const cy = lines.length === 2 ? y + 13 + i * lineH : y + boxH / 2;
+              // 第二行降一级：名字是主信息，数量是补充。
+              ctx.fillStyle = i === 0 ? tk.fg : tk.dim;
+              ctx.globalAlpha = i === 0 ? 0.94 : 0.8;
+              ctx.fillText(line, x + padX, cy);
+            });
             ctx.globalAlpha = 1;
+            // 可断言钩子：画布上的文字 DOM 探针读不到，这里按帧暴露一份，
+            // 让「悬停卡片到底显示了什么」有据可查（沿用 dataset.nodeTextAlpha 的做法）。
+            if (canvasRef.current) canvasRef.current.dataset.hoverCard = lines.join(' | ');
           }
         }
       }
@@ -2964,7 +3051,7 @@ export default function Legion3DPage() {
               {node.leader ? ` · 负责人 ${node.leader}` : ''}
             </p>
             {/* 讲解条也带上路径：演示时观众一直知道当前讲的是哪条链上的部门。 */}
-            <p data-testid="legion-3d-caption-path" className="mt-0.5 text-[10px] text-[var(--fg-dim)]">
+            <p data-testid="legion-3d-caption-path" className="mt-0.5 text-[11px] text-[var(--fg-dim)]">
               {(() => {
                 const byId = new Map(layout.nodes.map(n => [n.id, n]));
                 const chain: string[] = [];
@@ -3007,7 +3094,7 @@ export default function Legion3DPage() {
       <div ref={headerRef} data-testid="legion-3d-header" className={`pointer-events-none absolute inset-x-3 top-3 flex flex-col gap-2 transition-opacity duration-300 sm:inset-x-4 sm:top-4 sm:flex-row sm:items-start sm:justify-between ${cleanView ? 'invisible' : 'visible'}`}>
       <div className="pointer-events-none min-w-0 max-w-full sm:max-w-sm">
         <div className="flex min-h-11 items-center gap-2 pr-20 sm:min-h-0 sm:items-baseline sm:pr-0">
-          <h1 className="text-lg font-semibold text-[var(--fg)]">军团 · 3D</h1>
+          <h1 className="text-xl font-semibold text-[var(--fg)]">军团 · 3D</h1>
           <span className="hidden text-[11px] text-[var(--fg-dim)] sm:inline">Legion Topology</span>
         </div>
         <p className="mt-1 text-xs text-[var(--fg-muted)]">
@@ -3084,7 +3171,7 @@ export default function Legion3DPage() {
               return `${node.label} · ${node.memberCount} 人 · 下级 ${children}`;
             })()}</span>
             {/* 聚焦路径：深链/巡礼走到下一层部门时，观众需要知道它挂在哪条链上。 */}
-            <span data-testid="legion-3d-focus-path" className="text-[10px] text-[var(--fg-dim)]">
+            <span data-testid="legion-3d-focus-path" className="text-[11px] text-[var(--fg-dim)]">
               {(() => {
                 const node = layout.nodes.find(n => n.id === focus);
                 if (!node || node.kind !== 'group') return '';
@@ -3211,7 +3298,7 @@ export default function Legion3DPage() {
           role="group"
           aria-label="更多军团操作"
           data-testid="legion-3d-more-tools"
-          className={`${toolsOpen ? 'grid' : 'hidden'} basis-full grid-cols-3 gap-1.5 rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)]/95 p-1.5 sm:contents`}
+          className={`${toolsOpen ? 'grid' : 'hidden'} basis-full grid-cols-3 gap-1.5 rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)]/95 p-1.5 sm:contents`}
         >
         <button
           type="button"
@@ -3255,7 +3342,7 @@ export default function Legion3DPage() {
         </button>
         <label
           title="默认 720p（PPT 最稳）；1080p 仅用于其他场合"
-          className="flex items-center gap-1 rounded-lg px-1.5 py-1.5 text-[10px] text-[var(--fg-muted)]"
+          className="flex items-center gap-1 rounded-lg px-1.5 py-1.5 text-[11px] text-[var(--fg-muted)]"
         >
           <input
             type="checkbox"
@@ -3304,7 +3391,7 @@ export default function Legion3DPage() {
           className="absolute inset-0 z-20 flex items-center justify-center bg-[var(--bg)]/70 p-4"
           onClick={() => setHelpOpen(false)}
         >
-          <div className="w-full max-w-sm rounded-xl bg-[var(--bg-secondary)] p-4 text-sm text-[var(--fg)]" onClick={e => e.stopPropagation()}>
+          <div className="w-full max-w-sm rounded-2xl bg-[var(--bg-secondary)] p-4 text-sm text-[var(--fg)]" onClick={e => e.stopPropagation()}>
             <div className="flex items-center justify-between">
               <h2 className="text-sm font-semibold">键盘快捷键</h2>
               <button type="button" onClick={() => setHelpOpen(false)} aria-label="关闭" className="rounded px-1.5 py-0.5 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]">✕</button>
@@ -3389,9 +3476,9 @@ export default function Legion3DPage() {
           }}
           data-testid="legion-3d-node-list"
           style={{ maxHeight: 'min(52vh, calc(100% - var(--legion-list-top, 11rem) - 12px))' }}
-          className={`absolute left-3 top-[var(--legion-list-top,11rem)] z-10 w-64 overflow-y-auto rounded-xl bg-[var(--bg-secondary)]/96 p-1.5 text-xs shadow-lg backdrop-blur sm:block ${cleanView ? 'invisible' : 'visible'} ${listOpen ? 'block' : 'hidden'}`}
+          className={`absolute left-3 top-[var(--legion-list-top,11rem)] z-10 w-64 overflow-y-auto rounded-2xl bg-[var(--bg-secondary)]/96 p-1.5 text-xs shadow-lg backdrop-blur sm:block ${cleanView ? 'invisible' : 'visible'} ${listOpen ? 'block' : 'hidden'}`}
         >
-          <label className="mb-1 flex items-center gap-1.5 rounded px-1.5 py-1 text-[10px] text-[var(--fg-muted)]">
+          <label className="mb-1 flex items-center gap-1.5 rounded px-1.5 py-1 text-[11px] text-[var(--fg-muted)]">
             <input
               type="checkbox"
               data-testid="legion-3d-list-depts-only"
@@ -3411,7 +3498,7 @@ export default function Legion3DPage() {
             if (shownAll.length > 0) return null;
             // 与 2D 同口径：空列表要说清是搜索没命中，还是被「只列部门」挡住了。
             return (
-              <p data-testid="legion-3d-list-empty-hint" className="px-2 py-2 text-[10px] leading-relaxed text-[var(--fg-muted)]">
+              <p data-testid="legion-3d-list-empty-hint" className="px-2 py-2 text-[11px] leading-relaxed text-[var(--fg-muted)]">
                 {listDeptsOnly ? '当前只列部门，可能被这个筛选挡住了。' : '没有匹配的节点。'}
                 {listDeptsOnly && (
                   <button type="button" onClick={() => toggleDeptsOnly(false)} className="ml-1 underline hover:text-[var(--fg)]">
@@ -3457,7 +3544,7 @@ export default function Legion3DPage() {
                 <span className="w-8 shrink-0 text-[11px] text-[var(--fg-dim)]">{KIND_LABEL[n.kind]}</span>
                 <span className="truncate">{n.label}</span>
                 {/* 列表里直接给规模：挑部门时不必先点开看详情，也免得「平台」和「平台2组」看起来一样大。 */}
-                <span className="ml-auto shrink-0 tabular-nums text-[10px] text-[var(--fg-dim)]" data-testid={`legion-3d-list-facts-${n.id}`}>
+                <span className="ml-auto shrink-0 tabular-nums text-[11px] text-[var(--fg-dim)]" data-testid={`legion-3d-list-facts-${n.id}`}>
                   {n.kind === 'group'
                     ? `${n.memberCount} 人 · ${layout.nodes.filter(x => x.parentId === n.id && x.kind === 'group').length} 下级`
                     : n.kind === 'core'
@@ -3496,7 +3583,7 @@ export default function Legion3DPage() {
           data-testid="legion-3d-detail"
           role="status"
           aria-live="polite"
-          className={`absolute inset-x-3 bottom-3 rounded-xl bg-[var(--bg-secondary)]/95 p-3 backdrop-blur sm:inset-x-auto sm:right-4 sm:bottom-4 sm:w-72 ${cleanView ? 'invisible' : 'visible'} ${listOpen || toolsOpen ? 'hidden sm:block' : 'block'}`}
+          className={`absolute inset-x-3 bottom-3 rounded-2xl bg-[var(--bg-secondary)]/95 p-3 backdrop-blur sm:inset-x-auto sm:right-4 sm:bottom-4 sm:w-72 ${cleanView ? 'invisible' : 'visible'} ${listOpen || toolsOpen ? 'hidden sm:block' : 'block'}`}
         >
           <div className="flex items-start justify-between gap-2">
             <div className="min-w-0">
@@ -3623,20 +3710,20 @@ export default function Legion3DPage() {
 
       {/* 三态：只在真·空/真·错时覆盖画布，不用空态掩盖故障 */}
       {fatal === 'no-network' && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
-          <NetworkRequiredNotice className="max-w-md" />
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
+          <NetworkRequiredNotice className="pointer-events-auto max-w-md" />
         </div>
       )}
       {fatal === 'login' && (
-        <div role="alert" className="absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6 text-center">
-          <p className="text-sm text-[var(--warning)]">
+        <div role="alert" className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6 text-center">
+          <p className="pointer-events-auto text-sm text-[var(--warning)]">
             会话已过期，<Link href="/login" className="underline">重新登录</Link> 后再看军团。
           </p>
         </div>
       )}
       {fatal === 'error' && (
-        <div role="alert" className="absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
-          <div className="max-w-sm text-center">
+        <div role="alert" className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
+          <div className="pointer-events-auto max-w-sm text-center">
             <p className="text-sm text-[var(--danger)]">读取军团编制失败：{readError?.message ?? '未知错误'}</p>
             <button
               type="button"
@@ -3649,13 +3736,13 @@ export default function Legion3DPage() {
         </div>
       )}
       {isEmpty && (
-        <div className="absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
-          <EmptyState
+        <div className="pointer-events-none absolute inset-0 flex items-center justify-center bg-[var(--bg)]/92 px-6">
+          <div className="pointer-events-auto"><EmptyState
             variant="nodes"
             title="军团还没有成员"
             sub="成员加入网络并绑定 Agent 后，这里会自动长出三维编制。"
             cta={{ label: '去部门列表', href: '/org' }}
-          />
+          /></div>
         </div>
       )}
     </div>

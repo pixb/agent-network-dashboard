@@ -52,7 +52,7 @@ export function TagChip({ name, color, count, className = '' }: {
       {color && <span aria-hidden className="h-1.5 w-1.5 shrink-0 rounded-full" style={{ backgroundColor: color }} />}
       {name}
       {typeof count === 'number' && count > 0 && (
-        <span className="tabular-nums text-[9px] text-[var(--fg-dim)]">{count}</span>
+        <span className="tabular-nums text-[11px] text-[var(--fg-dim)]">{count}</span>
       )}
     </span>
   );
@@ -169,18 +169,18 @@ export function TagPicker({ draft, applied, catalog, onDraftChange, onApply }: {
                   <span aria-hidden className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: suggestion.color || 'transparent', boxShadow: suggestion.color ? 'none' : 'inset 0 0 0 1px var(--border)' }} />
                   <span className="min-w-0 flex-1 truncate">{suggestion.name}</span>
                   {typeof count === 'number' && count > 0 && (
-                    <span className="shrink-0 tabular-nums text-[10px] text-[var(--fg-dim)]">{count}</span>
+                    <span className="shrink-0 tabular-nums text-[11px] text-[var(--fg-dim)]">{count}</span>
                   )}
                 </button>
               </li>
             );
           })}
           {suggestions.length === 0 && (
-            <li role="status" data-testid="tag-suggestions-empty" className="px-2.5 py-1.5 text-[10px] text-[var(--fg-muted)]">
+            <li role="status" data-testid="tag-suggestions-empty" className="px-2.5 py-1.5 text-[11px] text-[var(--fg-muted)]">
               没有匹配的标签
             </li>
           )}
-          <li aria-hidden className="px-2.5 pt-1 text-[10px] text-[var(--fg-dim)]">
+          <li aria-hidden className="px-2.5 pt-1 text-[11px] text-[var(--fg-dim)]">
             {draft.trim() ? `回车按“${draft.trim()}”筛选` : '输入任意标签后回车筛选'}
           </li>
         </ul>

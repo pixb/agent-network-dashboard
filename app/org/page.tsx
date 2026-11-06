@@ -63,9 +63,9 @@ function GroupSection({ group, depth, counts, focusName, expandAll, overrides, o
         data-org-group={group.name}
         ref={el => { if (focused && el) el.scrollIntoView({ block: 'center' }); }}
       >
-        <span className="text-[13px] font-medium text-[var(--fg)]">{group.name}</span>
+        <span className="text-[12px] font-medium text-[var(--fg)]">{group.name}</span>
         {group.leader && (
-          <span className="rounded-full bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] text-[var(--fg-muted)]">
+          <span className="rounded-full bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)]">
             负责人 {group.leader}
           </span>
         )}
@@ -83,7 +83,7 @@ function GroupSection({ group, depth, counts, focusName, expandAll, overrides, o
           href={`/legion?focus=${encodeURIComponent(group.name)}`}
           title="在军团图里看这个部门"
           aria-label={`在军团图里看 ${group.name}`}
-          className="rounded-full bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] text-[var(--fg-muted)] hover:text-[var(--fg)]"
+          className="rounded-full bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)] hover:text-[var(--fg)]"
         >
           看军团
         </Link>
@@ -92,7 +92,7 @@ function GroupSection({ group, depth, counts, focusName, expandAll, overrides, o
             href={`/tasks?department=${encodeURIComponent(group.id.replace(/^dept:/, ''))}`}
             data-testid="org-dept-task-link"
             title="到任务页按这个部门筛选：数字是当前这批任务里的通讯录投影命中数，不是部门全量"
-            className="rounded-full bg-[var(--accent)]/12 px-1.5 py-0.5 text-[10px] text-[var(--fg)] hover:bg-[var(--accent)]/25"
+            className="rounded-full bg-[var(--accent)]/12 px-1.5 py-0.5 text-[11px] text-[var(--fg)] hover:bg-[var(--accent)]/25"
           >
             {taskCount} 条任务 →
           </Link>
@@ -110,7 +110,7 @@ function GroupSection({ group, depth, counts, focusName, expandAll, overrides, o
               <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
                 <span className="text-sm text-[var(--fg)]">{person.display_name || person.username}</span>
                 <span className="text-[11px] text-[var(--fg-muted)]">@{person.username}</span>
-                <span className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[10px] text-[var(--fg-muted)]">
+                <span className="rounded bg-[var(--bg-elevated)] px-1.5 py-0.5 text-[11px] text-[var(--fg-muted)]">
                   {person.role}
                 </span>
                 <span className="ml-auto text-[11px] text-[var(--fg-muted)]">{person.agents.length} 个 Agent</span>
@@ -319,7 +319,7 @@ function OrgContent() {
       <div className="mx-auto max-w-5xl px-4 py-6 sm:px-6">
         <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
-            <h1 className="text-lg font-semibold text-[var(--fg)]">Organization</h1>
+            <h1 className="text-xl font-semibold text-[var(--fg)]">Organization</h1>
             <p className="mt-1 text-xs text-[var(--fg-muted)]">
               人、部门与他们名下的 Agent（只读）。
             </p>
@@ -402,7 +402,7 @@ function OrgContent() {
           />
         ) : (
           <>
-            <ul className="overflow-hidden rounded-xl bg-[var(--bg-secondary)]">
+            <ul className="overflow-hidden rounded-2xl bg-[var(--bg-secondary)]">
               {tree.groups.map(group => (
                 <GroupSection key={group.id} group={group} depth={0} counts={deptTaskCounts} focusName={focusName} expandAll={!!q} overrides={expandOverrides} onToggle={toggleGroup} />
               ))}
@@ -420,7 +420,7 @@ function OrgContent() {
             )}
 
             {offset === 0 && withoutOwner.length > 0 && (
-              <div className="mt-6 rounded-xl bg-[var(--bg-secondary)] p-4">
+              <div className="mt-6 rounded-2xl bg-[var(--bg-secondary)] p-4">
                 <h2 className="mb-2 text-xs text-[var(--fg-muted)]">无 owner 的 Agent</h2>
                 <div className="flex flex-wrap gap-1.5">
                   {withoutOwner.map(agent => (

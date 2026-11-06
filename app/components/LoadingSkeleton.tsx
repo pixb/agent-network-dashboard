@@ -20,7 +20,7 @@ export function LoadingSkeleton() {
           and the loaded page jump by 16 px on mobile when data arrives. */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-4 sm:mb-8 anet-skeleton-pulse">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-3">
+          <div key={i} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] px-4 py-3">
             <Bar w="2.5rem" h="1.75rem" />
             <Bar w="3.5rem" h="0.75rem" className="mt-2" />
             <Bar w="5rem" h="0.625rem" className="mt-1" />
@@ -51,7 +51,7 @@ export function LoadingSkeleton() {
       {/* Stat strip 3 cards */}
       <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-3 anet-skeleton-pulse">
         {[1, 2, 3].map(i => (
-          <div key={i} className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-3">
+          <div key={i} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-3">
             <Bar w="2rem" h="1.25rem" />
             <Bar w="2.5rem" h="0.75rem" className="mt-1" />
             <Bar w="3.5rem" h="0.625rem" className="mt-px" />
@@ -63,7 +63,7 @@ export function LoadingSkeleton() {
           #209 R38: mb-6 → mb-4 sm:mb-6 to track the R28 mobile tighten. */}
       <div className="grid grid-cols-3 gap-2 sm:gap-3 mb-4 sm:mb-6 anet-skeleton-pulse">
         {[1, 2, 3].map(i => (
-          <div key={i} className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5 flex items-center justify-center gap-2">
+          <div key={i} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] px-3 py-2.5 flex items-center justify-center gap-2">
             <div className="w-4 h-4 rounded anet-skeleton-bar" />
             <Bar w="4rem" h="0.75rem" />
           </div>
@@ -82,7 +82,7 @@ export function LoadingSkeleton() {
           which made cards rearrange under hydration on 1024-1279 px). */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-3 sm:gap-4 anet-skeleton-pulse">
         {[1, 2, 3, 4].map(i => (
-          <div key={i} className="rounded-xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
+          <div key={i} className="rounded-2xl border border-[var(--border)] bg-[var(--bg-secondary)] p-4">
             <div className="flex items-center gap-2 mb-3">
               <div className="w-2 h-2 rounded-full anet-skeleton-bar" />
               <Bar w="6rem" h="0.875rem" />

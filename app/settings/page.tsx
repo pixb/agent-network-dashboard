@@ -18,13 +18,17 @@
 // 边框（信息卡不描边）、字重上限 600、选中态用中性 rowActive 而不是
 // 强调色块。
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useAnetConfig, useHealth } from '../lib/hooks';
 import { applyTheme } from '../components/ThemeSwitcher';
+import { DENSITY_OPTIONS, applyDensity, useDensity } from '../lib/density';
+import { FONT_OPTIONS, applyFontScale, useFontScale } from '../lib/font-scale';
+import { PALETTE_OPTIONS, applyLegionPalette, useLegionPalette } from '../lib/legion-palette';
 import { DASHBOARD_VERSION } from '../lib/version';
 import { clearPrivateChatStorage } from '../lib/chat-outbox';
 import { SETTINGS_SECTIONS, SETTINGS_LINKS, SETTINGS_THEMES } from '../lib/settings-model';
+import { readNotifyPreference, writeNotifyPreference } from '../lib/desktop-notify';
 
 function GroupHeading({ id, label }: { id: string; label: string }) {
   return (
@@ -37,6 +41,22 @@ function GroupHeading({ id, label }: { id: string; label: string }) {
   );
 }
 
+// 通知开关存在 localStorage；用 useSyncExternalStore 读取，避免「effect 里 setState」
+// 带来的级联渲染（lint 会报 react-hooks/set-state-in-effect），SSR 快照固定 false。
+const notifyListeners = new Set<() => void>();
+function subscribeNotify(listener: () => void) {
+  notifyListeners.add(listener);
+  return () => { notifyListeners.delete(listener); };
+}
+function notifySnapshot(): boolean {
+  return readNotifyPreference(typeof window !== 'undefined' ? window.localStorage : null);
+}
+function setNotifyPreference(enabled: boolean): boolean {
+  const ok = writeNotifyPreference(typeof window !== 'undefined' ? window.localStorage : null, enabled);
+  for (const listener of notifyListeners) listener();
+  return ok;
+}
+
 export default function SettingsPage() {
   const { config } = useAnetConfig();
   const { health, error: healthError } = useHealth();
@@ -44,6 +64,31 @@ export default function SettingsPage() {
   // hydration 不匹配：服务端渲染 cyber，客户端首帧读 localStorage 得到 light。
   // 挂载后再同步到真实选择（这时已经 hydrate 完，不会打架）。
   const [theme, setTheme] = useState<string>('cyber');
+  const density = useDensity();
+  const fontScale = useFontScale();
+  const legionPalette = useLegionPalette();
+  const [notifyHint, setNotifyHint] = useState('');
+  // 登录设备（对齐客户端「账号 → 登录设备」）：只读列表 + 两个退出动作。
+  const [devices, setDevices] = useState<Array<Record<string, unknown>> | null>(null);
+  const [devicesNote, setDevicesNote] = useState('');
+  useEffect(() => {
+    let cancelled = false;
+    fetch('/api/hub/auth-sessions')
+      .then(async res => {
+        const data = await res.json().catch(() => null);
+        if (cancelled) return;
+        if (res.ok && Array.isArray(data?.sessions)) setDevices(data.sessions);
+        else if (data?.error === 'user_token_required') {
+          // 节点 token 登录的 Dashboard 拿不到「用户会话」——这是能力边界，不是故障。
+          setDevicesNote('当前登录取自节点 token，Hub 不提供该账号的登录设备列表。');
+        } else {
+          setDevicesNote(`读取失败：${data?.message || data?.error || `HTTP ${res.status}`}`);
+        }
+      })
+      .catch(() => { if (!cancelled) setDevicesNote('读取失败：Hub 不可达'); });
+    return () => { cancelled = true; };
+  }, []);
+  const notifyOn = useSyncExternalStore(subscribeNotify, notifySnapshot, () => false);
   useEffect(() => {
     try {
       const saved = localStorage.getItem('anet-theme');
@@ -57,7 +102,7 @@ export default function SettingsPage() {
   const [pwdResult, setPwdResult] = useState('');
   const rowClass = 'flex flex-col gap-1 sm:flex-row sm:items-start sm:justify-between';
   const valueClass = 'break-all sm:max-w-[320px] sm:text-right';
-  const cardClass = 'rounded-xl bg-[var(--bg-secondary)] p-5';
+  const cardClass = 'rounded-2xl bg-[var(--bg-secondary)] p-5';
 
   return (
     <div className="min-h-screen bg-[var(--bg)] p-4 text-[var(--fg)] sm:p-6">
@@ -86,9 +131,9 @@ export default function SettingsPage() {
             <div className={cardClass}>
               <h3 className="mb-4 text-sm font-semibold">Change password</h3>
               <div className="space-y-3">
-                <input type="password" value={oldPwd} onChange={e => setOldPwd(e.target.value)} placeholder="Current password"
+                <input type="password" value={oldPwd} onChange={e => setOldPwd(e.target.value)} placeholder="Current password" aria-label="Current password"
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-base text-[var(--fg)] placeholder:text-[var(--fg-dim)] focus:border-[var(--hl)] focus:outline-none sm:text-sm" />
-                <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="New password"
+                <input type="password" value={newPwd} onChange={e => setNewPwd(e.target.value)} placeholder="New password" aria-label="New password"
                   className="w-full rounded-lg border border-[var(--border)] bg-[var(--bg)] px-3 py-2 text-base text-[var(--fg)] placeholder:text-[var(--fg-dim)] focus:border-[var(--hl)] focus:outline-none sm:text-sm" />
                 <button onClick={async () => {
                   if (!oldPwd || !newPwd) return;
@@ -116,6 +161,51 @@ export default function SettingsPage() {
                 </button>
               </div>
               {pwdResult && <div className={`mt-2 text-xs ${pwdResult.startsWith('Failed') ? 'text-[var(--danger)]' : 'text-[var(--success)]'}`}>{pwdResult}</div>}
+            </div>
+
+            <div className={cardClass} data-login-devices>
+              <h3 className="mb-1 text-sm font-semibold">登录设备</h3>
+              <p className="mb-3 text-xs text-[var(--fg-muted)]">
+                这些设备正以你的账号登录 Hub。退出后该设备需要重新登录。
+              </p>
+              {devicesNote && <p className="text-xs text-[var(--fg-muted)]" data-devices-note>{devicesNote}</p>}
+              {!devicesNote && devices === null && <p className="text-xs text-[var(--fg-muted)]">读取中…</p>}
+              {!devicesNote && devices?.length === 0 && <p className="text-xs text-[var(--fg-muted)]">没有其他登录设备。</p>}
+              {!devicesNote && !!devices?.length && (
+                <ul className="space-y-2">
+                  {devices.map((d, i) => {
+                    const id = String(d.id ?? d.session_id ?? i);
+                    const label = String(d.device ?? d.user_agent ?? d.label ?? '未知设备');
+                    const when = String(d.last_seen_at ?? d.created_at ?? '');
+                    return (
+                      <li key={id} className="flex items-center justify-between gap-3 rounded-lg border border-[var(--border)] px-3 py-2" data-device-row>
+                        <span className="min-w-0">
+                          <span className="block truncate text-sm text-[var(--fg)]">{label}</span>
+                          {when && <span className="block text-[11px] text-[var(--fg-dim)]">{when}</span>}
+                        </span>
+                        <button
+                          onClick={async () => {
+                            const res = await fetch(`/api/hub/auth-sessions?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+                            if (res.ok) { setDevices(prev => (prev ? prev.filter((_, idx) => idx !== i) : prev)); setDevicesNote(''); }
+                            else setDevicesNote('退出失败：Hub 拒绝了该请求');
+                          }}
+                          className="shrink-0 rounded-lg bg-[var(--bg-elevated)] px-3 py-1.5 text-xs text-[var(--fg-muted)] transition-colors hover:text-[var(--fg)]"
+                        >退出</button>
+                      </li>
+                    );
+                  })}
+                </ul>
+              )}
+              {!devicesNote && !!devices?.length && devices.length > 1 && (
+                <button
+                  onClick={async () => {
+                    const res = await fetch('/api/hub/auth-sessions?action=revoke-others', { method: 'POST' });
+                    if (res.ok) { setDevices(prev => (prev ? prev.slice(0, 1) : prev)); setDevicesNote('已退出其他设备'); }
+                    else setDevicesNote('退出其他设备失败：Hub 拒绝了该请求');
+                  }}
+                  className="mt-3 rounded-lg bg-[var(--bg-elevated)] px-4 py-2 text-sm text-[var(--fg-muted)] transition-colors hover:text-[var(--fg)]"
+                >退出其他所有设备</button>
+              )}
             </div>
 
             <div className={cardClass}>
@@ -211,7 +301,7 @@ export default function SettingsPage() {
             <GroupHeading id="team" label="Team" />
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {SETTINGS_LINKS.filter(l => l.group === 'team').map(l => (
-                <Link key={l.href} href={l.href} className="rounded-xl bg-[var(--bg-secondary)] p-5 transition-colors hover:bg-[var(--bg-elevated)]">
+                <Link key={l.href} href={l.href} className="rounded-2xl bg-[var(--bg-secondary)] p-5 transition-colors hover:bg-[var(--bg-elevated)]">
                   <h3 className="text-sm font-semibold">{l.title}</h3>
                   <p className="mt-2 text-xs text-[var(--fg-muted)]">{l.desc}</p>
                   <span className="mt-3 inline-block text-xs text-[var(--hl)]">{l.action} &rarr;</span>
@@ -244,7 +334,7 @@ export default function SettingsPage() {
                     <span
                       aria-hidden
                       className="inline-block h-5 w-5 shrink-0 rounded-full border border-black/20"
-                      style={{ backgroundColor: t.swatch }}
+                      style={{ background: t.swatch }}
                     />
                     {t.label}
                     {theme === t.id && (
@@ -256,6 +346,142 @@ export default function SettingsPage() {
                 ))}
               </div>
             </div>
+
+            {/* 军团 3D 配色：品牌级审美取向，交给使用者选，默认深空 */}
+            <div className={cardClass}>
+              <h3 className="mb-1 text-sm font-semibold">军团 3D 配色</h3>
+              <p className="mb-4 text-[12px] text-[var(--fg-muted)]">
+                只影响军团 3D 画布的深色主题；浅色主题与演示模式保持原样。
+              </p>
+              <div className="grid grid-cols-2 gap-3" data-legion-palette-picker>
+                {PALETTE_OPTIONS.map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      try { localStorage.setItem('anet-legion-palette', opt.key); } catch {}
+                      applyLegionPalette(opt.key);
+                    }}
+                    aria-pressed={legionPalette === opt.key}
+                    title={opt.hint}
+                    data-legion-palette-option={opt.key}
+                    className={`rounded-lg px-4 py-3 text-sm transition-colors ${
+                      legionPalette === opt.key
+                        ? 'bg-[var(--bg-elevated)] text-[var(--fg)]'
+                        : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 字体大小：与密度解耦（客户端同样是两个开关） */}
+            <div className={cardClass}>
+              <h3 className="mb-1 text-sm font-semibold">字体大小</h3>
+              <p className="mb-4 text-[12px] text-[var(--fg-muted)]">
+                只缩放文字，不改列表疏密（疏密在下面的「界面密度」）。
+              </p>
+              <div className="grid grid-cols-4 gap-3" data-font-picker>
+                {FONT_OPTIONS.map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      try { localStorage.setItem('anet-font-scale', opt.key); } catch {}
+                      applyFontScale(opt.key);
+                    }}
+                    aria-pressed={fontScale === opt.key}
+                    data-font-option={opt.key}
+                    className={`rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                      fontScale === opt.key
+                        ? 'bg-[var(--bg-elevated)] text-[var(--fg)]'
+                        : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 界面密度：与字号解耦（客户端同样拆成两个开关） */}
+            <div className={cardClass}>
+              <h3 className="mb-1 text-sm font-semibold">界面密度</h3>
+              <p className="mb-4 text-[12px] text-[var(--fg-muted)]">
+                只调整列表与侧栏的行高，字号不变。
+              </p>
+              <div className="grid grid-cols-3 gap-3" data-density-picker>
+                {DENSITY_OPTIONS.map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      try { localStorage.setItem('anet-density', opt.key); } catch {}
+                      applyDensity(opt.key);
+                    }}
+                    aria-pressed={density === opt.key}
+                    title={opt.hint}
+                    data-density-option={opt.key}
+                    className={`rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                      density === opt.key
+                        ? 'bg-[var(--bg-elevated)] text-[var(--fg)]'
+                        : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </section>
+
+          {/* ── 通知（对齐客户端 NotifySettings 的最小实现：默认关闭）── */}
+          <section id="notify" data-settings-group="notify" aria-labelledby="notify-heading" className="space-y-3 scroll-mt-6">
+            <GroupHeading id="notify" label="Notifications" />
+            <div className={cardClass}>
+              <h3 className="mb-2 text-sm font-semibold">桌面通知</h3>
+              <p className="mb-3 text-[11px] text-[var(--fg-dim)]">
+                页面在后台时，收到发给你的新消息会弹系统通知。默认关闭；开启需要浏览器授权，权限可随时在浏览器设置里撤销。
+              </p>
+              <button
+                type="button"
+                data-testid="settings-desktop-notify"
+                aria-pressed={notifyOn}
+                onClick={async () => {
+                  if (notifyOn) {
+                    setNotifyPreference(false);
+                    return;
+                  }
+                  if (!('Notification' in window)) { setNotifyHint('当前浏览器不支持通知'); return; }
+                  const permission = Notification.permission === 'granted' ? 'granted' : await Notification.requestPermission();
+                  if (permission !== 'granted') { setNotifyHint('未获得授权，通知保持关闭'); return; }
+                  setNotifyPreference(true);
+                  setNotifyHint('');
+                }}
+                className={`inline-flex min-h-11 items-center rounded-lg px-3 text-xs transition-colors ${
+                  notifyOn ? 'bg-[var(--accent)]/15 text-[var(--accent-text)]' : 'bg-[var(--bg-elevated)] text-[var(--fg)] hover:bg-[var(--hover-tint)]'
+                }`}
+              >
+                {notifyOn ? '已开启 · 点击关闭' : '开启桌面通知'}
+              </button>
+              {notifyOn && (
+                <button
+                  type="button"
+                  data-testid="settings-desktop-notify-test"
+                  onClick={() => {
+                    // 权限类功能没这个按钮，用户只能等真实消息才知道有没有生效。
+                    try {
+                      const n = new Notification('Agent Network · 测试通知', { body: '看到这条说明桌面通知已经生效。', tag: 'anet-test' });
+                      n.onclick = () => { try { window.focus(); n.close(); } catch { /* 忽略 */ } };
+                      setNotifyHint('');
+                    } catch { setNotifyHint('发送失败，请检查浏览器通知权限'); }
+                  }}
+                  className="ml-2 inline-flex min-h-11 items-center rounded-lg px-3 text-xs text-[var(--fg-muted)] hover:bg-[var(--hover-tint)]"
+                >
+                  发送测试通知
+                </button>
+              )}
+              {notifyHint && <p role="status" className="mt-2 text-[11px] text-[var(--warning)]">{notifyHint}</p>}
+            </div>
           </section>
 
           {/* ── Resources（Dashboard 特有：低频页面入口）───────── */}
@@ -266,7 +492,7 @@ export default function SettingsPage() {
                 need a discovery surface that isn't the primary nav. */}
             <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
               {SETTINGS_LINKS.filter(l => l.group === 'resource').map(l => (
-                <Link key={l.href} href={l.href} className="rounded-xl bg-[var(--bg-secondary)] p-5 transition-colors hover:bg-[var(--bg-elevated)]">
+                <Link key={l.href} href={l.href} className="rounded-2xl bg-[var(--bg-secondary)] p-5 transition-colors hover:bg-[var(--bg-elevated)]">
                   <h3 className="text-sm font-semibold">{l.title}</h3>
                   <p className="mt-2 text-xs text-[var(--fg-muted)]">{l.desc}</p>
                   <span className="mt-3 inline-block text-xs text-[var(--hl)]">{l.action} &rarr;</span>

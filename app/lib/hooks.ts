@@ -26,16 +26,26 @@ const fetcher = async (url: string) => {
 const SWR_OPTIONS = { refreshInterval: 5000, dedupingInterval: 3000 };
 
 /** Append network_id to URL if set */
+// 未就绪时返回 null（SWR 的 null key 不发请求）。
+// 为什么必须这样：`withNetwork(url, '')` 会**返回无作用域 URL 并发起请求**，
+// 网络解析完再按 scoped URL 发一次 —— 首屏因此白打一轮（实测 /api/hub/messages
+// 在 4.1s 与 6.2s 各来一次）。network-context 里早就写明了这个用法，只是这些
+// 调用点没接 `ready`。
+function scopedOrNull(url: string, networkId: string, ready: boolean): string | null {
+  if (!ready || !networkId) return null;
+  return withNetwork(url, networkId);
+}
+
 function withNetwork(url: string, networkId: string): string {
   if (!networkId) return url;
   const sep = url.includes('?') ? '&' : '?';
   return `${url}${sep}network_id=${encodeURIComponent(networkId)}`;
 }
 
-export function useSessions() {
-  const { networkId } = useNetworkId();
+export function useSessions(options?: { lite?: boolean }) {
+  const { networkId, ready } = useNetworkId();
   const { data, error, isLoading, mutate } = useSWR<{ sessions: Session[]; _hint?: { global_count?: number; filtered_network?: string } }>(
-    withNetwork('/api/hub/status', networkId),
+    scopedOrNull(options?.lite ? '/api/hub/status?lite=1' : '/api/hub/status', networkId, ready),
     fetcher,
     SWR_OPTIONS,
   );
@@ -67,9 +77,9 @@ interface NodesResp { nodes?: Array<{
   avatar_url?: string | null;
 }>; }
 export function useNodeLifecycle() {
-  const { networkId } = useNetworkId();
+  const { networkId, ready } = useNetworkId();
   const { data, error, mutate } = useSWR<NodesResp>(
-    withNetwork('/api/hub/nodes', networkId),
+    scopedOrNull('/api/hub/nodes', networkId, ready),
     fetcher,
     SWR_OPTIONS,
   );
@@ -106,11 +116,14 @@ export function useAnetConfig() {
   return { config: data || null };
 }
 
-export function useTasks(params?: Record<string, string>) {
-  const { networkId } = useNetworkId();
+export function useTasks(params?: Record<string, string>, enabled = true) {
+  const { networkId, ready } = useNetworkId();
   const query = new URLSearchParams({ limit: '100', ...params }).toString();
+  // enabled=false → null key，SWR 不发请求。
+  // 用途：首页只在 /api/stats 没有 by_status 时才需要任务列表兜底，
+  // 而 tasks?limit=500 生产实测 665,867 B（约 666 KB）。
   const { data, error, isLoading } = useSWR(
-    withNetwork(`/api/hub/tasks?${query}`, networkId),
+    enabled ? scopedOrNull(`/api/hub/tasks?${query}`, networkId, ready) : null,
     fetcher,
     SWR_OPTIONS,
   );
@@ -124,18 +137,33 @@ export function useTasks(params?: Record<string, string>) {
 }
 
 export function useStats() {
-  const { networkId } = useNetworkId();
-  const { data, error } = useSWR(withNetwork('/api/hub/stats', networkId), fetcher, SWR_OPTIONS);
+  const { networkId, ready } = useNetworkId();
+  const { data, error } = useSWR(scopedOrNull('/api/hub/stats', networkId, ready), fetcher, SWR_OPTIONS);
   return { stats: data?.ok ? data : null, error };
 }
 
+/**
+ * 任务状态计数（服务端统计，只回数字）。
+ * 用于 /api/stats 没有 tasks.by_status 的环境：避免为了 5 个数字下载 500 条任务
+ *（生产实测 665,867 B）。enabled=false 时不发请求。
+ */
+export function useTaskStats(enabled: boolean) {
+  const { networkId, ready } = useNetworkId();
+  const { data } = useSWR<{ ok: boolean; total: number; byStatus: Record<string, number> }>(
+    enabled ? scopedOrNull('/api/hub/task-stats', networkId, ready) : null,
+    fetcher,
+    SWR_OPTIONS,
+  );
+  return { taskStats: data?.byStatus ?? null, taskTotal: data?.total ?? null };
+}
+
 export function useMessages(limit = 100) {
-  const { networkId } = useNetworkId();
+  const { networkId, ready } = useNetworkId();
   // keepPreviousData: /messages grows `limit` when the user asks for older
   // history (#217 M5) — without it the key change would blank the list and
   // flash the skeleton while the bigger page is in flight.
   const { data, error, isLoading, mutate } = useSWR(
-    withNetwork(`/api/hub/messages?limit=${limit}`, networkId),
+    scopedOrNull(`/api/hub/messages?limit=${limit}`, networkId, ready),
     fetcher,
     { ...SWR_OPTIONS, keepPreviousData: true },
   );

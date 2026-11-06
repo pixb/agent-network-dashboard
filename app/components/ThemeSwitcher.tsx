@@ -15,19 +15,29 @@ import { useEffect } from 'react';
 // touches instead of a full hex→token sweep (that sweep stays scheduled as
 // redesign Phase 0 next version).
 
-export const THEMES = new Set(['cyber', 'light', 'slack']);
+export const THEMES = new Set(['cyber', 'light', 'slack', 'system']);
+
+/** `system` 是「模式」不是外观：按操作系统的明暗偏好解析成具体主题。
+ *  和客户端对齐（`agent-network-app/src/system-color-scheme-core.ts` 里
+ *  web 用 matchMedia('(prefers-color-scheme: dark)')）。 */
+export function resolveTheme(t: string): string {
+  if (t !== 'system') return t;
+  if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'cyber';
+  return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'cyber' : 'light';
+}
 
 /** Apply a theme choice to <html>. Single owner of the data-theme/data-skin
  *  contract — Settings and Cmd+K call this too, so the skin attribute can
  *  never desync from the theme attribute. */
 export function applyTheme(t: string) {
   if (typeof document === 'undefined') return;
+  const resolved = resolveTheme(t);
   const el = document.documentElement;
-  if (t === 'slack') {
+  if (resolved === 'slack') {
     el.setAttribute('data-theme', 'light');
     el.setAttribute('data-skin', 'slack');
   } else {
-    el.setAttribute('data-theme', t);
+    el.setAttribute('data-theme', resolved);
     el.removeAttribute('data-skin');
   }
 }
@@ -47,6 +57,22 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
       if (saved && THEMES.has(saved)) t = saved;
     } catch {}
     applyTheme(t);
+    // 「跟随系统」的监听必须常驻：用户可能在设置页中途才选 System，
+    // 只在挂载时判断 t === 'system' 会漏掉这种情况（实测：选完后改 OS 不跟随）。
+    // 回调里再读一次当前选择，只有仍是 system 才应用，避免覆盖用户手动选的主题。
+    if (typeof window.matchMedia !== 'function') return;
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const onChange = () => {
+      let saved = 'cyber';
+      try { saved = localStorage.getItem('anet-theme') || 'cyber'; } catch {}
+      if (saved === 'system') applyTheme('system');
+    };
+    if (mq.addEventListener) mq.addEventListener('change', onChange);
+    else mq.addListener(onChange);  // 老 Safari
+    return () => {
+      if (mq.removeEventListener) mq.removeEventListener('change', onChange);
+      else mq.removeListener(onChange);
+    };
   }, []);
   return <>{children}</>;
 }
