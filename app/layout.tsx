@@ -103,6 +103,8 @@ try {
     el.setAttribute('data-font', f);
     el.style.setProperty('--font-scale', String(map[f]));
   }
+  // 军团配色：属性给 CSS/断言用，画布本身读 localStorage（两处保持一致）。
+  el.setAttribute('data-legion-palette', localStorage.getItem('anet-legion-palette') === 'warm' ? 'warm' : 'deep');
   var d = localStorage.getItem('anet-density');
   if (d === 'compact' || d === 'comfortable') el.setAttribute('data-density', d);
 } catch (e) {}

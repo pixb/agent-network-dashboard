@@ -19,6 +19,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useSWR from 'swr';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { useLegionPalette, type LegionPalette } from '../../lib/legion-palette';
 import { buildLegionLayout, nearestDept, deptWorldRadius, tourOrder, type LegionNode } from '../../lib/legion-layout';
 import { tourStepMs } from '../../lib/legion-tour';
 import { restoreFocusAfterUnmount } from '../../lib/focus-fallback';
@@ -321,6 +322,10 @@ export default function Legion3DPage() {
   // 不再从画面中心一眼糊过去。纯装饰，减少动态效果下不跑（peak 恒为 0）。
   const camArcRef = useRef<{ t0: number; peak: number }>({ t0: 0, peak: 0 });
   const presentingRef = useRef(false);
+  // 军团配色（默认深空；设置里可切暖金）。用 ref 让绘制循环每帧读到最新值。
+  const legionPalette = useLegionPalette();
+  const paletteRef = useRef<LegionPalette>(legionPalette);
+  paletteRef.current = legionPalette;
   const [shareInfo, setShareInfo] = useState('');
   const [exportHigh, setExportHigh] = useState(false);
   const sharedView = useRef<{ yaw: number; pitch: number; zoom: number } | null>(null);
@@ -931,8 +936,12 @@ export default function Legion3DPage() {
     // 只在 effect 里选一次的话，切换后画布不会跟着换配色（踩过）。
     // 深空冷光（2026-11-06 视觉方案 A）：只改深色画布的配色与光晕，
     // 强调色仍在客户端 accent 的蓝 family 内（#5e9bff → #6f86ff），不引入新品牌色。
-    const FX: { bg: string | null; accent: string | null; info: string | null; haloRadius: number; haloAlpha: number; starBoost: number } | null
-      = { bg: '#05070f', accent: '#6f86ff', info: '#5b8cff', haloRadius: 0.38, haloAlpha: 0.22, starBoost: 1.3 };
+    // 两套取向（设置里可切，默认深空）。门闩仍是「深色 且 非演示」。
+    const PALETTES = {
+      deep: { bg: '#05070f', accent: '#6f86ff', info: '#5b8cff', haloRadius: 0.38, haloAlpha: 0.22, starBoost: 1.3 },
+      warm: { bg: '#0f0b08', accent: '#d99a3c', info: '#c08a45', haloRadius: 0.30, haloAlpha: 0.20, starBoost: 0.9 },
+    } as const;
+    let FX = PALETTES[paletteRef.current];
     let tk = presentingRef.current ? presentingInk : tkLive;
     const fxOn = () => Boolean(FX) && isDarkBg(tk.bg) && !presentingRef.current;
     if (FX?.accent && fxOn()) tk = { ...tk, accent: FX.accent, info: FX.info ?? tk.info };
@@ -999,6 +1008,7 @@ export default function Legion3DPage() {
       const dt = Math.min(0.05, (now - lastFrame) / 1000);
       lastFrame = now;
       tk = presentingRef.current ? presentingInk : tkLive;
+      FX = PALETTES[paletteRef.current];
       // 每帧都会重挑 token，FX 的强调色必须在这里再套一次，否则只有背景换色、
       // 边线与扇区仍是原色（2026-11-06 实测：棕底蓝线）。
       if (FX?.accent && fxOn()) tk = { ...tk, accent: FX.accent, info: FX.info ?? tk.info };

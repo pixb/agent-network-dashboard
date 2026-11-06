@@ -24,6 +24,7 @@ import { useAnetConfig, useHealth } from '../lib/hooks';
 import { applyTheme } from '../components/ThemeSwitcher';
 import { DENSITY_OPTIONS, applyDensity, useDensity } from '../lib/density';
 import { FONT_OPTIONS, applyFontScale, useFontScale } from '../lib/font-scale';
+import { PALETTE_OPTIONS, applyLegionPalette, useLegionPalette } from '../lib/legion-palette';
 import { DASHBOARD_VERSION } from '../lib/version';
 import { clearPrivateChatStorage } from '../lib/chat-outbox';
 import { SETTINGS_SECTIONS, SETTINGS_LINKS, SETTINGS_THEMES } from '../lib/settings-model';
@@ -65,6 +66,7 @@ export default function SettingsPage() {
   const [theme, setTheme] = useState<string>('cyber');
   const density = useDensity();
   const fontScale = useFontScale();
+  const legionPalette = useLegionPalette();
   const [notifyHint, setNotifyHint] = useState('');
   // 登录设备（对齐客户端「账号 → 登录设备」）：只读列表 + 两个退出动作。
   const [devices, setDevices] = useState<Array<Record<string, unknown>> | null>(null);
@@ -340,6 +342,35 @@ export default function SettingsPage() {
                         <path d="M20 6 9 17l-5-5" />
                       </svg>
                     )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 军团 3D 配色：品牌级审美取向，交给使用者选，默认深空 */}
+            <div className={cardClass}>
+              <h3 className="mb-1 text-sm font-semibold">军团 3D 配色</h3>
+              <p className="mb-4 text-[12px] text-[var(--fg-muted)]">
+                只影响军团 3D 画布的深色主题；浅色主题与演示模式保持原样。
+              </p>
+              <div className="grid grid-cols-2 gap-3" data-legion-palette-picker>
+                {PALETTE_OPTIONS.map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      try { localStorage.setItem('anet-legion-palette', opt.key); } catch {}
+                      applyLegionPalette(opt.key);
+                    }}
+                    aria-pressed={legionPalette === opt.key}
+                    title={opt.hint}
+                    data-legion-palette-option={opt.key}
+                    className={`rounded-lg px-4 py-3 text-sm transition-colors ${
+                      legionPalette === opt.key
+                        ? 'bg-[var(--bg-elevated)] text-[var(--fg)]'
+                        : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'
+                    }`}
+                  >
+                    {opt.label}
                   </button>
                 ))}
               </div>
