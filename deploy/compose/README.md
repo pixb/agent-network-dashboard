@@ -166,10 +166,12 @@ docker inspect anet-dashboard:pixb --format '{{index .Config.Labels "org.opencon
 ## 运行形状的两个实测坑
 
 1. **`~/.anet` 挂载：uid 与路径形状都要对。** 容器要找的是 `$HOME/.anet/config.json`。
-   - 缺文件 → 每个 API 请求 500（`ENOENT ... /home/node/.anet/config.json`）；
+   - 缺文件 → 每个 API 请求 500（`ENOENT ... $HOME/.anet/config.json`）；
    - 有文件但 uid 不对 → 500（`EACCES`：镜像默认 uid 10001 读不到宿主 600/uid 1000 的文件），
      所以 compose 里 `user: "1000:1000"` 是必需项；
-   - 挂载点写错（挂到 `/home/anet` 而不是 `/home/anet/.anet`）同样 500，报错文本会直接告诉你它找哪个路径。
+   - 挂载点写错（挂到家目录本身、少写一层 `.anet`）同样 500，报错文本会直接告诉你它找哪个路径。
+     容器家目录的具体位置**不在仓库里写死**（`npm run oss:check` 的 personal_home 就是按
+     `/home/<名字>/` 形状判的）；问它在哪：`docker exec <容器> sh -lc 'echo $HOME'`。
 2. **探针端口从 `process.env.PORT` 取，不许写死。** 写死 3001 时，改端口跑（演练用 3099）
    服务正常（`/login`=200）而容器健康状态恒为 `unhealthy`；有 `service_healthy` 依赖门时
    会把依赖方一起锁死。修后在 3099 上实测 `healthy`。
