@@ -8,6 +8,33 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ## 0.6.4-preview.397 — 2026-11-06
 
+
+### /nodes 会话面板：右侧聊天栏占不满窗口底部 + 过一会自己弹回底部
+
+- **现象**：点开一个节点聊天，把左侧列表滚到最底部，右侧聊天栏的下沿（输入区）不在窗口底部，
+  要靠滚整个页面才露出来；把会话滑到最顶部，过几秒视图会自己跳回底部。
+- **根因 A（高度链）**：`AppShell` 根是 `min-h-[100dvh]`（内容驱动），HealthBanner 绿色态也在流内占 ~28px，
+  而 `NodesView` 自己写死 `h-[100dvh]` —— 于是文档高 = 横幅 + 100dvh，**文档本身可滚动**，
+  聊天栏底部被推到折线之下。`NodesView` 原来那个「按剩余空间实测高度」的 ResizeObserver 监听的是
+  `document.body`，而 body 被 `min-height:100%` 钉住，横幅消失时 body 尺寸不变 → **回调不再触发，
+  高度停留在旧值**，这就是只有部分时候/部分窗口尺寸下才复现的原因。
+- **修**：`AppShell` 根改为定高 `h-[100dvh]`，`main` 补 `min-h-0`，子容器改为**唯一的滚动容器**
+  （`flex-1 min-h-0 overflow-y-auto`，`data-testid="app-main-scroll"`）；页面改用 `h-full` 拿到的就是
+  横幅之外的剩余空间。派生影响一并处理：路由切换时手动回顶（滚动容器不再随文档免费复位，
+  `app/lib/main-scroll.ts`），`scheduled-tasks` 的「回顶」改走 `scrollMainTop()`，三处自测高度的页面
+  （`nodes` / `node` / `legion/3d`）改用 `fillRemainingHeight()`——旧公式 `rect.top + window.scrollY`
+  在文档不再滚动后失去滚动不变性，会重新触发 #Stage D 已经消灭过的自激增高循环。
+- **根因 B（自动滚底）**：会话自动滚底用 `messagesEndRef.scrollIntoView()`，而 `scrollIntoView` 会滚动
+  **所有可滚动祖先**；15s 历史轮询 / SSE 软刷新每触发一次，就把外层文档一起拖到底 —— 即「过一会自动弹到最底部」。
+  另外 `atBottomRef` 只由聊天容器自己的 scroll 事件更新，用户滚的其实是文档时它永远停在 `true`，于是每次刷新都判定「用户在底部」并滚底。
+- **修**：自动滚底/「↓ N 条新消息」/会话内搜索定位一律改成**容器相对**的 `scrollTo`（内嵌场景原本就有这个守卫，
+  现在列表面板同样适用）；`loadOlder` 的视口锚定改双 rAF 并在回调里重取 `scrollRef`（React 提交可能晚于单帧，
+  锚定量算成 0 就会停在顶部）；切换会话时清 `skipAutoScrollRef`，避免在途的旧页加载吞掉新会话的首次锚定。
+- 回归测试：`tests/e2e-chatpane-viewport-fit.spec.ts`（文档不可滚动 + 聊天栏底边贴窗口底边 + 输入区可见；
+  滚到顶后跨过 15s 轮询周期不被弹回）。
+
+### 节点发给人的私信，第一次在 Dashboard 上有了显示面
+
 ### 修：调大字号后，消息摘要不再被切一半
 
 - 之前把字号调到「大/特大」时，列表里的消息摘要仍按旧的两行高度裁剪，文字会从行中间被切断。

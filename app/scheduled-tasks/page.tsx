@@ -4,6 +4,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useNetworkId } from '../lib/network-context';
 import { pinyinMatch, usePinyinReady } from '../lib/pinyin-match';
 import { isHubTimeStale, relativeAgo } from '../lib/time';
+import { scrollMainTop } from '../lib/main-scroll';
 
 type NodeRow = { node_id: string; alias?: string | null; node_name?: string | null; lifecycle_state?: string | null; updated_at?: string | null };
 
@@ -325,7 +326,7 @@ function ScheduledTasks({ networkId }: { networkId: string }) {
     if (row.schedule.type === 'daily') setClock(row.schedule.time);
     if (row.schedule.type === 'weekly') { setClock(row.schedule.time); setWeekdays(row.schedule.weekdays); }
     setShowForm(true); setError('');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
+    scrollMainTop('smooth');
   };
 
   const saveSchedule = async () => {
