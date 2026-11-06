@@ -929,7 +929,13 @@ export default function Legion3DPage() {
     };
     // 每帧按「是否在演示」挑一份 token：进入/退出演示是运行时状态，
     // 只在 effect 里选一次的话，切换后画布不会跟着换配色（踩过）。
+    // 深空冷光（2026-11-06 视觉方案 A）：只改深色画布的配色与光晕，
+    // 强调色仍在客户端 accent 的蓝 family 内（#5e9bff → #6f86ff），不引入新品牌色。
+    const FX: { bg: string | null; accent: string | null; info: string | null; haloRadius: number; haloAlpha: number; starBoost: number } | null
+      = { bg: '#05070f', accent: '#6f86ff', info: '#5b8cff', haloRadius: 0.38, haloAlpha: 0.22, starBoost: 1.3 };
     let tk = presentingRef.current ? presentingInk : tkLive;
+    const fxOn = () => Boolean(FX) && isDarkBg(tk.bg) && !presentingRef.current;
+    if (FX?.accent && fxOn()) tk = { ...tk, accent: FX.accent, info: FX.info ?? tk.info };
     let dark = isDarkBg(tk.bg);
     let raf = 0;
     let stopped = false;
@@ -947,7 +953,8 @@ export default function Legion3DPage() {
       const g2 = cv.getContext('2d');
       if (!g2) return null;
       g2.setTransform(dpr, 0, 0, dpr, 0, 0);
-      g2.fillStyle = tk.bg;
+      const fxBg = fxOn() ? FX?.bg : null;
+      g2.fillStyle = fxBg ?? tk.bg;
       g2.fillRect(0, 0, size.width, size.height);
       const grad = g2.createRadialGradient(
         size.width / 2, size.height * 0.5, 0,
@@ -956,14 +963,15 @@ export default function Legion3DPage() {
       // 浅底上大面积的 accent 晕染会把整张图洗成一片绿；白天只留很薄一层，
       // 深底保持原来的呼吸感。
       const present = presentingRef.current;
-      grad.addColorStop(0, hexToRgba(tk.accent, present ? 0.16 : dark ? 0.11 : 0.032));
-      grad.addColorStop(0.55, hexToRgba(tk.accent, present ? 0.055 : dark ? 0.035 : 0.012));
+      const bgAccent = (fxOn() ? FX?.accent : null) ?? tk.accent;
+      grad.addColorStop(0, hexToRgba(bgAccent, present ? 0.16 : dark ? (fxOn() ? 0.15 : 0.11) : 0.032));
+      grad.addColorStop(0.55, hexToRgba(bgAccent, present ? 0.055 : dark ? (fxOn() ? 0.05 : 0.035) : 0.012));
       grad.addColorStop(1, 'rgba(0,0,0,0)');
       g2.fillStyle = grad;
       g2.fillRect(0, 0, size.width, size.height);
       g2.fillStyle = tk.fg;
       for (const st of starsRef.current) {
-        g2.globalAlpha = st.a;
+        g2.globalAlpha = Math.min(1, st.a * (fxOn() ? FX.starBoost : 1));
         g2.beginPath();
         g2.arc(st.x * size.width, st.y * size.height, st.r, 0, Math.PI * 2);
         g2.fill();
@@ -991,6 +999,9 @@ export default function Legion3DPage() {
       const dt = Math.min(0.05, (now - lastFrame) / 1000);
       lastFrame = now;
       tk = presentingRef.current ? presentingInk : tkLive;
+      // 每帧都会重挑 token，FX 的强调色必须在这里再套一次，否则只有背景换色、
+      // 边线与扇区仍是原色（2026-11-06 实测：棕底蓝线）。
+      if (FX?.accent && fxOn()) tk = { ...tk, accent: FX.accent, info: FX.info ?? tk.info };
       dark = isDarkBg(tk.bg);
       const capture = captureRef.current;
       if (capture) {
@@ -1430,11 +1441,12 @@ export default function Legion3DPage() {
       // 圆心光晕：给整张图一个视觉重心，不然四周的环会散掉。
       const coreCenter = byIdProbe();
       if (coreCenter) {
-        const halo = ctx.createRadialGradient(coreCenter.x, coreCenter.y, 0, coreCenter.x, coreCenter.y, Math.min(size.width, size.height) * 0.34);
+        const halo = ctx.createRadialGradient(coreCenter.x, coreCenter.y, 0, coreCenter.x, coreCenter.y, Math.min(size.width, size.height) * (fxOn() ? FX.haloRadius : 0.34));
         // 浅底上这层核心光晕是整张图泛绿的主因：只留到能看出重心为止。
-        halo.addColorStop(0, hexToRgba(tk.accent, dark ? 0.16 : 0.035));
-        halo.addColorStop(0.45, hexToRgba(tk.accent, dark ? 0.05 : 0.012));
-        halo.addColorStop(1, hexToRgba(tk.accent, 0));
+        const haloInk = (fxOn() ? FX?.accent : null) ?? tk.accent;
+        halo.addColorStop(0, hexToRgba(haloInk, dark ? (fxOn() ? FX.haloAlpha : 0.16) : 0.035));
+        halo.addColorStop(0.45, hexToRgba(haloInk, dark ? (fxOn() ? 0.07 : 0.05) : 0.012));
+        halo.addColorStop(1, hexToRgba(haloInk, 0));
         ctx.fillStyle = halo;
         ctx.fillRect(0, 0, size.width, size.height);
       }
