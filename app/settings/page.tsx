@@ -22,6 +22,7 @@ import { useEffect, useState, useSyncExternalStore } from 'react';
 import Link from 'next/link';
 import { useAnetConfig, useHealth } from '../lib/hooks';
 import { applyTheme } from '../components/ThemeSwitcher';
+import { DENSITY_OPTIONS, applyDensity, useDensity } from '../lib/density';
 import { DASHBOARD_VERSION } from '../lib/version';
 import { clearPrivateChatStorage } from '../lib/chat-outbox';
 import { SETTINGS_SECTIONS, SETTINGS_LINKS, SETTINGS_THEMES } from '../lib/settings-model';
@@ -61,6 +62,7 @@ export default function SettingsPage() {
   // hydration 不匹配：服务端渲染 cyber，客户端首帧读 localStorage 得到 light。
   // 挂载后再同步到真实选择（这时已经 hydrate 完，不会打架）。
   const [theme, setTheme] = useState<string>('cyber');
+  const density = useDensity();
   const [notifyHint, setNotifyHint] = useState('');
   const notifyOn = useSyncExternalStore(subscribeNotify, notifySnapshot, () => false);
   useEffect(() => {
@@ -271,6 +273,35 @@ export default function SettingsPage() {
                         <path d="M20 6 9 17l-5-5" />
                       </svg>
                     )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 界面密度：与字号解耦（客户端同样拆成两个开关） */}
+            <div className={cardClass}>
+              <h3 className="mb-1 text-sm font-semibold">界面密度</h3>
+              <p className="mb-4 text-[12px] text-[var(--fg-muted)]">
+                只调整列表与侧栏的行高，字号不变。
+              </p>
+              <div className="grid grid-cols-3 gap-3" data-density-picker>
+                {DENSITY_OPTIONS.map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      try { localStorage.setItem('anet-density', opt.key); } catch {}
+                      applyDensity(opt.key);
+                    }}
+                    aria-pressed={density === opt.key}
+                    title={opt.hint}
+                    data-density-option={opt.key}
+                    className={`rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                      density === opt.key
+                        ? 'bg-[var(--bg-elevated)] text-[var(--fg)]'
+                        : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'
+                    }`}
+                  >
+                    {opt.label}
                   </button>
                 ))}
               </div>

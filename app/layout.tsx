@@ -96,6 +96,9 @@ try {
     el.setAttribute('data-theme', t);
     el.removeAttribute('data-skin');
   }
+  // 界面密度也要在首帧前生效，否则会先按标准行高画一帧再跳（列表会「抖一下」）。
+  var d = localStorage.getItem('anet-density');
+  if (d === 'compact' || d === 'comfortable') el.setAttribute('data-density', d);
 } catch (e) {}
 `;
 

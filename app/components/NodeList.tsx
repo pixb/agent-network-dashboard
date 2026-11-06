@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { AliasAvatar } from './AliasAvatar';
+import { densityAvatarSize, useDensity } from '../lib/density';
 import { useChatUnread } from '../lib/chat-unread';
 import { useHasDraft } from '../lib/chat-drafts';
 import { usePinned } from '../lib/chat-pin';
@@ -64,14 +65,16 @@ export interface NodeListProps {
 // mounts a fresh hook state per alias.
 interface NodeListRowProps {
   session: SessionRow;
+  height: number;
   selected: boolean;
   unread: number;
   onSelect: (alias: string) => void;
   onContextMenu: (alias: string, e: React.MouseEvent) => void;
 }
-function NodeListRow({ session: s, selected, unread, onSelect, onContextMenu }: NodeListRowProps) {
+function NodeListRow({ session: s, height, selected, unread, onSelect, onContextMenu }: NodeListRowProps) {
   const pinned = usePinned(s.alias);
   const muted = useMuted(s.alias);
+  const density = useDensity();
   return (
     <button
       key={s.alias}
@@ -102,7 +105,7 @@ function NodeListRow({ session: s, selected, unread, onSelect, onContextMenu }: 
       // SPEC §11.1: pinned row = whole-row light background
       // rgba(125,211,252,0.04) (hover 0.08); no pin ICON (Feishu
       // pattern). Selected wins over both.
-      style={{ height: NODE_ROW_HEIGHT, minHeight: NODE_ROW_HEIGHT }}
+      style={{ height, minHeight: height }}
       className={`w-full flex items-center gap-2.5 px-3 py-2.5 text-left transition-colors border-b border-[var(--col-hairline)] ${
         selected
           ? 'bg-cyan-500/8'
@@ -112,7 +115,7 @@ function NodeListRow({ session: s, selected, unread, onSelect, onContextMenu }: 
       }`}
     >
       <div className="relative shrink-0">
-        <AliasAvatar alias={s.alias} size={32} />
+        <AliasAvatar alias={s.alias} size={densityAvatarSize(density, 32)} />
         {s.online && (
           <span
             aria-hidden
@@ -184,6 +187,13 @@ function NodeListRow({ session: s, selected, unread, onSelect, onContextMenu }: 
 // measuring every mounted node. Six rows of overscan keep wheel/touch scrolling
 // smooth while bounding a 100+ node rail to a small DOM working set.
 const NODE_ROW_HEIGHT = 53;
+/** 密度档对应的行高：紧凑 44 / 标准 53 / 宽松 62。
+ *  虚拟化是按行高算窗口的，所以行高必须与样式同步改，否则会「滚到空白」。 */
+function nodeRowHeight(pref: 'compact' | 'standard' | 'comfortable'): number {
+  if (pref === 'compact') return 44;
+  if (pref === 'comfortable') return 62;
+  return NODE_ROW_HEIGHT;
+}
 const NODE_ROW_OVERSCAN = 6;
 const INITIAL_VIEWPORT_HEIGHT = 600;
 
@@ -191,17 +201,18 @@ export function nodeListWindow(
   itemCount: number,
   scrollTop: number,
   viewportHeight: number,
+  rowHeight: number = NODE_ROW_HEIGHT,
 ) {
   const safeTop = Math.max(0, Number.isFinite(scrollTop) ? scrollTop : 0);
   const safeHeight = Math.max(1, Number.isFinite(viewportHeight) ? viewportHeight : INITIAL_VIEWPORT_HEIGHT);
-  const start = Math.max(0, Math.floor(safeTop / NODE_ROW_HEIGHT) - NODE_ROW_OVERSCAN);
-  const visible = Math.ceil(safeHeight / NODE_ROW_HEIGHT) + NODE_ROW_OVERSCAN * 2;
+  const start = Math.max(0, Math.floor(safeTop / rowHeight) - NODE_ROW_OVERSCAN);
+  const visible = Math.ceil(safeHeight / rowHeight) + NODE_ROW_OVERSCAN * 2;
   const end = Math.min(itemCount, start + visible);
   return {
     start,
     end,
-    top: start * NODE_ROW_HEIGHT,
-    bottom: Math.max(0, (itemCount - end) * NODE_ROW_HEIGHT),
+    top: start * rowHeight,
+    bottom: Math.max(0, (itemCount - end) * rowHeight),
   };
 }
 
@@ -225,6 +236,8 @@ function LastLine({ alias, session }: { alias: string; session: SessionRow }) {
 
 export function NodeList({ sessions, selectedAlias, onSelect, search, onSearchChange }: NodeListProps) {
   const { unreadCount } = useChatUnread();
+  const density = useDensity();
+  const rowHeight = nodeRowHeight(density);
   // Batch (07-31) segment 2: right-click context menu state. `null` when
   // closed; `{alias, x, y}` when open. Positioning is at the mouse
   // coords from the contextmenu event so the menu appears where the
@@ -314,8 +327,8 @@ export function NodeList({ sessions, selectedAlias, onSelect, search, onSearchCh
   useEffect(() => {
     const element = scrollRef.current;
     if (!element || selectedIndex < 0) return;
-    const rowTop = selectedIndex * NODE_ROW_HEIGHT;
-    const rowBottom = rowTop + NODE_ROW_HEIGHT;
+    const rowTop = selectedIndex * rowHeight;
+    const rowBottom = rowTop + rowHeight;
     let nextTop = element.scrollTop;
     if (rowTop < element.scrollTop) nextTop = rowTop;
     else if (rowBottom > element.scrollTop + element.clientHeight) {
@@ -324,20 +337,20 @@ export function NodeList({ sessions, selectedAlias, onSelect, search, onSearchCh
     if (nextTop !== element.scrollTop) {
       element.scrollTop = nextTop;
     }
-  }, [selectedIndex]);
+  }, [selectedIndex, rowHeight]);
 
   // A filter can shrink the list while it is scrolled near the bottom. Clamp
   // the retained offset so the new result set cannot render as a blank rail.
   useEffect(() => {
     const element = scrollRef.current;
     if (!element) return;
-    const maxTop = Math.max(0, sessions.length * NODE_ROW_HEIGHT - element.clientHeight);
+    const maxTop = Math.max(0, sessions.length * rowHeight - element.clientHeight);
     if (element.scrollTop > maxTop) {
       element.scrollTop = maxTop;
     }
-  }, [sessions.length]);
+  }, [sessions.length, rowHeight]);
 
-  const virtualWindow = nodeListWindow(sessions.length, scrollTop, viewportHeight);
+  const virtualWindow = nodeListWindow(sessions.length, scrollTop, viewportHeight, rowHeight);
   const visibleSessions = sessions.slice(virtualWindow.start, virtualWindow.end);
 
   return (
@@ -401,6 +414,7 @@ export function NodeList({ sessions, selectedAlias, onSelect, search, onSearchCh
           <>
             {virtualWindow.top > 0 && <div aria-hidden style={{ height: virtualWindow.top }} />}
             {visibleSessions.map(s => <NodeListRow
+              height={rowHeight}
               key={s.alias}
               session={s}
               selected={s.alias === selectedAlias}

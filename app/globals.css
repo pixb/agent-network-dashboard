@@ -177,7 +177,28 @@ nothing blurs. */
    Light: mid-grey on white card (not too light or it disappears). */
 .anet-skeleton-bar {
   background-color: #1c1c1f;
-}/* Command palette modal surface — bumped depth so it sits clearly above
+}/* ─────────────────────────────────────────────────────────────────────
+   界面密度（对齐客户端「设置 → 界面密度」）
+   ---------------------------------------------------------------------
+   只调「行高 + 上下内边距」，**不动字号**：客户端把字号与密度当两个独立
+   开关（src/ui-scale.ts），这里保持同样的语义。
+   作用面明确限定在三处高频列表，避免 !important 波及全站：
+     侧栏导航 [data-nav-item] / 节点列表 [data-node-list-item] / 需求行 a[data-req-row]
+   标准档不写属性，因此默认样式完全不变（无需回滚风险）。
+   ───────────────────────────────────────────────────────────────────── */
+[data-density="compact"] [data-node-list-item],
+[data-density="compact"] a[data-req-row] {
+  padding-top: 3px !important;
+  padding-bottom: 3px !important;
+}
+[data-density="comfortable"] [data-node-list-item],
+[data-density="comfortable"] a[data-req-row] {
+  padding-top: 12px !important;
+  padding-bottom: 12px !important;
+}
+/* 侧栏是「图标轨」：44×44 的方块，改高度只会让图标错位，不纳入密度作用面。 */
+
+/* Command palette modal surface — bumped depth so it sits clearly above
    the page content in both themes. Light/mint: white shell with a real
    shadow (not the dark navy that the CSS shim would normally translate
    `bg-[#111113]` into). */
