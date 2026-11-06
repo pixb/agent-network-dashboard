@@ -912,6 +912,11 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
     anchoredRef.current = false;
     firstAnchorRef.current = true;
     atBottomRef.current = true;
+    // A loadOlder in flight when the alias swaps leaves its skip-flag set; the
+    // new conversation's FIRST anchor would then be swallowed and the pane
+    // would open at the TOP of the thread.
+    skipAutoScrollRef.current = false;
+    forceScrollRef.current = false;
     prevBubblesRef.current = 0;
     setNewBelow(0);
     setErrorFor(null);
@@ -956,11 +961,18 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
     const prevHeight = el?.scrollHeight ?? 0;
     skipAutoScrollRef.current = true;
     const loaded = await loadHistory({ task_id: cursor.task_id, created_at: cursor.created_at });
-    requestAnimationFrame(() => {
-      if (loaded && el) el.scrollTop += el.scrollHeight - prevHeight;
+    // TWO frames, and re-query the element.
+    // React commits the prepended page in a task that can land *after* a
+    // single requestAnimationFrame, so a one-frame anchor computed
+    // `scrollHeight - prevHeight` as 0, leaving the viewport at the top of
+    // freshly prepended content (reads as "弹走了"). scrollRef is re-read
+    // because the pane can remount (alias switch) while the fetch is in flight.
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      const live = scrollRef.current;
+      if (loaded && live) live.scrollTop += live.scrollHeight - prevHeight;
       if (!loaded) skipAutoScrollRef.current = false;
       setLoadingOlder(false);
-    });
+    }));
   }, [loadingOlder, hasOlder, loadHistory, messages]);
 
   const onMessagesScroll = useCallback(() => {
@@ -1004,12 +1016,21 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
       return;
     }
     const behavior: ScrollBehavior = firstAnchorRef.current ? 'auto' : 'smooth';
+    // The first anchor is also the arming event for the scroll-to-top
+    // older-page loader (see onMessagesScroll). Arming here, not only on a
+    // scroll event, means a pane whose content grew *after* the anchor (its
+    // dist went back over 80 without a scroll event) is not left deaf.
+    if (firstAnchorRef.current) anchoredRef.current = true;
     firstAnchorRef.current = false;
     forceScrollRef.current = false;
-    // Embedded scenes must not scroll their page/camera out of view with the chat.
-    if (scopeNetworkId) scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior });
-    else messagesEndRef.current?.scrollIntoView({ behavior });
-  }, [messages, scopeNetworkId]);
+    // Container-relative, never scrollIntoView. scrollIntoView scrolls EVERY
+    // scrollable ancestor, so a periodic soft refresh (15 s poll / SSE) dragged
+    // the document to its bottom whenever the pane was taller than the viewport
+    // — the "滑到最顶部，过一会自动弹到最底部" report. Embedded scenes had the
+    // same guard for the same reason; the pane column needs it too.
+    // messagesEndRef stays as a layout marker only.
+    scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior });
+  }, [messages]);
 
   // SSE-driven task updates: the server pushes new_reply events to the
   // sender's alias channel (/events/<from_session>), so we just listen for
@@ -1547,9 +1568,10 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
     if (!currentMatchKey) return;
     const el = scrollRef.current?.querySelector(`[data-ev="${CSS.escape(currentMatchKey)}"]`);
     const container = scrollRef.current;
-    if (scopeNetworkId && el && container) container.scrollTo({ top: container.scrollTop + el.getBoundingClientRect().top - container.getBoundingClientRect().top - container.clientHeight / 2, behavior: 'smooth' });
-    else el?.scrollIntoView({ block: 'center', behavior: 'smooth' });
-  }, [currentMatchKey, scopeNetworkId]);
+    // Container-relative for the same reason as the auto-scroll above: an
+    // ancestor-blind scrollIntoView would scroll the shell/document as well.
+    if (el && container) container.scrollTo({ top: container.scrollTop + el.getBoundingClientRect().top - container.getBoundingClientRect().top - container.clientHeight / 2, behavior: 'smooth' });
+  }, [currentMatchKey]);
   const stepMatch = (delta: number) => {
     if (!searchMatches.length) return;
     setSearchIdx((i) => (i + delta + searchMatches.length) % searchMatches.length);
@@ -1806,8 +1828,7 @@ export function TaskChatPanel({ alias, onClose, inline, availableNodes, active, 
                 onClick={() => {
                   setNewBelow(0);
                   atBottomRef.current = true;
-                  if (scopeNetworkId) scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
-                  else messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+                  scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
                 }}
                 className="pointer-events-auto flex items-center gap-1 rounded-full border border-[var(--accent)]/30 bg-[var(--bg-elevated)] px-3 py-1 text-[11px] text-[var(--accent-text)] shadow-lg shadow-black/40 hover:bg-[var(--accent)]/10"
               >
