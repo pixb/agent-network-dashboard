@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { AliasAvatar } from './AliasAvatar';
 import { densityAvatarSize, useDensity } from '../lib/density';
+import { scaleRowHeight, useFontScale } from '../lib/font-scale';
 import { useChatUnread } from '../lib/chat-unread';
 import { useHasDraft } from '../lib/chat-drafts';
 import { usePinned } from '../lib/chat-pin';
@@ -237,7 +238,9 @@ function LastLine({ alias, session }: { alias: string; session: SessionRow }) {
 export function NodeList({ sessions, selectedAlias, onSelect, search, onSearchChange }: NodeListProps) {
   const { unreadCount } = useChatUnread();
   const density = useDensity();
-  const rowHeight = nodeRowHeight(density);
+  const fontScale = useFontScale();
+  // 字号放大时固定行高会把字裁掉：行高按同一倍率放大（虚拟化窗口同步用这个值）。
+  const rowHeight = scaleRowHeight(nodeRowHeight(density), fontScale);
   // Batch (07-31) segment 2: right-click context menu state. `null` when
   // closed; `{alias, x, y}` when open. Positioning is at the mouse
   // coords from the contextmenu event so the menu appears where the

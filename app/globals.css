@@ -178,6 +178,22 @@ nothing blurs. */
 .anet-skeleton-bar {
   background-color: #1c1c1f;
 }/* ─────────────────────────────────────────────────────────────────────
+   字号缩放（对齐客户端「设置 → 字体大小」）
+   ---------------------------------------------------------------------
+   只覆盖排版类，不动 padding/gap/宽高 —— 与「界面密度」保持正交。
+   不用「缩放根字号」的原因：Tailwind 的间距也是 rem，缩根字号会连带
+   改变整个布局的松紧，那就变成第二个密度开关了。
+   行高一起缩放，否则 xlarge 下 11px→14.3px 的字会挤在 16px 行高里。
+   ───────────────────────────────────────────────────────────────────── */
+[data-font] .text-xs { font-size: calc(0.75rem * var(--font-scale)) !important; line-height: calc(1rem * var(--font-scale)) !important; }
+[data-font] .text-sm { font-size: calc(0.875rem * var(--font-scale)) !important; line-height: calc(1.25rem * var(--font-scale)) !important; }
+[data-font] .text-base { font-size: calc(1rem * var(--font-scale)) !important; line-height: calc(1.5rem * var(--font-scale)) !important; }
+[data-font] .text-lg { font-size: calc(1.125rem * var(--font-scale)) !important; line-height: calc(1.75rem * var(--font-scale)) !important; }
+[data-font] .text-xl { font-size: calc(1.25rem * var(--font-scale)) !important; line-height: calc(1.75rem * var(--font-scale)) !important; }
+[data-font] .text-\[11px\] { font-size: calc(11px * var(--font-scale)) !important; }
+[data-font] .text-\[12px\] { font-size: calc(12px * var(--font-scale)) !important; }
+
+/* ─────────────────────────────────────────────────────────────────────
    界面密度（对齐客户端「设置 → 界面密度」）
    ---------------------------------------------------------------------
    只调「行高 + 上下内边距」，**不动字号**：客户端把字号与密度当两个独立

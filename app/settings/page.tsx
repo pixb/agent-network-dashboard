@@ -23,6 +23,7 @@ import Link from 'next/link';
 import { useAnetConfig, useHealth } from '../lib/hooks';
 import { applyTheme } from '../components/ThemeSwitcher';
 import { DENSITY_OPTIONS, applyDensity, useDensity } from '../lib/density';
+import { FONT_OPTIONS, applyFontScale, useFontScale } from '../lib/font-scale';
 import { DASHBOARD_VERSION } from '../lib/version';
 import { clearPrivateChatStorage } from '../lib/chat-outbox';
 import { SETTINGS_SECTIONS, SETTINGS_LINKS, SETTINGS_THEMES } from '../lib/settings-model';
@@ -63,6 +64,7 @@ export default function SettingsPage() {
   // 挂载后再同步到真实选择（这时已经 hydrate 完，不会打架）。
   const [theme, setTheme] = useState<string>('cyber');
   const density = useDensity();
+  const fontScale = useFontScale();
   const [notifyHint, setNotifyHint] = useState('');
   const notifyOn = useSyncExternalStore(subscribeNotify, notifySnapshot, () => false);
   useEffect(() => {
@@ -273,6 +275,34 @@ export default function SettingsPage() {
                         <path d="M20 6 9 17l-5-5" />
                       </svg>
                     )}
+                  </button>
+                ))}
+              </div>
+            </div>
+
+            {/* 字体大小：与密度解耦（客户端同样是两个开关） */}
+            <div className={cardClass}>
+              <h3 className="mb-1 text-sm font-semibold">字体大小</h3>
+              <p className="mb-4 text-[12px] text-[var(--fg-muted)]">
+                只缩放文字，不改列表疏密（疏密在下面的「界面密度」）。
+              </p>
+              <div className="grid grid-cols-4 gap-3" data-font-picker>
+                {FONT_OPTIONS.map(opt => (
+                  <button
+                    key={opt.key}
+                    onClick={() => {
+                      try { localStorage.setItem('anet-font-scale', opt.key); } catch {}
+                      applyFontScale(opt.key);
+                    }}
+                    aria-pressed={fontScale === opt.key}
+                    data-font-option={opt.key}
+                    className={`rounded-lg px-3 py-2.5 text-sm transition-colors ${
+                      fontScale === opt.key
+                        ? 'bg-[var(--bg-elevated)] text-[var(--fg)]'
+                        : 'text-[var(--fg-muted)] hover:bg-[var(--hover-tint)] hover:text-[var(--fg)]'
+                    }`}
+                  >
+                    {opt.label}
                   </button>
                 ))}
               </div>
