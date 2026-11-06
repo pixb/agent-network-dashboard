@@ -1,0 +1,16 @@
+name: CI canary
+
+# 只有一条 run:，没有任何 uses: —— 用来把「调度阶段被 allowlist 拒」和「测试红」分开。
+# 有 uses: 的 workflow 在 startup_failure 时看不到 job 也看不到日志，无法归因；
+# 这条能跑起来就说明 runner 与调度是好的，问题出在 action 白名单。
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  canary:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "canary ok; actor=${{ github.actor }} repo=${{ github.repository }}"
