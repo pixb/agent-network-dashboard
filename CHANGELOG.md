@@ -8,6 +8,27 @@ Format: chronological release notes; each entry lists what *changed for a user* 
 
 ## Unreleased
 
+### CI：oss-gates 在我们自己仓库上跑通了
+
+`gh workflow run oss-gates.yml -r pixb` 实测连抓两次真问题（都在我们加的文件里）：
+
+1. `[oss-public-surface] personal_home` —— `deploy/compose/Dockerfile.source` 与 `README.md`
+   里写了 `/home/<名字>/…` 形状的路径（仓库里其他文件一律写 `$HOME/.anet`）。
+   门是按形状判的，公开仓库里它就等于「某个人 home 里的路径」。
+   修法只动文字不动运行时：容器家目录换到 `/srv/dashboard`（`useradd -d` + `ENV HOME` 同步），
+   README 写 `$HOME/.anet` 并给出「想知道具体路径就 `docker exec … echo $HOME`」。
+   实测：镜像里 `$HOME/.anet/config.json` 在、uid 10001、`/login`=200、
+   带会话打 `/api/hub/networks` = 502（hub 故意不可达）而日志 **ENOENT/EACCES 次数 0**
+   ⇒ 不是当年那个 500。现网 compose 不挂载容器家目录（config.json 是镜像里预置的），
+   所以部署协调面为零。
+2. Lint 4 处红 `Cannot access refs during render`（`app/messages/page.tsx`）：
+   在渲染里读写 `meRef` 取当前用户名。改成仓库里既有的写法
+   （`useState(() => currentUserAlias())` 惰性初始化，`chat-unread.ts` 早就这么写）。
+   本地 `npm run lint` 0 errors、`npm test` 333 pass / 0 fail。
+
+本地对照：`npm run oss:check` 34/34 PASS。
+
+
 ### /nodes 会话面板：右侧聊天栏占不满窗口底部 + 过一会自己弹回底部
 
 - **现象**：点开一个节点聊天，把左侧列表滚到最底部，右侧聊天栏的下沿（输入区）不在窗口底部，

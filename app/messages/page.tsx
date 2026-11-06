@@ -89,11 +89,12 @@ export default function MessagesPage() {
   // （inbox.acked 由节点消费、user_inbox.acked 由人 ack），让一条私信在 Hub 变成
   // 两行就得到「一处已读一处未读」的红点口径分叉。
   const { rows: inboxRows } = useUserInbox({ limit: histLimit });
-  const meRef = useRef<string | null>(null);
-  if (meRef.current === null && typeof window !== 'undefined') meRef.current = currentUserAlias() || '';
+  // 用户名存在 sessionStorage 里，读它是副作用；渲染必须是纯函数，所以放进惰性 state
+  // 初始化（在渲染里读写 ref 是 react-hooks/refs 的错误，oss-gates 的 Lint 步骤会红）。
+  const [meAlias] = useState(() => (typeof window === 'undefined' ? '' : currentUserAlias() || ''));
   const timeline = useMemo(
-    () => mergeInboxIntoTimeline(messages, inboxRows, (row) => userInboxRowToMessage(row, meRef.current || '')),
-    [messages, inboxRows],
+    () => mergeInboxIntoTimeline(messages, inboxRows, (row) => userInboxRowToMessage(row, meAlias)),
+    [messages, inboxRows, meAlias],
   );
   const inboxInTimeline = countInboxRowsInTimeline(timeline);
   // The hub returned a full page → assume more history exists beyond it.
